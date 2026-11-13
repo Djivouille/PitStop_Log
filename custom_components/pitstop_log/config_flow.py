@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import datetime
 from typing import Any
 
 import voluptuous as vol
@@ -12,10 +13,20 @@ from homeassistant.data_entry_flow import FlowResult
 from homeassistant.util import slugify
 
 from .const import (
+    CONF_ACTIONS,
     CONF_BRAND,
+    CONF_COST,
+    CONF_DATE,
+    CONF_INVOICE_PATH,
+    CONF_INTERVAL_KM,
+    CONF_INTERVAL_MONTHS,
+    CONF_KM,
+    CONF_LAST_DATE,
+    CONF_LAST_KM,
     CONF_MODEL,
     CONF_MODEL_YEAR,
     CONF_ODOMETER,
+    CONF_PLAN_NAME,
     CONF_PURCHASE_DATE,
     CONF_REGISTRATION,
     CONF_VEHICLE_NAME,
@@ -39,6 +50,40 @@ VEHICLE_SCHEMA = vol.Schema(
     }
 )
 
+# Schéma d'ajout d'un plan d'entretien depuis l'interface
+PLAN_SCHEMA = vol.Schema(
+    {
+        vol.Required(CONF_PLAN_NAME): str,
+        vol.Optional(CONF_INTERVAL_KM): int,
+        vol.Optional(CONF_INTERVAL_MONTHS): int,
+        vol.Optional(CONF_LAST_KM): int,
+        vol.Optional(CONF_LAST_DATE): str,
+    }
+)
+
+# Schéma d'édition d'une entrée d'historique depuis l'interface
+HISTORY_SCHEMA = vol.Schema(
+    {
+        vol.Required(CONF_DATE): str,
+        vol.Required(CONF_KM): int,
+        vol.Required(CONF_ACTIONS): str,
+        vol.Optional(CONF_COST): vol.Coerce(float),
+        vol.Optional(CONF_INVOICE_PATH): str,
+        vol.Optional("delete"): bool,
+    }
+)
+
+
+def _validate_date(value: str | None) -> str | None:
+    """Valider une date au format AAAA-MM-JJ, retourne un code d'erreur ou None."""
+    if not value:
+        return None
+    try:
+        datetime.strptime(value, "%Y-%m-%d")
+    except ValueError:
+        return "invalid_date"
+    return None
+
 
 class PitStopLogConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Gestion du flux de configuration pour ajouter un véhicule."""
@@ -56,16 +101,10 @@ class PitStopLogConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             existing = coordinator.find_vehicle_id(user_input[CONF_VEHICLE_NAME])
             if existing is not None:
                 errors[CONF_VEHICLE_NAME] = "name_already_used"
-            elif user_input.get(CONF_PURCHASE_DATE):
-                # Validation simple de la date d'achat (AAAA-MM-JJ)
-                try:
-                    from datetime import datetime
-
-                    datetime.strptime(
-                        user_input[CONF_PURCHASE_DATE], "%Y-%m-%d"
-                    )
-                except ValueError:
-                    errors[CONF_PURCHASE_DATE] = "invalid_date"
+            else:
+                error = _validate_date(user_input.get(CONF_PURCHASE_DATE))
+                if error:
+                    errors[CONF_PURCHASE_DATE] = error
             if not errors:
                 # Identifiant interne stable basé sur le nom du véhicule
                 vehicle_id = slugify(user_input[CONF_VEHICLE_NAME])
@@ -83,38 +122,62 @@ class PitStopLogConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     def async_get_supported_options_flow(
         config_entry: config_entries.ConfigEntry,
     ) -> PitStopLogOptionsFlow:
-        """Retourner le flux d'options pour éditer un véhicule existant."""
+        """Retourner le flux d'options pour gérer le véhicule et ses entretiens."""
         return PitStopLogOptionsFlow(config_entry)
 
 
 class PitStopLogOptionsFlow(config_entries.OptionsFlow):
-    """Flux d'options pour modifier les informations d'un véhicule."""
+    """Flux d'options : édition du véhicule, des plans et de l'historique."""
 
     def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
-        """Conserver l'entrée de configuration associée."""
+        """Conserver l'entrée de configuration et l'état de navigation."""
         self.config_entry = config_entry
+        self._plan_id: str | None = None
+        self._history_index: int | None = None
+
+    @property
+    def _vehicle_id(self) -> str:
+        """Identifiant du véhicule géré par ce flux d'options."""
+        return self.config_entry.data["vehicle_id"]
+
+    async def _async_save(self) -> None:
+        """Sauvegarder les données et rafraîchir les capteurs."""
+        coordinator = await async_get_or_create_coordinator(self.hass)
+        await coordinator.async_save()
+        await coordinator.async_refresh()
 
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
-        """Présenter le formulaire pré-rempli et enregistrer les modifications."""
-        errors: dict[str, str] = {}
-        if user_input is not None:
-            coordinator = await async_get_or_create_coordinator(self.hass)
-            vehicle_id = self.config_entry.data["vehicle_id"]
-            if user_input.get(CONF_PURCHASE_DATE):
-                try:
-                    from datetime import datetime
+        """Menu principal : véhicule, plans d'entretien ou historique."""
+        return self.async_show_menu(
+            step_id="init",
+            menu_options=["vehicle", "plans", "history", "done"],
+        )
 
-                    datetime.strptime(
-                        user_input[CONF_PURCHASE_DATE], "%Y-%m-%d"
-                    )
-                except ValueError:
-                    errors[CONF_PURCHASE_DATE] = "invalid_date"
+    async def async_step_done(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Terminer le flux d'options."""
+        return self.async_create_entry(title="", data={})
+
+    # ------------------------------------------------------------------
+    # Édition du véhicule
+    # ------------------------------------------------------------------
+    async def async_step_vehicle(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Modifier les informations de base du véhicule."""
+        errors: dict[str, str] = {}
+        coordinator = await async_get_or_create_coordinator(self.hass)
+        if user_input is not None:
+            error = _validate_date(user_input.get(CONF_PURCHASE_DATE))
+            if error:
+                errors[CONF_PURCHASE_DATE] = error
             if not errors:
                 # Mise à jour des données persistées du véhicule (modèle normalisé)
                 coordinator.set_vehicle(
-                    vehicle_id,
+                    self._vehicle_id,
                     {
                         "name": user_input[CONF_VEHICLE_NAME],
                         "type": user_input.get(CONF_VEHICLE_TYPE, "car"),
@@ -126,15 +189,17 @@ class PitStopLogOptionsFlow(config_entries.OptionsFlow):
                         "odometer": user_input.get(CONF_ODOMETER, 0),
                     },
                 )
-                await coordinator.async_save()
-                await coordinator.async_refresh()
+                await self._async_save()
                 self.hass.async_create_task(
                     self.hass.config_entries.async_update_entry(
                         self.config_entry,
-                        data={"vehicle_id": vehicle_id, **user_input},
+                        data={
+                            "vehicle_id": self._vehicle_id,
+                            **user_input,
+                        },
                     )
                 )
-                return self.async_create_entry(title="", data={})
+                return await self.async_step_init()
 
         # Pré-remplissage avec les valeurs actuelles du véhicule
         defaults = dict(self.config_entry.data)
@@ -164,5 +229,195 @@ class PitStopLogOptionsFlow(config_entries.OptionsFlow):
             }
         )
         return self.async_show_form(
-            step_id="init", data_schema=schema, errors=errors
+            step_id="vehicle", data_schema=schema, errors=errors
+        )
+
+    # ------------------------------------------------------------------
+    # Plans d'entretien
+    # ------------------------------------------------------------------
+    async def async_step_plans(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Sélectionner un plan d'entretien à modifier, ou en ajouter un."""
+        coordinator = await async_get_or_create_coordinator(self.hass)
+        plans = coordinator.get_plans(self._vehicle_id)
+        choices: dict[str, str] = {
+            plan_id: plan.get("name", plan_id) for plan_id, plan in plans
+        }
+        choices["__add__"] = "➕ Ajouter un plan d'entretien"
+        choices["__back__"] = "↩️ Retour"
+        if user_input is not None:
+            choice = user_input["choice"]
+            if choice == "__add__":
+                return await self.async_step_add_plan()
+            if choice == "__back__":
+                return await self.async_step_init()
+            if choice in coordinator.data["plans"]:
+                self._plan_id = choice
+                return await self.async_step_plan()
+        schema = vol.Schema({vol.Required("choice"): vol.In(choices)})
+        return self.async_show_form(step_id="plans", data_schema=schema)
+
+    async def async_step_add_plan(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Ajouter un plan d'entretien périodique."""
+        errors: dict[str, str] = {}
+        coordinator = await async_get_or_create_coordinator(self.hass)
+        if user_input is not None:
+            if not user_input.get(CONF_INTERVAL_KM) and not user_input.get(
+                CONF_INTERVAL_MONTHS
+            ):
+                errors["base"] = "interval_required"
+            else:
+                error = _validate_date(user_input.get(CONF_LAST_DATE))
+                if error:
+                    errors[CONF_LAST_DATE] = error
+            if not errors:
+                await coordinator.async_add_maintenance_plan(
+                    vehicle_id=self._vehicle_id,
+                    name=user_input[CONF_PLAN_NAME],
+                    interval_km=user_input.get(CONF_INTERVAL_KM),
+                    interval_months=user_input.get(CONF_INTERVAL_MONTHS),
+                    last_km=user_input.get(CONF_LAST_KM),
+                    last_date=user_input.get(CONF_LAST_DATE),
+                )
+                return await self.async_step_plans()
+        return self.async_show_form(
+            step_id="add_plan", data_schema=PLAN_SCHEMA, errors=errors
+        )
+
+    async def async_step_plan(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Modifier ou supprimer un plan d'entretien existant."""
+        errors: dict[str, str] = {}
+        coordinator = await async_get_or_create_coordinator(self.hass)
+        plan_id = self._plan_id or ""
+        plan = coordinator.data["plans"].get(plan_id)
+        if plan is None:
+            return await self.async_step_plans()
+        if user_input is not None:
+            if user_input.get("delete"):
+                coordinator.delete_plan(plan_id)
+                await self._async_save()
+                return await self.async_step_plans()
+            if not user_input.get(CONF_INTERVAL_KM) and not user_input.get(
+                CONF_INTERVAL_MONTHS
+            ):
+                errors["base"] = "interval_required"
+            else:
+                error = _validate_date(user_input.get(CONF_LAST_DATE))
+                if error:
+                    errors[CONF_LAST_DATE] = error
+            if not errors:
+                coordinator.set_plan(
+                    plan_id,
+                    {
+                        **plan,
+                        "name": user_input[CONF_PLAN_NAME],
+                        "interval_km": user_input.get(CONF_INTERVAL_KM),
+                        "interval_months": user_input.get(CONF_INTERVAL_MONTHS),
+                        "last_km": user_input.get(CONF_LAST_KM),
+                        "last_date": user_input.get(CONF_LAST_DATE),
+                    },
+                )
+                await self._async_save()
+                return await self.async_step_plans()
+
+        schema = vol.Schema(
+            {
+                vol.Required(CONF_PLAN_NAME, default=plan.get("name", "")): str,
+                vol.Optional(
+                    CONF_INTERVAL_KM, default=plan.get("interval_km")
+                ): int,
+                vol.Optional(
+                    CONF_INTERVAL_MONTHS, default=plan.get("interval_months")
+                ): int,
+                vol.Optional(CONF_LAST_KM, default=plan.get("last_km")): int,
+                vol.Optional(
+                    CONF_LAST_DATE, default=plan.get("last_date", "")
+                ): str,
+                vol.Optional("delete", default=False): bool,
+            }
+        )
+        return self.async_show_form(step_id="plan", data_schema=schema, errors=errors)
+
+    # ------------------------------------------------------------------
+    # Historique des entretiens
+    # ------------------------------------------------------------------
+    async def async_step_history(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Sélectionner une entrée d'historique à modifier."""
+        coordinator = await async_get_or_create_coordinator(self.hass)
+        entries = coordinator.get_history(self._vehicle_id)
+        choices: dict[str, str] = {
+            str(index): (
+                f"{entry.get('date', '?')} — {entry.get('km', '?')} km — "
+                f"{(entry.get('actions', '') or '')[:40]}"
+            )
+            for index, entry in enumerate(entries)
+        }
+        choices["__back__"] = "↩️ Retour"
+        if user_input is not None:
+            choice = user_input["choice"]
+            if choice == "__back__":
+                return await self.async_step_init()
+            if choice.isdigit() and int(choice) < len(entries):
+                self._history_index = int(choice)
+                return await self.async_step_history_entry()
+        schema = vol.Schema({vol.Required("choice"): vol.In(choices)})
+        return self.async_show_form(step_id="history", data_schema=schema)
+
+    async def async_step_history_entry(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Modifier ou supprimer une entrée de l'historique."""
+        errors: dict[str, str] = {}
+        coordinator = await async_get_or_create_coordinator(self.hass)
+        index = self._history_index if self._history_index is not None else -1
+        entry = coordinator.get_history_entry(self._vehicle_id, index)
+        if entry is None:
+            return await self.async_step_history()
+        if user_input is not None:
+            error = _validate_date(user_input.get(CONF_DATE))
+            if error:
+                errors[CONF_DATE] = error
+            if not errors:
+                if user_input.get("delete"):
+                    coordinator.delete_history_entry(self._vehicle_id, index)
+                else:
+                    coordinator.update_history_entry(
+                        self._vehicle_id,
+                        index,
+                        {
+                            "vehicle_id": self._vehicle_id,
+                            "date": user_input[CONF_DATE],
+                            "km": user_input[CONF_KM],
+                            "actions": user_input[CONF_ACTIONS],
+                            "cost": user_input.get(CONF_COST),
+                            "invoice_url": user_input.get(CONF_INVOICE_PATH),
+                            "created_at": entry.get("created_at"),
+                        },
+                    )
+                await self._async_save()
+                return await self.async_step_history()
+
+        schema = vol.Schema(
+            {
+                vol.Required(CONF_DATE, default=entry.get("date", "")): str,
+                vol.Required(CONF_KM, default=entry.get("km", 0)): int,
+                vol.Required(CONF_ACTIONS, default=entry.get("actions", "")): str,
+                vol.Optional(
+                    CONF_COST, default=entry.get("cost")
+                ): vol.Coerce(float),
+                vol.Optional(
+                    CONF_INVOICE_PATH, default=entry.get("invoice_url", "")
+                ): str,
+                vol.Optional("delete", default=False): bool,
+            }
+        )
+        return self.async_show_form(
+            step_id="history_entry", data_schema=schema, errors=errors
         )

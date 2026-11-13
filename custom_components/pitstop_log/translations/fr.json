@@ -28,6 +28,15 @@
     "options": {
         "step": {
             "init": {
+                "title": "PitStop Log",
+                "menu_options": {
+                    "vehicle": "Modifier le véhicule",
+                    "plans": "Plans d'entretien",
+                    "history": "Historique des entretiens",
+                    "done": "Terminé"
+                }
+            },
+            "vehicle": {
                 "title": "Modifier le véhicule",
                 "data": {
                     "vehicle_name": "Nom du véhicule",
@@ -39,10 +48,60 @@
                     "registration": "Immatriculation / carte grise",
                     "odometer": "Kilométrage actuel"
                 }
+            },
+            "plans": {
+                "title": "Plans d'entretien",
+                "description": "Sélectionnez un plan à modifier ou ajoutez-en un.",
+                "data": {
+                    "choice": "Plan d'entretien"
+                }
+            },
+            "add_plan": {
+                "title": "Ajouter un plan d'entretien",
+                "description": "Définissez un intervalle en kilomètres et/ou en mois.",
+                "data": {
+                    "plan_name": "Nom du plan",
+                    "interval_km": "Intervalle (km)",
+                    "interval_months": "Intervalle (mois)",
+                    "last_km": "Dernier kilométrage effectué",
+                    "last_date": "Date de la dernière réalisation (AAAA-MM-JJ)"
+                }
+            },
+            "plan": {
+                "title": "Modifier le plan d'entretien",
+                "description": "Cochez « Supprimer » pour supprimer ce plan.",
+                "data": {
+                    "plan_name": "Nom du plan",
+                    "interval_km": "Intervalle (km)",
+                    "interval_months": "Intervalle (mois)",
+                    "last_km": "Dernier kilométrage effectué",
+                    "last_date": "Date de la dernière réalisation (AAAA-MM-JJ)",
+                    "delete": "Supprimer ce plan"
+                }
+            },
+            "history": {
+                "title": "Historique des entretiens",
+                "description": "Sélectionnez un entretien à modifier.",
+                "data": {
+                    "choice": "Entretien réalisé"
+                }
+            },
+            "history_entry": {
+                "title": "Modifier l'entretien",
+                "description": "Cochez « Supprimer » pour supprimer cette entrée.",
+                "data": {
+                    "date": "Date (AAAA-MM-JJ)",
+                    "km": "Kilométrage",
+                    "actions": "Actions effectuées",
+                    "cost": "Coût",
+                    "invoice_path": "Chemin / URL de la facture",
+                    "delete": "Supprimer cette entrée"
+                }
             }
         },
         "error": {
-            "invalid_date": "Date invalide, format attendu : AAAA-MM-JJ."
+            "invalid_date": "Date invalide, format attendu : AAAA-MM-JJ.",
+            "interval_required": "Un intervalle en km ou en mois doit être défini."
         }
     },
     "entity": {

@@ -28,6 +28,15 @@
     "options": {
         "step": {
             "init": {
+                "title": "PitStop Log",
+                "menu_options": {
+                    "vehicle": "Edit vehicle",
+                    "plans": "Maintenance plans",
+                    "history": "Maintenance history",
+                    "done": "Done"
+                }
+            },
+            "vehicle": {
                 "title": "Edit vehicle",
                 "data": {
                     "vehicle_name": "Vehicle name",
@@ -39,10 +48,60 @@
                     "registration": "Registration / vehicle title",
                     "odometer": "Current mileage"
                 }
+            },
+            "plans": {
+                "title": "Maintenance plans",
+                "description": "Select a plan to edit or add a new one.",
+                "data": {
+                    "choice": "Maintenance plan"
+                }
+            },
+            "add_plan": {
+                "title": "Add a maintenance plan",
+                "description": "Define an interval in kilometers and/or months.",
+                "data": {
+                    "plan_name": "Plan name",
+                    "interval_km": "Interval (km)",
+                    "interval_months": "Interval (months)",
+                    "last_km": "Last mileage done",
+                    "last_date": "Date of last completion (YYYY-MM-DD)"
+                }
+            },
+            "plan": {
+                "title": "Edit maintenance plan",
+                "description": "Check \"Delete\" to remove this plan.",
+                "data": {
+                    "plan_name": "Plan name",
+                    "interval_km": "Interval (km)",
+                    "interval_months": "Interval (months)",
+                    "last_km": "Last mileage done",
+                    "last_date": "Date of last completion (YYYY-MM-DD)",
+                    "delete": "Delete this plan"
+                }
+            },
+            "history": {
+                "title": "Maintenance history",
+                "description": "Select a completed maintenance to edit.",
+                "data": {
+                    "choice": "Completed maintenance"
+                }
+            },
+            "history_entry": {
+                "title": "Edit maintenance",
+                "description": "Check \"Delete\" to remove this entry.",
+                "data": {
+                    "date": "Date (YYYY-MM-DD)",
+                    "km": "Mileage",
+                    "actions": "Actions performed",
+                    "cost": "Cost",
+                    "invoice_path": "Invoice path / URL",
+                    "delete": "Delete this entry"
+                }
             }
         },
         "error": {
-            "invalid_date": "Invalid date, expected format: YYYY-MM-DD."
+            "invalid_date": "Invalid date, expected format: YYYY-MM-DD.",
+            "interval_required": "An interval in km or months must be defined."
         }
     },
     "entity": {

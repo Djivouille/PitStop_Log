@@ -181,6 +181,56 @@ class PitStopDataUpdateCoordinator:
             if plan.get("vehicle_id") == vehicle_id and plan.get("active", True)
         ]
 
+    def set_plan(self, plan_id: str, plan: dict[str, Any]) -> None:
+        """Créer ou mettre à jour un plan d'entretien en mémoire."""
+        self.data["plans"][plan_id] = plan
+
+    def delete_plan(self, plan_id: str) -> None:
+        """Supprimer un plan d'entretien."""
+        self.data["plans"].pop(plan_id, None)
+
+    def get_history_entry(self, vehicle_id: str, index: int) -> dict[str, Any] | None:
+        """Retourner une entrée d'historique par son index (ordre du menu)."""
+        entries = self.get_history(vehicle_id)
+        if 0 <= index < len(entries):
+            return entries[index]
+        return None
+
+    def update_history_entry(
+        self, vehicle_id: str, index: int, entry: dict[str, Any]
+    ) -> bool:
+        """Mettre à jour une entrée d'historique par son index."""
+        target = self.get_history_entry(vehicle_id, index)
+        if target is None:
+            return False
+        # Les entrées sont identifiées par leur date + kilométrage + actions
+        for pos, stored in enumerate(self.data["history"]):
+            if (
+                stored.get("vehicle_id") == vehicle_id
+                and stored.get("date") == target.get("date")
+                and stored.get("km") == target.get("km")
+                and stored.get("actions") == target.get("actions")
+            ):
+                self.data["history"][pos] = entry
+                return True
+        return False
+
+    def delete_history_entry(self, vehicle_id: str, index: int) -> bool:
+        """Supprimer une entrée d'historique par son index."""
+        target = self.get_history_entry(vehicle_id, index)
+        if target is None:
+            return False
+        for pos, stored in enumerate(self.data["history"]):
+            if (
+                stored.get("vehicle_id") == vehicle_id
+                and stored.get("date") == target.get("date")
+                and stored.get("km") == target.get("km")
+                and stored.get("actions") == target.get("actions")
+            ):
+                del self.data["history"][pos]
+                return True
+        return False
+
     # ------------------------------------------------------------------
     # Historique (entretiens faits)
     # ------------------------------------------------------------------

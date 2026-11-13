@@ -11,7 +11,10 @@ Les versions suivent le format **`AAAA.MM.JJ`** (date de publication), par exemp
 
 - **Gestion multi-véhicules** via l'interface de Home Assistant (Config Flow) :
   type, marque, modèle, année-modèle, date d'achat, immatriculation (carte grise)
-  et kilométrage actuel. Modification possible via l'Options Flow.
+  et kilométrage actuel.
+- **Édition complète via l'interface** (Options Flow) : métadonnées du véhicule,
+  plans d'entretien (ajout/modification/suppression) et historique des entretiens
+  (modification/suppression) — sans passer par les services YAML.
 - **Entretiens à faire** : échéances basées sur un intervalle en kilomètres
   et/ou en mois, avec calcul automatique du reste à faire (km restants, jours
   restants) et statut d'alerte : `OK`, `Bientôt dû`, `En retard` (états traduits
@@ -52,7 +55,11 @@ Prérequis : [**HACS**](https://hacs.xyz/installation/prerequisites/) déjà ins
 1. **Paramètres** → **Appareils et services** → **Ajouter une intégration**.
 2. Recherchez **PitStop Log** et suivez l'assistant pour créer un véhicule.
 3. Répétez pour chaque véhicule du parc.
-4. Pour modifier un véhicule : roulez sa carte → **Configurer** (Options Flow).
+4. Pour gérer un véhicule : roulez sa carte → **Configurer** (Options Flow). Le menu permet de :
+   - **Modifier le véhicule** : nom, type, marque, modèle, année-modèle, date d'achat, immatriculation, kilométrage ;
+   - **Plans d'entretien** : ajouter, modifier ou supprimer les entretiens périodiques (intervalle km/mois, dernière réalisation) ;
+   - **Historique des entretiens** : modifier ou supprimer chaque entretien réalisé (date, kilométrage, actions, coût, facture) ;
+   - **Terminé** pour fermer.
 
 ## Capteurs créés par véhicule
 
