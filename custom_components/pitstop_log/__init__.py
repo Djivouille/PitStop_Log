@@ -188,7 +188,7 @@ async def async_setup_entry(
             },
         )
         await coordinator.async_save()
-    await hass.config_entries.async_forward_platforms(entry, PLATFORMS)
+    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     return True
 
 
