@@ -14,6 +14,7 @@ from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
 
 from .const import (
+    BRANDS_DIR,
     CONF_ACTIONS,
     CONF_BRAND,
     CONF_COST,
@@ -89,6 +90,13 @@ async def async_setup(hass: HomeAssistant, config: dict[str, Any]) -> bool:
     invoice_dir = os.path.join(hass.config.path(), INVOICE_DIR)
     await hass.async_add_executor_job(_ensure_invoice_dir, invoice_dir)
 
+    # Copie des logos de marques embarqués vers www (servis via /local/)
+    source_brands = os.path.join(os.path.dirname(__file__), "brands")
+    target_brands = os.path.join(hass.config.path(), BRANDS_DIR)
+    await hass.async_add_executor_job(
+        _sync_brand_logos, source_brands, target_brands
+    )
+
     async def handle_update_odometer(call: ServiceCall) -> None:
         """Service : mettre à jour le kilométrage d'un véhicule."""
         vehicle_id = coordinator.find_vehicle_id(call.data["vehicle_id"])
@@ -154,6 +162,26 @@ async def async_setup(hass: HomeAssistant, config: dict[str, Any]) -> bool:
 def _ensure_invoice_dir(invoice_dir: str) -> None:
     """Créer le dossier des factures s'il n'existe pas (exécuté hors boucle)."""
     os.makedirs(invoice_dir, exist_ok=True)
+
+
+def _sync_brand_logos(source_dir: str, target_dir: str) -> None:
+    """Copier les SVG de marques embarqués vers www (exécuté hors boucle).
+
+    Les fichiers déjà présents ne sont pas écrasés ; l'opération est
+    idempotente et ne fait rien si le dossier source est absent.
+    """
+    if not os.path.isdir(source_dir):
+        return
+    os.makedirs(target_dir, exist_ok=True)
+    for filename in os.listdir(source_dir):
+        if not filename.endswith(".svg"):
+            continue
+        target = os.path.join(target_dir, filename)
+        if os.path.exists(target):
+            continue
+        with open(os.path.join(source_dir, filename), "rb") as src:
+            with open(target, "wb") as dst:
+                dst.write(src.read())
 
 
 def _save_invoice_image(filepath: str, image_b64: str) -> None:

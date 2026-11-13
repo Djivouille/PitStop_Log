@@ -142,12 +142,17 @@ custom_components/pitstop_log/
 
 La liste des marques proposées dans le sélecteur est définie dans
 `custom_components/pitstop_log/brands.json` (fichier à part) : motos, voitures et
-camping-cars les plus courants, chacun associé à l'URL de son logo (CDN
-Simple Icons quand disponible). Pour ajouter une marque, éditez ce fichier et
-ajoutez une entrée :
+camping-cars les plus courants, chacun associé au chemin de son logo SVG stocké **localement** dans
+`custom_components/pitstop_log/brands/` (39 logos embarqués, issus de Simple
+Icons ; certaines marques retirées du projet n'ont pas de logo). Les logos
+sont copiés automatiquement dans `/config/www/pitstop_log/brands/` au
+démarrage et servis localement via `/local/pitstop_log/brands/...`.
+
+Pour ajouter une marque : déposez son SVG dans `brands/` et éditez
+`brands.json` :
 
 ```json
-"Ma Marque": {"logo": "https://cdn.simpleicons.org/mamarque", "category": "moto", "label": "Ma Marque"}
+"Ma Marque": {"logo": "/local/pitstop_log/brands/mamarque.svg", "category": "moto", "label": "Ma Marque"}
 ```
 
 Le logo de la marque et la photo du véhicule sont exposés en attributs du
