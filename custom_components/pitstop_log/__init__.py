@@ -39,6 +39,7 @@ from .const import (
     brand_logo,
     INVOICE_DIR,
     INVOICE_URL_PREFIX,
+    PHOTOS_DIR,
     PLATFORMS,
     SERVICE_ADD_MAINTENANCE_DONE,
     SERVICE_ADD_MAINTENANCE_PLAN,
@@ -96,6 +97,10 @@ async def async_setup(hass: HomeAssistant, config: dict[str, Any]) -> bool:
     await hass.async_add_executor_job(
         _sync_brand_logos, source_brands, target_brands
     )
+
+    # Dossier des photos des véhicules (téléversées depuis l'interface)
+    photos_dir = os.path.join(hass.config.path(), PHOTOS_DIR)
+    await hass.async_add_executor_job(_ensure_invoice_dir, photos_dir)
 
     async def handle_update_odometer(call: ServiceCall) -> None:
         """Service : mettre à jour le kilométrage d'un véhicule."""

@@ -6,6 +6,8 @@ le calcul des échéances et la mise à jour des capteurs.
 
 from __future__ import annotations
 
+import os
+import shutil
 from datetime import date, datetime, timedelta
 from typing import Any
 
@@ -19,12 +21,37 @@ from .const import (
     DOMAIN,
     DUE_SOON_DAYS,
     DUE_SOON_KM_PERCENT,
+    PHOTOS_DIR,
+    PHOTOS_URL_PREFIX,
     STATUS_DUE_SOON,
     STATUS_OK,
     STATUS_OVERDUE,
 )
 
 DEFAULT_SAVE_DELAY = 30  # Secondes avant écriture différée sur le disque
+
+
+async def async_save_uploaded_photo(
+    hass: HomeAssistant, file_id: str, vehicle_id: str
+) -> str:
+    """Copier une photo téléversée vers www et retourner son URL locale.
+
+    L'identifiant de fichier est fourni par le sélecteur file du flux de
+    configuration ; le fichier temporaire est consommé et supprimé par
+    l'API file_upload de Home Assistant.
+    """
+    from homeassistant.components.file_upload import process_uploaded_file
+
+    photos_dir = os.path.join(hass.config.path(), PHOTOS_DIR)
+    os.makedirs(photos_dir, exist_ok=True)
+    with process_uploaded_file(hass, file_id) as file_path:
+        # Extension sécurisée, .jpg par défaut
+        ext = file_path.suffix.lower()
+        if not ext or not ext.isalnum() or len(ext) > 6:
+            ext = ".jpg"
+        target = os.path.join(photos_dir, f"{vehicle_id}{ext}")
+        await hass.async_add_executor_job(shutil.copyfile, file_path, target)
+    return f"{PHOTOS_URL_PREFIX}/{vehicle_id}{ext}"
 
 
 async def async_get_or_create_coordinator(

@@ -12,6 +12,8 @@ from homeassistant import config_entries
 from homeassistant.core import callback
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers.selector import (
+    FileSelector,
+    FileSelectorConfig,
     SelectSelector,
     SelectSelectorConfig,
     SelectSelectorMode,
@@ -45,7 +47,10 @@ from .const import (
     brand_logo,
     brands_for_type,
 )
-from .coordinator import async_get_or_create_coordinator
+from .coordinator import (
+    async_get_or_create_coordinator,
+    async_save_uploaded_photo,
+)
 
 
 def dropdown_selector(options: list[dict[str, str]]) -> SelectSelector:
@@ -74,6 +79,22 @@ def brand_options(brands: list[str]) -> list[dict[str, str]]:
     ]
 
 
+def vehicle_details_schema(current_photo: str | None = None) -> vol.Schema:
+    """Schéma de l'étape 2 : le reste des informations du véhicule."""
+    return vol.Schema(
+        {
+            vol.Required(CONF_VEHICLE_NAME): str,
+            vol.Optional(CONF_MODEL_YEAR): int,
+            vol.Optional(CONF_PURCHASE_DATE): str,
+            vol.Optional(CONF_REGISTRATION): str,
+            vol.Required(CONF_ODOMETER, default=0): int,
+            vol.Optional(CONF_PHOTO): FileSelector(
+                FileSelectorConfig(accept="image/*")
+            ),
+        }
+    )
+
+
 # Schéma de la première étape : choix du type de véhicule (menu déroulant)
 VEHICLE_TYPE_SCHEMA = vol.Schema(
     {
@@ -84,18 +105,7 @@ VEHICLE_TYPE_SCHEMA = vol.Schema(
 )
 
 
-def vehicle_details_schema() -> vol.Schema:
-    """Schéma de l'étape 2 : le reste des informations du véhicule."""
-    return vol.Schema(
-        {
-            vol.Required(CONF_VEHICLE_NAME): str,
-            vol.Optional(CONF_MODEL_YEAR): int,
-            vol.Optional(CONF_PURCHASE_DATE): str,
-            vol.Optional(CONF_REGISTRATION): str,
-            vol.Required(CONF_ODOMETER, default=0): int,
-            vol.Optional(CONF_PHOTO): str,
-        }
-    )
+
 
 # Schéma d'ajout d'un plan d'entretien depuis l'interface
 PLAN_SCHEMA = vol.Schema(
@@ -199,6 +209,12 @@ class PitStopLogConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             if not errors:
                 # Identifiant interne stable basé sur le nom du véhicule
                 vehicle_id = slugify(user_input[CONF_VEHICLE_NAME])
+                # Copie de la photo téléversée (si fournie) vers www
+                photo_url = ""
+                if user_input.get(CONF_PHOTO):
+                    photo_url = await async_save_uploaded_photo(
+                        self.hass, user_input[CONF_PHOTO], vehicle_id
+                    )
                 return self.async_create_entry(
                     title=user_input[CONF_VEHICLE_NAME],
                     data={
@@ -207,6 +223,7 @@ class PitStopLogConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         CONF_BRAND: self._vehicle_brand,
                         CONF_MODEL: self._vehicle_model,
                         **user_input,
+                        CONF_PHOTO: photo_url,
                     },
                 )
 
@@ -342,6 +359,12 @@ class PitStopLogOptionsFlow(config_entries.OptionsFlow):
             if error:
                 errors[CONF_PURCHASE_DATE] = error
             if not errors:
+                # Copie de la nouvelle photo téléversée, sinon conservation de l'actuelle
+                photo_url = defaults.get(CONF_PHOTO, "")
+                if user_input.get(CONF_PHOTO):
+                    photo_url = await async_save_uploaded_photo(
+                        self.hass, user_input[CONF_PHOTO], self._vehicle_id
+                    )
                 # Mise à jour des données persistées du véhicule (modèle normalisé)
                 coordinator.set_vehicle(
                     self._vehicle_id,
@@ -354,7 +377,7 @@ class PitStopLogOptionsFlow(config_entries.OptionsFlow):
                         "purchase_date": user_input.get(CONF_PURCHASE_DATE),
                         "registration": user_input.get(CONF_REGISTRATION, ""),
                         "odometer": user_input.get(CONF_ODOMETER, 0),
-                        "photo": user_input.get(CONF_PHOTO, ""),
+                        "photo": photo_url,
                         "brand_logo": brand_logo(self._vehicle_brand),
                     },
                 )
@@ -368,6 +391,7 @@ class PitStopLogOptionsFlow(config_entries.OptionsFlow):
                             CONF_BRAND: self._vehicle_brand,
                             CONF_MODEL: self._vehicle_model,
                             **user_input,
+                            CONF_PHOTO: photo_url,
                         },
                     )
                 )
@@ -391,9 +415,9 @@ class PitStopLogOptionsFlow(config_entries.OptionsFlow):
                 vol.Required(
                     CONF_ODOMETER, default=defaults.get(CONF_ODOMETER, 0)
                 ): int,
-                vol.Optional(
-                    CONF_PHOTO, default=defaults.get(CONF_PHOTO, "")
-                ): str,
+                vol.Optional(CONF_PHOTO): FileSelector(
+                    FileSelectorConfig(accept="image/*")
+                ),
             }
         )
         return self.async_show_form(

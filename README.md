@@ -12,7 +12,8 @@ Les versions suivent le format **`AAAA.MM.JJ`** (date de publication), par exemp
 - **Gestion multi-véhicules** via l'interface de Home Assistant (Config Flow) :
   type, marque (liste déroulante issue de `brands.json`, avec logo associé), modèle,
   année-modèle, date d'achat, immatriculation (carte grise), kilométrage actuel
-  et photo du véhicule (URL ou chemin `/local/...`).
+  et photo du véhicule (téléversement depuis l'interface, stockée dans
+  `/config/www/pitstop_log/photos/`, servie via `/local/pitstop_log/photos/...`).
 - **Édition complète via l'interface** (Options Flow) : métadonnées du véhicule,
   plans d'entretien (ajout/modification/suppression) et historique des entretiens
   (modification/suppression) — sans passer par les services YAML.

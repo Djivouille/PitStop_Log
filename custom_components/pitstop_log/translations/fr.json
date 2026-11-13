@@ -32,7 +32,7 @@
                     "purchase_date": "Date d'achat (AAAA-MM-JJ)",
                     "registration": "Immatriculation / carte grise",
                     "odometer": "Kilométrage actuel",
-                    "photo": "Photo du véhicule (URL ou /local/...)"
+                    "photo": "Photo du véhicule (téléverser une image)"
                 }
             }
         },
@@ -120,7 +120,7 @@
                     "purchase_date": "Date d'achat (AAAA-MM-JJ)",
                     "registration": "Immatriculation / carte grise",
                     "odometer": "Kilométrage actuel",
-                    "photo": "Photo du véhicule (URL ou /local/...)"
+                    "photo": "Photo du véhicule (téléverser une image)"
                 }
             },
             "vehicle_brand": {

@@ -40,7 +40,7 @@ def brands_for_type(vehicle_type: str) -> list[str]:
 # Domaine et version de l'intégration
 # Convention : AAAA.MM.JJ (date de publication)
 DOMAIN = "pitstop_log"
-VERSION = "2026.11.22"
+VERSION = "2026.11.23"
 PLATFORMS = ["sensor"]
 
 # Clé et version du stockage persistant (homeassistant.helpers.storage.Store)
@@ -54,6 +54,10 @@ INVOICE_URL_PREFIX = "/local/pitstop_log/invoices"
 # Dossier des logos de marques (copiés dans www au démarrage, servis localement)
 BRANDS_DIR = "www/pitstop_log/brands"
 BRANDS_URL_PREFIX = "/local/pitstop_log/brands"
+
+# Dossier des photos des véhicules (servies localement)
+PHOTOS_DIR = "www/pitstop_log/photos"
+PHOTOS_URL_PREFIX = "/local/pitstop_log/photos"
 
 # Clés de configuration des véhicules
 CONF_VEHICLE_NAME = "vehicle_name"

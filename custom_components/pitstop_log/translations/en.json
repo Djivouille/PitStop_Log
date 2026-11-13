@@ -32,7 +32,7 @@
                     "purchase_date": "Purchase date (YYYY-MM-DD)",
                     "registration": "Registration / vehicle title",
                     "odometer": "Current mileage",
-                    "photo": "Vehicle photo (URL or /local/...)"
+                    "photo": "Vehicle photo (upload an image)"
                 }
             }
         },
@@ -120,7 +120,7 @@
                     "purchase_date": "Purchase date (YYYY-MM-DD)",
                     "registration": "Registration / vehicle title",
                     "odometer": "Current mileage",
-                    "photo": "Vehicle photo (URL or /local/...)"
+                    "photo": "Vehicle photo (upload an image)"
                 }
             },
             "vehicle_brand": {
