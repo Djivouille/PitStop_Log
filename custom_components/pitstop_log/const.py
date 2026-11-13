@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 # Domaine et version de l'intégration
-# Convention : AAAA.MM.JJ.N (date de publication + numéro de version du jour)
+# Convention : AAAA.MM.JJ (date de publication)
 DOMAIN = "pitstop_log"
-VERSION = "2026.11.13.1"
+VERSION = "2026.11.13"
 PLATFORMS = ["sensor"]
 
 # Clé et version du stockage persistant (homeassistant.helpers.storage.Store)
