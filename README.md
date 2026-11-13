@@ -3,6 +3,10 @@
 **PitStop Log** est une intégration personnalisée pour Home Assistant qui sert de
 carnet d'entretien numérique multi-véhicules (motos, voitures, camping-cars, etc.).
 
+## Versionnement
+
+Les versions suivent le format **`AAAA.MM.JJ.N`** (date de publication + numéro de version du jour), par exemple `2026.11.13.1`. HA exigeant une version parsable dans `manifest.json`, les séparateurs `-` et `_` sont remplacés par des points.
+
 ## Fonctionnalités
 
 - **Gestion multi-véhicules** via l'interface de Home Assistant (Config Flow) :
