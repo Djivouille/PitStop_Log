@@ -70,6 +70,8 @@ Prérequis : [**HACS**](https://hacs.xyz/installation/prerequisites/) déjà ins
 | Kilométrage | Kilométrage actuel du véhicule (km). |
 | Prochain entretien | Statut le plus urgent (`OK` / `Bientôt dû` / `En retard`, traduit dans l'interface), avec en attributs le détail des plans et l'historique complet (dates, km, actions, coûts, liens vers les factures). |
 | Un capteur par plan d'entretien | Statut du plan (traduit dans l'interface) avec attributs `km_remaining`, `days_remaining`, `due_km`, `due_date`. |
+| Photo du véhicule (entité image) | Affiche la photo téléversée, visible sur la page de l'appareil et dans les tableaux de bord. |
+| Logo de marque (entité image) | Affiche le logo de la marque du véhicule, visible sur la page de l'appareil et dans les tableaux de bord. |
 
 ## Services
 

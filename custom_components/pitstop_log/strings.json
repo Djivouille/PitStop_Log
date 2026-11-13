@@ -164,6 +164,14 @@
                     "overdue": "En retard"
                 }
             }
+        },
+        "image": {
+            "vehicle_photo": {
+                "name": "Photo du véhicule"
+            },
+            "brand_logo": {
+                "name": "Logo de marque"
+            }
         }
     }
 }

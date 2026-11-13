@@ -40,8 +40,8 @@ def brands_for_type(vehicle_type: str) -> list[str]:
 # Domaine et version de l'intégration
 # Convention : AAAA.MM.JJ (date de publication)
 DOMAIN = "pitstop_log"
-VERSION = "2026.11.23"
-PLATFORMS = ["sensor"]
+VERSION = "2026.11.24"
+PLATFORMS = ["sensor", "image"]
 
 # Clé et version du stockage persistant (homeassistant.helpers.storage.Store)
 STORAGE_KEY = DOMAIN

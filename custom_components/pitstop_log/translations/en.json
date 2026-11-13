@@ -164,6 +164,14 @@
                     "overdue": "Overdue"
                 }
             }
+        },
+        "image": {
+            "vehicle_photo": {
+                "name": "Vehicle photo"
+            },
+            "brand_logo": {
+                "name": "Brand logo"
+            }
         }
     }
 }
