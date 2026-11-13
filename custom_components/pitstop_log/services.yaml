@@ -1,0 +1,160 @@
+update_odometer:
+  name: Mettre à jour le kilométrage
+  description: >-
+    Met à jour le kilométrage actuel d'un véhicule.
+  fields:
+    vehicle_id:
+      name: Véhicule
+      description: Identifiant ou nom du véhicule.
+      required: true
+      example: "moto_yamaha"
+      selector:
+        text:
+    km:
+      name: Kilométrage
+      description: Nouveau kilométrage (km).
+      required: true
+      example: 12345
+      selector:
+        number:
+          min: 0
+          max: 2000000
+          step: 1
+          unit_of_measurement: km
+
+add_maintenance_done:
+  name: Enregistrer un entretien réalisé
+  description: >-
+    Ajoute une intervention réalisée à l'historique du véhicule.
+  fields:
+    vehicle_id:
+      name: Véhicule
+      description: Identifiant ou nom du véhicule.
+      required: true
+      example: "moto_yamaha"
+      selector:
+        text:
+    date:
+      name: Date
+      description: Date de l'intervention (AAAA-MM-JJ).
+      required: true
+      example: "2025-05-01"
+      selector:
+        date:
+    km:
+      name: Kilométrage
+      description: Kilométrage au moment de l'intervention.
+      required: true
+      example: 12345
+      selector:
+        number:
+          min: 0
+          max: 2000000
+          step: 1
+          unit_of_measurement: km
+    actions:
+      name: Actions effectuées
+      description: Description des actions réalisées.
+      required: true
+      example: "Vidange, remplacement du filtre à huile"
+      selector:
+        text:
+          multiline: true
+    cost:
+      name: Coût
+      description: Coût de l'intervention (optionnel).
+      required: false
+      example: 89.5
+      selector:
+        number:
+          min: 0
+          max: 100000
+          step: 0.01
+    invoice_path:
+      name: Chemin de la facture
+      description: >-
+        Chemin ou URL locale de la photo de facture
+        (ex. /local/pitstop_log/invoices/mafacture.jpg). Optionnel.
+      required: false
+      example: "/local/pitstop_log/invoices/mafacture.jpg"
+      selector:
+        text:
+    invoice_base64:
+      name: Image de facture (base64)
+      description: >-
+        Contenu de la photo de facture encodé en base64.
+        Sauvegardé automatiquement dans /config/www/pitstop_log/invoices/.
+        Optionnel.
+      required: false
+      selector:
+        text:
+          multiline: true
+    plan_id:
+      name: Plan d'entretien
+      description: >-
+        Identifiant du plan d'entretien à réinitialiser
+        (entretien périodique). Optionnel.
+      required: false
+      example: "moto_yamaha_vidange"
+      selector:
+        text:
+
+add_maintenance_plan:
+  name: Ajouter un plan d'entretien
+  description: >-
+    Ajoute une règle d'entretien périodique (en km et/ou en mois).
+  fields:
+    vehicle_id:
+      name: Véhicule
+      description: Identifiant ou nom du véhicule.
+      required: true
+      example: "moto_yamaha"
+      selector:
+        text:
+    plan_name:
+      name: Nom du plan
+      description: Nom de l'entretien périodique.
+      required: true
+      example: "Vidange moteur"
+      selector:
+        text:
+    interval_km:
+      name: Intervalle (km)
+      description: Fréquence en kilomètres. Optionnel si l'intervalle en mois est défini.
+      required: false
+      example: 6000
+      selector:
+        number:
+          min: 1
+          max: 200000
+          step: 1
+          unit_of_measurement: km
+    interval_months:
+      name: Intervalle (mois)
+      description: Fréquence en mois. Optionnel si l'intervalle en km est défini.
+      required: false
+      example: 12
+      selector:
+        number:
+          min: 1
+          max: 240
+          step: 1
+          unit_of_measurement: mois
+    last_km:
+      name: Dernier kilométrage effectué
+      description: Kilométrage de la dernière réalisation. Optionnel.
+      required: false
+      example: 12000
+      selector:
+        number:
+          min: 0
+          max: 2000000
+          step: 1
+          unit_of_measurement: km
+    last_date:
+      name: Date de la dernière réalisation
+      description: Date de la dernière réalisation (AAAA-MM-JJ). Optionnel.
+      required: false
+      example: "2025-05-01"
+      selector:
+        date:

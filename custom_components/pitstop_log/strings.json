@@ -1,0 +1,48 @@
+{
+    "title": "PitStop Log",
+    "config": {
+        "step": {
+            "user": {
+                "title": "Ajouter un véhicule",
+                "description": "Renseignez les informations de votre véhicule.",
+                "data": {
+                    "vehicle_name": "Nom du véhicule",
+                    "vehicle_type": "Type de véhicule",
+                    "brand": "Marque",
+                    "model": "Modèle",
+                    "model_year": "Année-modèle",
+                    "purchase_date": "Date d'achat (AAAA-MM-JJ)",
+                    "registration": "Immatriculation / carte grise",
+                    "odometer": "Kilométrage actuel"
+                }
+            }
+        },
+        "error": {
+            "name_already_used": "Un véhicule porte déjà ce nom.",
+            "invalid_date": "Date invalide, format attendu : AAAA-MM-JJ."
+        },
+        "abort": {
+            "already_configured": "Ce véhicule est déjà configuré."
+        }
+    },
+    "options": {
+        "step": {
+            "init": {
+                "title": "Modifier le véhicule",
+                "data": {
+                    "vehicle_name": "Nom du véhicule",
+                    "vehicle_type": "Type de véhicule",
+                    "brand": "Marque",
+                    "model": "Modèle",
+                    "model_year": "Année-modèle",
+                    "purchase_date": "Date d'achat (AAAA-MM-JJ)",
+                    "registration": "Immatriculation / carte grise",
+                    "odometer": "Kilométrage actuel"
+                }
+            }
+        },
+        "error": {
+            "invalid_date": "Date invalide, format attendu : AAAA-MM-JJ."
+        }
+    }
+}
