@@ -3,19 +3,31 @@
     "config": {
         "step": {
             "user": {
-                "title": "Type de véhicule",
+                "title": "Étape 1/2 — Type de véhicule",
                 "description": "Choisissez le type de véhicule à ajouter.",
                 "data": {
                     "vehicle_type": "Type de véhicule"
                 }
             },
+            "vehicle_brand": {
+                "title": "Étape 1/2 — Marque",
+                "description": "Choisissez la marque du véhicule.",
+                "data": {
+                    "brand": "Marque"
+                }
+            },
+            "vehicle_model": {
+                "title": "Étape 1/2 — Modèle",
+                "description": "Saisissez le modèle du véhicule.",
+                "data": {
+                    "model": "Modèle"
+                }
+            },
             "vehicle_details": {
-                "title": "Détails du véhicule",
+                "title": "Étape 2/2 — Informations du véhicule",
                 "description": "Renseignez les informations de votre véhicule.",
                 "data": {
                     "vehicle_name": "Nom du véhicule",
-                    "brand": "Marque",
-                    "model": "Modèle",
                     "model_year": "Année-modèle",
                     "purchase_date": "Date d'achat (AAAA-MM-JJ)",
                     "registration": "Immatriculation / carte grise",
@@ -44,7 +56,8 @@
                 }
             },
             "vehicle": {
-                "title": "Modifier le type du véhicule",
+                "title": "Étape 1/2 — Type de véhicule",
+                "description": "Choisissez le type de véhicule à ajouter.",
                 "data": {
                     "vehicle_type": "Type de véhicule"
                 }
@@ -99,17 +112,29 @@
                 }
             },
             "vehicle_details": {
-                "title": "Détails du véhicule",
+                "title": "Étape 2/2 — Informations du véhicule",
                 "description": "Renseignez les informations de votre véhicule.",
                 "data": {
                     "vehicle_name": "Nom du véhicule",
-                    "brand": "Marque",
-                    "model": "Modèle",
                     "model_year": "Année-modèle",
                     "purchase_date": "Date d'achat (AAAA-MM-JJ)",
                     "registration": "Immatriculation / carte grise",
                     "odometer": "Kilométrage actuel",
                     "photo": "Photo du véhicule (URL ou /local/...)"
+                }
+            },
+            "vehicle_brand": {
+                "title": "Étape 1/2 — Marque",
+                "description": "Choisissez la marque du véhicule.",
+                "data": {
+                    "brand": "Marque"
+                }
+            },
+            "vehicle_model": {
+                "title": "Étape 1/2 — Modèle",
+                "description": "Saisissez le modèle du véhicule.",
+                "data": {
+                    "model": "Modèle"
                 }
             }
         },

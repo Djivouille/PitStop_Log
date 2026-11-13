@@ -3,19 +3,31 @@
     "config": {
         "step": {
             "user": {
-                "title": "Vehicle type",
+                "title": "Step 1/2 — Vehicle type",
                 "description": "Choose the type of vehicle to add.",
                 "data": {
                     "vehicle_type": "Vehicle type"
                 }
             },
+            "vehicle_brand": {
+                "title": "Step 1/2 — Brand",
+                "description": "Choose the brand of the vehicle.",
+                "data": {
+                    "brand": "Brand"
+                }
+            },
+            "vehicle_model": {
+                "title": "Step 1/2 — Model",
+                "description": "Enter the model of the vehicle.",
+                "data": {
+                    "model": "Model"
+                }
+            },
             "vehicle_details": {
-                "title": "Vehicle details",
+                "title": "Step 2/2 — Vehicle information",
                 "description": "Enter your vehicle information.",
                 "data": {
                     "vehicle_name": "Vehicle name",
-                    "brand": "Brand",
-                    "model": "Model",
                     "model_year": "Model year",
                     "purchase_date": "Purchase date (YYYY-MM-DD)",
                     "registration": "Registration / vehicle title",
@@ -44,7 +56,8 @@
                 }
             },
             "vehicle": {
-                "title": "Edit vehicle type",
+                "title": "Step 1/2 — Vehicle type",
+                "description": "Choose the type of vehicle to add.",
                 "data": {
                     "vehicle_type": "Vehicle type"
                 }
@@ -99,17 +112,29 @@
                 }
             },
             "vehicle_details": {
-                "title": "Vehicle details",
+                "title": "Step 2/2 — Vehicle information",
                 "description": "Enter your vehicle information.",
                 "data": {
                     "vehicle_name": "Vehicle name",
-                    "brand": "Brand",
-                    "model": "Model",
                     "model_year": "Model year",
                     "purchase_date": "Purchase date (YYYY-MM-DD)",
                     "registration": "Registration / vehicle title",
                     "odometer": "Current mileage",
                     "photo": "Vehicle photo (URL or /local/...)"
+                }
+            },
+            "vehicle_brand": {
+                "title": "Step 1/2 — Brand",
+                "description": "Choose the brand of the vehicle.",
+                "data": {
+                    "brand": "Brand"
+                }
+            },
+            "vehicle_model": {
+                "title": "Step 1/2 — Model",
+                "description": "Enter the model of the vehicle.",
+                "data": {
+                    "model": "Model"
                 }
             }
         },
