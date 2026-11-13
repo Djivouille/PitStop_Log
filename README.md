@@ -10,7 +10,8 @@ carnet d'entretien numérique multi-véhicules (motos, voitures, camping-cars, e
   et kilométrage actuel. Modification possible via l'Options Flow.
 - **Entretiens à faire** : échéances basées sur un intervalle en kilomètres
   et/ou en mois, avec calcul automatique du reste à faire (km restants, jours
-  restants) et statut d'alerte : `OK`, `Bientôt dû`, `En retard`.
+  restants) et statut d'alerte : `OK`, `Bientôt dû`, `En retard` (états traduits
+  dans l'interface via `translation_key` + sélecteur de texte).
 - **Entretiens réalisés** : historique daté avec kilométrage, description des
   actions, coût et photo de facture (stockée dans `/config/www/pitstop_log/invoices/`,
   accessible via `/local/pitstop_log/invoices/...`).
@@ -38,8 +39,8 @@ carnet d'entretien numérique multi-véhicules (motos, voitures, camping-cars, e
 | Capteur | Description |
 |---|---|
 | Kilométrage | Kilométrage actuel du véhicule (km). |
-| Prochain entretien | Statut le plus urgent (`OK` / `Bientôt dû` / `En retard`), avec en attributs le détail des plans et l'historique complet (dates, km, actions, coûts, liens vers les factures). |
-| Un capteur par plan d'entretien | Statut du plan avec attributs `km_remaining`, `days_remaining`, `due_km`, `due_date`. |
+| Prochain entretien | Statut le plus urgent (`OK` / `Bientôt dû` / `En retard`, traduit dans l'interface), avec en attributs le détail des plans et l'historique complet (dates, km, actions, coûts, liens vers les factures). |
+| Un capteur par plan d'entretien | Statut du plan (traduit dans l'interface) avec attributs `km_remaining`, `days_remaining`, `due_km`, `due_date`. |
 
 ## Services
 

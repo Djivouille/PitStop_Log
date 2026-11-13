@@ -59,7 +59,11 @@ ATTR_ENTITY_ID = "entity_id"
 DUE_SOON_KM_PERCENT = 0.15  # Bientôt dû sous 15 % de l'intervalle km restant
 DUE_SOON_DAYS = 30  # Bientôt dû sous 30 jours
 
-# États possibles des capteurs d'entretien
-STATUS_OK = "OK"
-STATUS_DUE_SOON = "Bientôt dû"
-STATUS_OVERDUE = "En retard"
+# États possibles des capteurs d'entretien (jetons neutres, traduits dans
+# l'interface via translation_key + sélecteur de texte)
+STATUS_OK = "ok"
+STATUS_DUE_SOON = "due_soon"
+STATUS_OVERDUE = "overdue"
+
+# Clé de traduction commune des capteurs de statut d'entretien
+TRANSLATION_KEY_MAINTENANCE_STATUS = "maintenance_status"

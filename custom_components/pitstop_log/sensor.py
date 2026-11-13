@@ -14,11 +14,17 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import StateType
 
-from .const import DOMAIN, STATUS_OVERDUE
+from .const import (
+    DOMAIN,
+    STATUS_DUE_SOON,
+    STATUS_OK,
+    STATUS_OVERDUE,
+    TRANSLATION_KEY_MAINTENANCE_STATUS,
+)
 from .coordinator import PitStopDataUpdateCoordinator
 
 # Priorité d'affichage des statuts (le plus urgent remonte en tête)
-_STATUS_PRIORITY = {STATUS_OVERDUE: 0, "Bientôt dû": 1, "OK": 2}
+_STATUS_PRIORITY = {STATUS_OVERDUE: 0, STATUS_DUE_SOON: 1, STATUS_OK: 2}
 
 
 async def async_setup_entry(
@@ -113,21 +119,12 @@ class PitStopNextMaintenanceSensor(PitStopEntity):
     _attr_translation_key = "next_maintenance"
     _attr_icon = "mdi:wrench-clock"
 
-    def __init__(
-        self,
-        coordinator: PitStopDataUpdateCoordinator,
-        entry: ConfigEntry,
-        vehicle_id: str,
-    ) -> None:
-        """Initialiser et s'abonner aux mises à jour du coordinateur."""
-        super().__init__(coordinator, entry, vehicle_id)
-
     @property
     def native_value(self) -> StateType:
-        """Statut d'entretien le plus urgent parmi tous les plans actifs."""
+        """Statut d'entretien le plus urgent (jeton traduit dans l'interface)."""
         plans = self.coordinator.get_plans(self.vehicle_id)
         if not plans:
-            return "OK"
+            return STATUS_OK
         infos = [
             (self.coordinator.get_due_info(plan), plan)
             for _, plan in plans
@@ -136,6 +133,15 @@ class PitStopNextMaintenanceSensor(PitStopEntity):
             key=lambda item: _STATUS_PRIORITY.get(item[0]["status"], 9)
         )
         return infos[0][0]["status"]
+
+    def __init__(
+        self,
+        coordinator: PitStopDataUpdateCoordinator,
+        entry: ConfigEntry,
+        vehicle_id: str,
+    ) -> None:
+        """Initialiser et s'abonner aux mises à jour du coordinateur."""
+        super().__init__(coordinator, entry, vehicle_id)
 
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
@@ -189,12 +195,16 @@ class PitStopMaintenancePlanSensor(PitStopEntity):
         self.plan_id = plan_id
         plan = coordinator.data["plans"].get(plan_id, {})
         self._attr_key = f"plan_{plan_id}"
-        self._attr_name = plan.get("name", plan_id)
+        # Nom et état traduits via translation_key + paramètres de traduction
+        self._attr_translation_key = TRANSLATION_KEY_MAINTENANCE_STATUS
+        self._attr_translation_placeholders = {
+            "plan_name": plan.get("name", plan_id)
+        }
         super().__init__(coordinator, entry, vehicle_id)
 
     @property
     def native_value(self) -> StateType:
-        """Statut du plan (OK, Bientôt dû, En retard)."""
+        """Statut du plan (jeton traduit dans l'interface)."""
         plan = self.coordinator.data["plans"].get(self.plan_id)
         if plan is None:
             return None

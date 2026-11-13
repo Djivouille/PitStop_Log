@@ -44,5 +44,28 @@
         "error": {
             "invalid_date": "Invalid date, expected format: YYYY-MM-DD."
         }
+    },
+    "entity": {
+        "sensor": {
+            "odometer": {
+                "name": "Mileage"
+            },
+            "next_maintenance": {
+                "name": "Next maintenance",
+                "state": {
+                    "ok": "OK",
+                    "due_soon": "Due soon",
+                    "overdue": "Overdue"
+                }
+            },
+            "maintenance_status": {
+                "name": "Maintenance: {plan_name}",
+                "state": {
+                    "ok": "OK",
+                    "due_soon": "Due soon",
+                    "overdue": "Overdue"
+                }
+            }
+        }
     }
 }
