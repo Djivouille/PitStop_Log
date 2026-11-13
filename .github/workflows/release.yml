@@ -1,0 +1,46 @@
+name: Release
+
+# Publie automatiquement une release GitHub quand la version du manifest
+# change. HACS se base sur les releases pour afficher la version installable.
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "custom_components/pitstop_log/manifest.json"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Récupérer le dépôt
+        uses: actions/checkout@v4
+
+      - name: Extraire la version du manifest
+        id: version
+        run: |
+          VERSION=$(jq -r '.version' custom_components/pitstop_log/manifest.json)
+          if [ -z "$VERSION" ] || [ "$VERSION" = "null" ]; then
+            echo "Version absente du manifest" >&2
+            exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Créer la release si elle n'existe pas
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          if gh release view "$VERSION" >/dev/null 2>&1; then
+            echo "La release $VERSION existe déjà, rien à faire."
+            exit 0
+          fi
+          git tag "$VERSION" 2>/dev/null || true
+          git push origin "refs/tags/$VERSION"
+          gh release create "$VERSION" \
+            --title "$VERSION" \
+            --notes "Publication PitStop Log $VERSION. Consultez le README pour les changements."
+          echo "Release $VERSION publiée."
