@@ -3,11 +3,17 @@
     "config": {
         "step": {
             "user": {
-                "title": "Add a vehicle",
+                "title": "Vehicle type",
+                "description": "Choose the type of vehicle to add.",
+                "data": {
+                    "vehicle_type": "Vehicle type"
+                }
+            },
+            "vehicle_details": {
+                "title": "Vehicle details",
                 "description": "Enter your vehicle information.",
                 "data": {
                     "vehicle_name": "Vehicle name",
-                    "vehicle_type": "Vehicle type",
                     "brand": "Brand",
                     "model": "Model",
                     "model_year": "Model year",
@@ -38,17 +44,9 @@
                 }
             },
             "vehicle": {
-                "title": "Edit vehicle",
+                "title": "Edit vehicle type",
                 "data": {
-                    "vehicle_name": "Vehicle name",
-                    "vehicle_type": "Vehicle type",
-                    "brand": "Brand",
-                    "model": "Model",
-                    "model_year": "Model year",
-                    "purchase_date": "Purchase date (YYYY-MM-DD)",
-                    "registration": "Registration / vehicle title",
-                    "odometer": "Current mileage",
-                    "photo": "Vehicle photo (URL or /local/...)"
+                    "vehicle_type": "Vehicle type"
                 }
             },
             "plans": {
@@ -98,6 +96,20 @@
                     "cost": "Cost",
                     "invoice_path": "Invoice path / URL",
                     "delete": "Delete this entry"
+                }
+            },
+            "vehicle_details": {
+                "title": "Vehicle details",
+                "description": "Enter your vehicle information.",
+                "data": {
+                    "vehicle_name": "Vehicle name",
+                    "brand": "Brand",
+                    "model": "Model",
+                    "model_year": "Model year",
+                    "purchase_date": "Purchase date (YYYY-MM-DD)",
+                    "registration": "Registration / vehicle title",
+                    "odometer": "Current mileage",
+                    "photo": "Vehicle photo (URL or /local/...)"
                 }
             }
         },

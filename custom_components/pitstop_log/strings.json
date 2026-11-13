@@ -3,11 +3,17 @@
     "config": {
         "step": {
             "user": {
-                "title": "Ajouter un véhicule",
+                "title": "Type de véhicule",
+                "description": "Choisissez le type de véhicule à ajouter.",
+                "data": {
+                    "vehicle_type": "Type de véhicule"
+                }
+            },
+            "vehicle_details": {
+                "title": "Détails du véhicule",
                 "description": "Renseignez les informations de votre véhicule.",
                 "data": {
                     "vehicle_name": "Nom du véhicule",
-                    "vehicle_type": "Type de véhicule",
                     "brand": "Marque",
                     "model": "Modèle",
                     "model_year": "Année-modèle",
@@ -38,17 +44,9 @@
                 }
             },
             "vehicle": {
-                "title": "Modifier le véhicule",
+                "title": "Modifier le type du véhicule",
                 "data": {
-                    "vehicle_name": "Nom du véhicule",
-                    "vehicle_type": "Type de véhicule",
-                    "brand": "Marque",
-                    "model": "Modèle",
-                    "model_year": "Année-modèle",
-                    "purchase_date": "Date d'achat (AAAA-MM-JJ)",
-                    "registration": "Immatriculation / carte grise",
-                    "odometer": "Kilométrage actuel",
-                    "photo": "Photo du véhicule (URL ou /local/...)"
+                    "vehicle_type": "Type de véhicule"
                 }
             },
             "plans": {
@@ -98,6 +96,20 @@
                     "cost": "Coût",
                     "invoice_path": "Chemin / URL de la facture",
                     "delete": "Supprimer cette entrée"
+                }
+            },
+            "vehicle_details": {
+                "title": "Détails du véhicule",
+                "description": "Renseignez les informations de votre véhicule.",
+                "data": {
+                    "vehicle_name": "Nom du véhicule",
+                    "brand": "Marque",
+                    "model": "Modèle",
+                    "model_year": "Année-modèle",
+                    "purchase_date": "Date d'achat (AAAA-MM-JJ)",
+                    "registration": "Immatriculation / carte grise",
+                    "odometer": "Kilométrage actuel",
+                    "photo": "Photo du véhicule (URL ou /local/...)"
                 }
             }
         },

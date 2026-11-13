@@ -35,25 +35,36 @@ from .const import (
     CONF_VEHICLE_NAME,
     CONF_VEHICLE_TYPE,
     DOMAIN,
-    VEHICLE_TYPES,
+    VEHICLE_TYPE_LABELS,
     brand_logo,
+    brands_for_type,
 )
 from .coordinator import async_get_or_create_coordinator
 
-# Schéma du formulaire de création/modification d'un véhicule
-VEHICLE_SCHEMA = vol.Schema(
+# Schéma de la première étape : choix du type de véhicule
+VEHICLE_TYPE_SCHEMA = vol.Schema(
     {
-        vol.Required(CONF_VEHICLE_NAME): str,
-        vol.Required(CONF_VEHICLE_TYPE, default="car"): vol.In(VEHICLE_TYPES),
-        vol.Required(CONF_BRAND): vol.In(BRAND_NAMES),
-        vol.Required(CONF_MODEL): str,
-        vol.Optional(CONF_MODEL_YEAR): int,
-        vol.Optional(CONF_PURCHASE_DATE): str,
-        vol.Optional(CONF_REGISTRATION): str,
-        vol.Required(CONF_ODOMETER, default=0): int,
-        vol.Optional(CONF_PHOTO): str,
+        vol.Required(CONF_VEHICLE_TYPE, default="car"): vol.In(
+            VEHICLE_TYPE_LABELS
+        ),
     }
 )
+
+
+def vehicle_details_schema(brands: list[str]) -> vol.Schema:
+    """Schéma de la seconde étape : marque (filtrée) puis détails du véhicule."""
+    return vol.Schema(
+        {
+            vol.Required(CONF_VEHICLE_NAME): str,
+            vol.Required(CONF_BRAND): vol.In(brands),
+            vol.Required(CONF_MODEL): str,
+            vol.Optional(CONF_MODEL_YEAR): int,
+            vol.Optional(CONF_PURCHASE_DATE): str,
+            vol.Optional(CONF_REGISTRATION): str,
+            vol.Required(CONF_ODOMETER, default=0): int,
+            vol.Optional(CONF_PHOTO): str,
+        }
+    )
 
 # Schéma d'ajout d'un plan d'entretien depuis l'interface
 PLAN_SCHEMA = vol.Schema(
@@ -95,10 +106,26 @@ class PitStopLogConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     VERSION = 1
 
+    def __init__(self) -> None:
+        """Initialiser le flux et l'état de navigation."""
+        super().__init__()
+        self._vehicle_type: str = "car"
+
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
-        """Étape initiale : formulaire de saisie des métadonnées du véhicule."""
+        """Première étape : choix du type de véhicule."""
+        if user_input is not None:
+            self._vehicle_type = user_input[CONF_VEHICLE_TYPE]
+            return await self.async_step_vehicle_details()
+        return self.async_show_form(
+            step_id="user", data_schema=VEHICLE_TYPE_SCHEMA
+        )
+
+    async def async_step_vehicle_details(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Seconde étape : marque (filtrée par type) et détails du véhicule."""
         errors: dict[str, str] = {}
         if user_input is not None:
             # Vérifie que le nom du véhicule n'est pas déjà utilisé
@@ -115,11 +142,19 @@ class PitStopLogConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 vehicle_id = slugify(user_input[CONF_VEHICLE_NAME])
                 return self.async_create_entry(
                     title=user_input[CONF_VEHICLE_NAME],
-                    data={"vehicle_id": vehicle_id, **user_input},
+                    data={
+                        "vehicle_id": vehicle_id,
+                        CONF_VEHICLE_TYPE: self._vehicle_type,
+                        **user_input,
+                    },
                 )
 
         return self.async_show_form(
-            step_id="user", data_schema=VEHICLE_SCHEMA, errors=errors
+            step_id="vehicle_details",
+            data_schema=vehicle_details_schema(
+                brands_for_type(self._vehicle_type)
+            ),
+            errors=errors,
         )
 
     @staticmethod
@@ -139,6 +174,7 @@ class PitStopLogOptionsFlow(config_entries.OptionsFlow):
         self.config_entry = config_entry
         self._plan_id: str | None = None
         self._history_index: int | None = None
+        self._vehicle_type: str | None = None
 
     @property
     def _vehicle_id(self) -> str:
@@ -172,9 +208,30 @@ class PitStopLogOptionsFlow(config_entries.OptionsFlow):
     async def async_step_vehicle(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
-        """Modifier les informations de base du véhicule."""
+        """Première étape de modification : choix du type du véhicule."""
+        defaults = dict(self.config_entry.data)
+        if user_input is not None:
+            self._vehicle_type = user_input[CONF_VEHICLE_TYPE]
+            return await self.async_step_vehicle_details()
+        schema = vol.Schema(
+            {
+                vol.Required(
+                    CONF_VEHICLE_TYPE,
+                    default=defaults.get(CONF_VEHICLE_TYPE, "car"),
+                ): vol.In(VEHICLE_TYPE_LABELS),
+            }
+        )
+        return self.async_show_form(step_id="vehicle", data_schema=schema)
+
+    async def async_step_vehicle_details(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Seconde étape : marque (filtrée par type) et détails du véhicule."""
         errors: dict[str, str] = {}
         coordinator = await async_get_or_create_coordinator(self.hass)
+        defaults = dict(self.config_entry.data)
+        if self._vehicle_type is None:
+            self._vehicle_type = defaults.get(CONF_VEHICLE_TYPE, "car")
         if user_input is not None:
             error = _validate_date(user_input.get(CONF_PURCHASE_DATE))
             if error:
@@ -185,7 +242,7 @@ class PitStopLogOptionsFlow(config_entries.OptionsFlow):
                     self._vehicle_id,
                     {
                         "name": user_input[CONF_VEHICLE_NAME],
-                        "type": user_input.get(CONF_VEHICLE_TYPE, "car"),
+                        "type": self._vehicle_type,
                         "brand": user_input.get(CONF_BRAND, ""),
                         "model": user_input.get(CONF_MODEL, ""),
                         "model_year": user_input.get(CONF_MODEL_YEAR),
@@ -202,25 +259,24 @@ class PitStopLogOptionsFlow(config_entries.OptionsFlow):
                         self.config_entry,
                         data={
                             "vehicle_id": self._vehicle_id,
+                            CONF_VEHICLE_TYPE: self._vehicle_type,
                             **user_input,
                         },
                     )
                 )
                 return await self.async_step_init()
 
-        # Pré-remplissage avec les valeurs actuelles du véhicule
-        defaults = dict(self.config_entry.data)
+        # Marques filtrées selon le type choisi + valeurs actuelles
+        brands = brands_for_type(self._vehicle_type)
+        current_brand = defaults.get(CONF_BRAND, brands[0])
+        if current_brand not in brands:
+            brands.insert(0, current_brand)
         schema = vol.Schema(
             {
                 vol.Required(
                     CONF_VEHICLE_NAME, default=defaults.get(CONF_VEHICLE_NAME)
                 ): str,
-                vol.Required(
-                    CONF_VEHICLE_TYPE, default=defaults.get(CONF_VEHICLE_TYPE, "car")
-                ): vol.In(VEHICLE_TYPES),
-                vol.Required(
-                    CONF_BRAND, default=defaults.get(CONF_BRAND, BRAND_NAMES[0])
-                ): vol.In(BRAND_NAMES),
+                vol.Required(CONF_BRAND, default=current_brand): vol.In(brands),
                 vol.Required(CONF_MODEL, default=defaults.get(CONF_MODEL, "")): str,
                 vol.Optional(
                     CONF_MODEL_YEAR, default=defaults.get(CONF_MODEL_YEAR)
@@ -241,7 +297,7 @@ class PitStopLogOptionsFlow(config_entries.OptionsFlow):
             }
         )
         return self.async_show_form(
-            step_id="vehicle", data_schema=schema, errors=errors
+            step_id="vehicle_details", data_schema=schema, errors=errors
         )
 
     # ------------------------------------------------------------------

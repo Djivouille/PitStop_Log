@@ -22,10 +22,25 @@ def brand_logo(brand: str) -> str:
     """Retourner l'URL du logo d'une marque (chaîne vide si inconnue)."""
     return BRANDS.get(brand, {}).get("logo", "")
 
+
+def brands_for_type(vehicle_type: str) -> list[str]:
+    """Lister les marques correspondant à un type de véhicule.
+
+    « Autre » est toujours proposé ; pour le type « other »,
+    toutes les marques sont affichées.
+    """
+    if vehicle_type == "other":
+        return list(BRANDS)
+    return [
+        name
+        for name, info in BRANDS.items()
+        if info.get("category") == vehicle_type or name == "Autre"
+    ]
+
 # Domaine et version de l'intégration
 # Convention : AAAA.MM.JJ (date de publication)
 DOMAIN = "pitstop_log"
-VERSION = "2026.11.19"
+VERSION = "2026.11.20"
 PLATFORMS = ["sensor"]
 
 # Clé et version du stockage persistant (homeassistant.helpers.storage.Store)
@@ -53,7 +68,15 @@ CONF_PHOTO = "photo"
 CONF_BRAND_LOGO = "brand_logo"
 
 # Types de véhicules proposés dans le flux de configuration
-VEHICLE_TYPES = ["moto", "car", "other"]
+VEHICLE_TYPES = ["moto", "car", "camper", "other"]
+
+# Libellés affichés pour chaque type de véhicule
+VEHICLE_TYPE_LABELS = {
+    "moto": "Moto",
+    "car": "Voiture",
+    "camper": "Camping-car",
+    "other": "Autre",
+}
 
 # Clés des plans d'entretien (entretiens à faire)
 CONF_PLAN_NAME = "plan_name"
