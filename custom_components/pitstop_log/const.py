@@ -2,10 +2,30 @@
 
 from __future__ import annotations
 
+import json
+from pathlib import Path
+
+
+def _load_brands() -> dict[str, dict[str, str]]:
+    """Charger la liste des marques et leurs logos depuis brands.json."""
+    brands_path = Path(__file__).parent / "brands.json"
+    with open(brands_path, encoding="utf-8") as file:
+        return json.load(file)["brands"]
+
+
+# Marques disponibles pour le sélecteur (fichier à part : brands.json)
+BRANDS = _load_brands()
+BRAND_NAMES = list(BRANDS)
+
+
+def brand_logo(brand: str) -> str:
+    """Retourner l'URL du logo d'une marque (chaîne vide si inconnue)."""
+    return BRANDS.get(brand, {}).get("logo", "")
+
 # Domaine et version de l'intégration
 # Convention : AAAA.MM.JJ (date de publication)
 DOMAIN = "pitstop_log"
-VERSION = "2026.11.17"
+VERSION = "2026.11.18"
 PLATFORMS = ["sensor"]
 
 # Clé et version du stockage persistant (homeassistant.helpers.storage.Store)
@@ -25,6 +45,8 @@ CONF_MODEL_YEAR = "model_year"
 CONF_PURCHASE_DATE = "purchase_date"
 CONF_REGISTRATION = "registration"
 CONF_ODOMETER = "odometer"
+CONF_PHOTO = "photo"
+CONF_BRAND_LOGO = "brand_logo"
 
 # Types de véhicules proposés dans le flux de configuration
 VEHICLE_TYPES = ["moto", "car", "other"]

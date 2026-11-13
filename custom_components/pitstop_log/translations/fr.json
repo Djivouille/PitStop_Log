@@ -13,7 +13,8 @@
                     "model_year": "Année-modèle",
                     "purchase_date": "Date d'achat (AAAA-MM-JJ)",
                     "registration": "Immatriculation / carte grise",
-                    "odometer": "Kilométrage actuel"
+                    "odometer": "Kilométrage actuel",
+                    "photo": "Photo du véhicule (URL ou /local/...)"
                 }
             }
         },
@@ -46,7 +47,8 @@
                     "model_year": "Année-modèle",
                     "purchase_date": "Date d'achat (AAAA-MM-JJ)",
                     "registration": "Immatriculation / carte grise",
-                    "odometer": "Kilométrage actuel"
+                    "odometer": "Kilométrage actuel",
+                    "photo": "Photo du véhicule (URL ou /local/...)"
                 }
             },
             "plans": {

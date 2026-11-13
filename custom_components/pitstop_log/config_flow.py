@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from datetime import datetime
 from typing import Any
 
@@ -13,6 +14,7 @@ from homeassistant.data_entry_flow import FlowResult
 from homeassistant.util import slugify
 
 from .const import (
+    BRAND_NAMES,
     CONF_ACTIONS,
     CONF_BRAND,
     CONF_COST,
@@ -26,6 +28,7 @@ from .const import (
     CONF_MODEL,
     CONF_MODEL_YEAR,
     CONF_ODOMETER,
+    CONF_PHOTO,
     CONF_PLAN_NAME,
     CONF_PURCHASE_DATE,
     CONF_REGISTRATION,
@@ -33,6 +36,7 @@ from .const import (
     CONF_VEHICLE_TYPE,
     DOMAIN,
     VEHICLE_TYPES,
+    brand_logo,
 )
 from .coordinator import async_get_or_create_coordinator
 
@@ -41,12 +45,13 @@ VEHICLE_SCHEMA = vol.Schema(
     {
         vol.Required(CONF_VEHICLE_NAME): str,
         vol.Required(CONF_VEHICLE_TYPE, default="car"): vol.In(VEHICLE_TYPES),
-        vol.Required(CONF_BRAND): str,
+        vol.Required(CONF_BRAND): vol.In(BRAND_NAMES),
         vol.Required(CONF_MODEL): str,
         vol.Optional(CONF_MODEL_YEAR): int,
         vol.Optional(CONF_PURCHASE_DATE): str,
         vol.Optional(CONF_REGISTRATION): str,
         vol.Required(CONF_ODOMETER, default=0): int,
+        vol.Optional(CONF_PHOTO): str,
     }
 )
 
@@ -187,6 +192,8 @@ class PitStopLogOptionsFlow(config_entries.OptionsFlow):
                         "purchase_date": user_input.get(CONF_PURCHASE_DATE),
                         "registration": user_input.get(CONF_REGISTRATION, ""),
                         "odometer": user_input.get(CONF_ODOMETER, 0),
+                        "photo": user_input.get(CONF_PHOTO, ""),
+                        "brand_logo": brand_logo(user_input.get(CONF_BRAND, "")),
                     },
                 )
                 await self._async_save()
@@ -211,7 +218,9 @@ class PitStopLogOptionsFlow(config_entries.OptionsFlow):
                 vol.Required(
                     CONF_VEHICLE_TYPE, default=defaults.get(CONF_VEHICLE_TYPE, "car")
                 ): vol.In(VEHICLE_TYPES),
-                vol.Required(CONF_BRAND, default=defaults.get(CONF_BRAND, "")): str,
+                vol.Required(
+                    CONF_BRAND, default=defaults.get(CONF_BRAND, BRAND_NAMES[0])
+                ): vol.In(BRAND_NAMES),
                 vol.Required(CONF_MODEL, default=defaults.get(CONF_MODEL, "")): str,
                 vol.Optional(
                     CONF_MODEL_YEAR, default=defaults.get(CONF_MODEL_YEAR)
@@ -226,6 +235,9 @@ class PitStopLogOptionsFlow(config_entries.OptionsFlow):
                 vol.Required(
                     CONF_ODOMETER, default=defaults.get(CONF_ODOMETER, 0)
                 ): int,
+                vol.Optional(
+                    CONF_PHOTO, default=defaults.get(CONF_PHOTO, "")
+                ): str,
             }
         )
         return self.async_show_form(

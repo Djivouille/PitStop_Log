@@ -1,0 +1,369 @@
+{
+    "brands": {
+        "Autre": {
+            "logo": "",
+            "category": "other",
+            "label": "Autre"
+        },
+        "Yamaha": {
+            "logo": "https://cdn.simpleicons.org/yamaha",
+            "category": "moto",
+            "label": "Yamaha"
+        },
+        "Honda": {
+            "logo": "https://cdn.simpleicons.org/honda",
+            "category": "moto",
+            "label": "Honda"
+        },
+        "Kawasaki": {
+            "logo": "https://cdn.simpleicons.org/kawasaki",
+            "category": "moto",
+            "label": "Kawasaki"
+        },
+        "Suzuki": {
+            "logo": "https://cdn.simpleicons.org/suzuki",
+            "category": "moto",
+            "label": "Suzuki"
+        },
+        "BMW": {
+            "logo": "https://cdn.simpleicons.org/bmw",
+            "category": "moto",
+            "label": "BMW"
+        },
+        "Ducati": {
+            "logo": "https://cdn.simpleicons.org/ducati",
+            "category": "moto",
+            "label": "Ducati"
+        },
+        "KTM": {
+            "logo": "https://cdn.simpleicons.org/ktm",
+            "category": "moto",
+            "label": "KTM"
+        },
+        "Triumph": {
+            "logo": "https://cdn.simpleicons.org/triumphmotorcycles",
+            "category": "moto",
+            "label": "Triumph"
+        },
+        "Harley-Davidson": {
+            "logo": "https://cdn.simpleicons.org/harley-davidson",
+            "category": "moto",
+            "label": "Harley-Davidson"
+        },
+        "Royal Enfield": {
+            "logo": "https://cdn.simpleicons.org/royalenfield",
+            "category": "moto",
+            "label": "Royal Enfield"
+        },
+        "Husqvarna": {
+            "logo": "https://cdn.simpleicons.org/husqvarna",
+            "category": "moto",
+            "label": "Husqvarna"
+        },
+        "GasGas": {
+            "logo": "https://cdn.simpleicons.org/gasgas",
+            "category": "moto",
+            "label": "GasGas"
+        },
+        "Piaggio": {
+            "logo": "https://cdn.simpleicons.org/piaggio",
+            "category": "moto",
+            "label": "Piaggio"
+        },
+        "Vespa": {
+            "logo": "https://cdn.simpleicons.org/vespa",
+            "category": "moto",
+            "label": "Vespa"
+        },
+        "Aprilia": {
+            "logo": "",
+            "category": "moto",
+            "label": "Aprilia"
+        },
+        "Moto Guzzi": {
+            "logo": "",
+            "category": "moto",
+            "label": "Moto Guzzi"
+        },
+        "Benelli": {
+            "logo": "",
+            "category": "moto",
+            "label": "Benelli"
+        },
+        "CFMoto": {
+            "logo": "",
+            "category": "moto",
+            "label": "CFMoto"
+        },
+        "Renault": {
+            "logo": "https://cdn.simpleicons.org/renault",
+            "category": "car",
+            "label": "Renault"
+        },
+        "Peugeot": {
+            "logo": "https://cdn.simpleicons.org/peugeot",
+            "category": "car",
+            "label": "Peugeot"
+        },
+        "Citroën": {
+            "logo": "https://cdn.simpleicons.org/citroen",
+            "category": "car",
+            "label": "Citroën"
+        },
+        "Dacia": {
+            "logo": "https://cdn.simpleicons.org/dacia",
+            "category": "car",
+            "label": "Dacia"
+        },
+        "DS": {
+            "logo": "https://cdn.simpleicons.org/dsautomobiles",
+            "category": "car",
+            "label": "DS"
+        },
+        "Volkswagen": {
+            "logo": "https://cdn.simpleicons.org/volkswagen",
+            "category": "car",
+            "label": "Volkswagen"
+        },
+        "Audi": {
+            "logo": "https://cdn.simpleicons.org/audi",
+            "category": "car",
+            "label": "Audi"
+        },
+        "Mercedes-Benz": {
+            "logo": "https://cdn.simpleicons.org/mercedes",
+            "category": "car",
+            "label": "Mercedes-Benz"
+        },
+        "Toyota": {
+            "logo": "https://cdn.simpleicons.org/toyota",
+            "category": "car",
+            "label": "Toyota"
+        },
+        "Hyundai": {
+            "logo": "https://cdn.simpleicons.org/hyundai",
+            "category": "car",
+            "label": "Hyundai"
+        },
+        "Kia": {
+            "logo": "https://cdn.simpleicons.org/kia",
+            "category": "car",
+            "label": "Kia"
+        },
+        "Ford": {
+            "logo": "https://cdn.simpleicons.org/ford",
+            "category": "car",
+            "label": "Ford"
+        },
+        "Opel": {
+            "logo": "https://cdn.simpleicons.org/opel",
+            "category": "car",
+            "label": "Opel"
+        },
+        "Škoda": {
+            "logo": "https://cdn.simpleicons.org/skoda",
+            "category": "car",
+            "label": "Škoda"
+        },
+        "Seat": {
+            "logo": "https://cdn.simpleicons.org/seat",
+            "category": "car",
+            "label": "Seat"
+        },
+        "Cupra": {
+            "logo": "https://cdn.simpleicons.org/cupra",
+            "category": "car",
+            "label": "Cupra"
+        },
+        "Fiat": {
+            "logo": "https://cdn.simpleicons.org/fiat",
+            "category": "car",
+            "label": "Fiat"
+        },
+        "Abarth": {
+            "logo": "https://cdn.simpleicons.org/abarth",
+            "category": "car",
+            "label": "Abarth"
+        },
+        "Alfa Romeo": {
+            "logo": "https://cdn.simpleicons.org/alfaromeo",
+            "category": "car",
+            "label": "Alfa Romeo"
+        },
+        "Ferrari": {
+            "logo": "https://cdn.simpleicons.org/ferrari",
+            "category": "car",
+            "label": "Ferrari"
+        },
+        "Lamborghini": {
+            "logo": "https://cdn.simpleicons.org/lamborghini",
+            "category": "car",
+            "label": "Lamborghini"
+        },
+        "Maserati": {
+            "logo": "https://cdn.simpleicons.org/maserati",
+            "category": "car",
+            "label": "Maserati"
+        },
+        "Porsche": {
+            "logo": "https://cdn.simpleicons.org/porsche",
+            "category": "car",
+            "label": "Porsche"
+        },
+        "Nissan": {
+            "logo": "https://cdn.simpleicons.org/nissan",
+            "category": "car",
+            "label": "Nissan"
+        },
+        "Mazda": {
+            "logo": "https://cdn.simpleicons.org/mazda",
+            "category": "car",
+            "label": "Mazda"
+        },
+        "Subaru": {
+            "logo": "https://cdn.simpleicons.org/subaru",
+            "category": "car",
+            "label": "Subaru"
+        },
+        "Mitsubishi": {
+            "logo": "https://cdn.simpleicons.org/mitsubishi",
+            "category": "car",
+            "label": "Mitsubishi"
+        },
+        "Volvo": {
+            "logo": "https://cdn.simpleicons.org/volvo",
+            "category": "car",
+            "label": "Volvo"
+        },
+        "Tesla": {
+            "logo": "https://cdn.simpleicons.org/tesla",
+            "category": "car",
+            "label": "Tesla"
+        },
+        "Mini": {
+            "logo": "https://cdn.simpleicons.org/mini",
+            "category": "car",
+            "label": "Mini"
+        },
+        "Lexus": {
+            "logo": "https://cdn.simpleicons.org/lexus",
+            "category": "car",
+            "label": "Lexus"
+        },
+        "Jeep": {
+            "logo": "https://cdn.simpleicons.org/jeep",
+            "category": "car",
+            "label": "Jeep"
+        },
+        "Land Rover": {
+            "logo": "https://cdn.simpleicons.org/landrover",
+            "category": "car",
+            "label": "Land Rover"
+        },
+        "Bentley": {
+            "logo": "https://cdn.simpleicons.org/bentley",
+            "category": "car",
+            "label": "Bentley"
+        },
+        "Aston Martin": {
+            "logo": "https://cdn.simpleicons.org/astonmartin",
+            "category": "car",
+            "label": "Aston Martin"
+        },
+        "Chevrolet": {
+            "logo": "https://cdn.simpleicons.org/chevrolet",
+            "category": "car",
+            "label": "Chevrolet"
+        },
+        "Cadillac": {
+            "logo": "https://cdn.simpleicons.org/cadillac",
+            "category": "car",
+            "label": "Cadillac"
+        },
+        "BYD": {
+            "logo": "https://cdn.simpleicons.org/byd",
+            "category": "car",
+            "label": "BYD"
+        },
+        "Chausson": {
+            "logo": "",
+            "category": "camper",
+            "label": "Chausson"
+        },
+        "Rapido": {
+            "logo": "",
+            "category": "camper",
+            "label": "Rapido"
+        },
+        "Rimor": {
+            "logo": "",
+            "category": "camper",
+            "label": "Rimor"
+        },
+        "Pilote": {
+            "logo": "",
+            "category": "camper",
+            "label": "Pilote"
+        },
+        "Hymer": {
+            "logo": "",
+            "category": "camper",
+            "label": "Hymer"
+        },
+        "Burstner": {
+            "logo": "",
+            "category": "camper",
+            "label": "Burstner"
+        },
+        "Adria": {
+            "logo": "",
+            "category": "camper",
+            "label": "Adria"
+        },
+        "Benimar": {
+            "logo": "",
+            "category": "camper",
+            "label": "Benimar"
+        },
+        "Elnagh": {
+            "logo": "",
+            "category": "camper",
+            "label": "Elnagh"
+        },
+        "Sunlight": {
+            "logo": "",
+            "category": "camper",
+            "label": "Sunlight"
+        },
+        "Weinsberg": {
+            "logo": "",
+            "category": "camper",
+            "label": "Weinsberg"
+        },
+        "Carthago": {
+            "logo": "",
+            "category": "camper",
+            "label": "Carthago"
+        },
+        "Challenger": {
+            "logo": "",
+            "category": "camper",
+            "label": "Challenger"
+        },
+        "Frankia": {
+            "logo": "",
+            "category": "camper",
+            "label": "Frankia"
+        },
+        "Le Voyageur": {
+            "logo": "",
+            "category": "camper",
+            "label": "Le Voyageur"
+        },
+        "Globe-Traveller": {
+            "logo": "",
+            "category": "camper",
+            "label": "Globe-Traveller"
+        }
+    }
+}

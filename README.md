@@ -10,8 +10,9 @@ Les versions suivent le format **`AAAA.MM.JJ`** (date de publication), par exemp
 ## Fonctionnalités
 
 - **Gestion multi-véhicules** via l'interface de Home Assistant (Config Flow) :
-  type, marque, modèle, année-modèle, date d'achat, immatriculation (carte grise)
-  et kilométrage actuel.
+  type, marque (liste déroulante issue de `brands.json`, avec logo associé), modèle,
+  année-modèle, date d'achat, immatriculation (carte grise), kilométrage actuel
+  et photo du véhicule (URL ou chemin `/local/...`).
 - **Édition complète via l'interface** (Options Flow) : métadonnées du véhicule,
   plans d'entretien (ajout/modification/suppression) et historique des entretiens
   (modification/suppression) — sans passer par les services YAML.
@@ -136,6 +137,22 @@ custom_components/pitstop_log/
     ├── fr.json
     └── en.json
 ```
+
+## Marques et logos
+
+La liste des marques proposées dans le sélecteur est définie dans
+`custom_components/pitstop_log/brands.json` (fichier à part) : motos, voitures et
+camping-cars les plus courants, chacun associé à l'URL de son logo (CDN
+Simple Icons quand disponible). Pour ajouter une marque, éditez ce fichier et
+ajoutez une entrée :
+
+```json
+"Ma Marque": {"logo": "https://cdn.simpleicons.org/mamarque", "category": "moto", "label": "Ma Marque"}
+```
+
+Le logo de la marque et la photo du véhicule sont exposés en attributs du
+capteur « Prochain entretien » (`brand_logo`, `photo`), utilisables dans les
+tableaux de bord Lovelace.
 
 ## Stockage des données
 

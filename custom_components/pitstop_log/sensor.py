@@ -172,6 +172,9 @@ class PitStopNextMaintenanceSensor(PitStopEntity):
         vehicle = self.coordinator.get_vehicle(self.vehicle_id) or {}
         return {
             "vehicle": vehicle.get("name"),
+            "brand": vehicle.get("brand"),
+            "brand_logo": vehicle.get("brand_logo"),
+            "photo": vehicle.get("photo"),
             "registration": vehicle.get("registration"),
             "plans": plans_attr,
             "history": history_attr,

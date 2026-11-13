@@ -35,6 +35,7 @@ from .const import (
     CONF_VEHICLE_NAME,
     CONF_VEHICLE_TYPE,
     DOMAIN,
+    brand_logo,
     INVOICE_DIR,
     INVOICE_URL_PREFIX,
     PLATFORMS,
@@ -185,6 +186,8 @@ async def async_setup_entry(
                 "purchase_date": entry.data.get(CONF_PURCHASE_DATE),
                 "registration": entry.data.get(CONF_REGISTRATION, ""),
                 "odometer": entry.data.get(CONF_ODOMETER, 0),
+                "photo": entry.data.get("photo", ""),
+                "brand_logo": brand_logo(entry.data.get(CONF_BRAND, "")),
             },
         )
         await coordinator.async_save()

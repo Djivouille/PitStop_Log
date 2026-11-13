@@ -13,7 +13,8 @@
                     "model_year": "Model year",
                     "purchase_date": "Purchase date (YYYY-MM-DD)",
                     "registration": "Registration / vehicle title",
-                    "odometer": "Current mileage"
+                    "odometer": "Current mileage",
+                    "photo": "Vehicle photo (URL or /local/...)"
                 }
             }
         },
@@ -46,7 +47,8 @@
                     "model_year": "Model year",
                     "purchase_date": "Purchase date (YYYY-MM-DD)",
                     "registration": "Registration / vehicle title",
-                    "odometer": "Current mileage"
+                    "odometer": "Current mileage",
+                    "photo": "Vehicle photo (URL or /local/...)"
                 }
             },
             "plans": {
