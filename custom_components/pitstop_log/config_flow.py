@@ -48,17 +48,13 @@ from .const import (
 from .coordinator import async_get_or_create_coordinator
 
 
-def dropdown_selector(
-    options: list[dict[str, str]], default: str | None = None
-) -> SelectSelector:
+def dropdown_selector(options: list[dict[str, str]]) -> SelectSelector:
     """Construire un sélecteur déroulant (jamais de boutons radio)."""
     return SelectSelector(
         SelectSelectorConfig(
             options=options,
             mode=SelectSelectorMode.DROPDOWN,
-            translation_key=None,
-        ),
-        default=default,
+        )
     )
 
 
@@ -282,10 +278,8 @@ class PitStopLogOptionsFlow(config_entries.OptionsFlow):
             {
                 vol.Required(
                     CONF_VEHICLE_TYPE,
-                ): dropdown_selector(
-                    vehicle_type_options(),
                     default=defaults.get(CONF_VEHICLE_TYPE, "car"),
-                ),
+                ): dropdown_selector(vehicle_type_options()),
             }
         )
         return self.async_show_form(step_id="vehicle", data_schema=schema)
@@ -306,9 +300,9 @@ class PitStopLogOptionsFlow(config_entries.OptionsFlow):
             brands.insert(0, current_brand)
         schema = vol.Schema(
             {
-                vol.Required(CONF_BRAND): dropdown_selector(
-                    brand_options(brands), default=current_brand
-                ),
+                vol.Required(
+                    CONF_BRAND, default=current_brand
+                ): dropdown_selector(brand_options(brands)),
             }
         )
         return self.async_show_form(step_id="vehicle_brand", data_schema=schema)
