@@ -19,13 +19,29 @@ carnet d'entretien numérique multi-véhicules (motos, voitures, camping-cars, e
   Home Assistant dans `.storage/pitstop_log`.
 - **Interface bilingue** français / anglais.
 
-## Installation via HACS
+## **Installation**
 
-1. Ouvrez **HACS** → **Intégrations**.
-2. Cliquez sur les trois points en haut à droite → **Dépôts personnalisés**.
-3. Ajoutez ce dépôt avec la catégorie **Intégration**.
-4. Recherchez **PitStop Log** et installez-le.
-5. Redémarrez Home Assistant.
+### **Via HACS (recommandé)**
+
+Prérequis : [**HACS**](https://hacs.xyz/installation/prerequisites/) déjà installé.
+
+1. Dans Home Assistant, ouvrez **HACS** dans le menu latéral.
+
+2. Cliquez sur les **trois points** en haut à droite, puis **Dépôts personnalisés** (*Custom repositories*).
+
+3. Collez l'URL du dépôt et choisissez la catégorie **Integration** :
+
+   * URL : `https://github.com/Djivouille/PitStop_Log`
+
+   * Catégorie : `Integration`
+
+4. Cliquez sur **Ajouter**, puis fermez la fenêtre.
+
+5. Recherchez **PitStop Log** dans HACS, ouvrez la fiche et cliquez sur **Télécharger** (*Download*).
+
+6. **Redémarrez Home Assistant** (Paramètres > Système > Redémarrer).
+
+7. Ajoutez l'intégration : **Paramètres > Appareils et services > Ajouter une intégration**, recherchez **PitStop Log** et suivez l'assistant (voir [**Configuration**](#configuration)).
 
 ## Configuration
 
