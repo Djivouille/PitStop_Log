@@ -3,8 +3,8 @@
     "name": "PitStop Log",
     "codeowners": ["@Djivouille"],
     "config_flow": true,
-    "documentation": "https://github.com/Djivouille/PitStop_Log-",
+    "documentation": "https://github.com/Djivouille/PitStop_Log",
     "iot_class": "local_polling",
-    "issue_tracker": "https://github.com/Djivouille/PitStop_Log-/issues",
+    "issue_tracker": "https://github.com/Djivouille/PitStop_Log/issues",
     "version": "0.1.0"
 }
