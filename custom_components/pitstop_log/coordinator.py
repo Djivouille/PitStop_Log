@@ -16,6 +16,7 @@ from homeassistant.util import slugify
 from homeassistant.util import dt as dt_util
 
 from .const import (
+    DOMAIN,
     DUE_SOON_DAYS,
     DUE_SOON_KM_PERCENT,
     STATUS_DUE_SOON,
@@ -24,6 +25,23 @@ from .const import (
 )
 
 DEFAULT_SAVE_DELAY = 30  # Secondes avant écriture différée sur le disque
+
+
+async def async_get_or_create_coordinator(
+    hass: HomeAssistant,
+) -> PitStopDataUpdateCoordinator:
+    """Retourner le coordinateur, en le créant et chargeant s'il est absent.
+
+    Garantit que le coordinateur existe même si le flux de configuration est
+    démarré avant l'appel à async_setup de l'intégration.
+    """
+    if DOMAIN not in hass.data:
+        hass.data[DOMAIN] = {}
+    if "coordinator" not in hass.data[DOMAIN]:
+        coordinator = PitStopDataUpdateCoordinator(hass)
+        await coordinator.async_load()
+        hass.data[DOMAIN]["coordinator"] = coordinator
+    return hass.data[DOMAIN]["coordinator"]
 
 
 class PitStopDataUpdateCoordinator:

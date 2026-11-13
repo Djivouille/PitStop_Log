@@ -23,7 +23,7 @@ from .const import (
     DOMAIN,
     VEHICLE_TYPES,
 )
-from .coordinator import PitStopDataUpdateCoordinator
+from .coordinator import async_get_or_create_coordinator
 
 # Schéma du formulaire de création/modification d'un véhicule
 VEHICLE_SCHEMA = vol.Schema(
@@ -52,9 +52,7 @@ class PitStopLogConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors: dict[str, str] = {}
         if user_input is not None:
             # Vérifie que le nom du véhicule n'est pas déjà utilisé
-            coordinator: PitStopDataUpdateCoordinator = self.hass.data[DOMAIN][
-                "coordinator"
-            ]
+            coordinator = await async_get_or_create_coordinator(self.hass)
             existing = coordinator.find_vehicle_id(user_input[CONF_VEHICLE_NAME])
             if existing is not None:
                 errors[CONF_VEHICLE_NAME] = "name_already_used"
@@ -102,9 +100,7 @@ class PitStopLogOptionsFlow(config_entries.OptionsFlow):
         """Présenter le formulaire pré-rempli et enregistrer les modifications."""
         errors: dict[str, str] = {}
         if user_input is not None:
-            coordinator: PitStopDataUpdateCoordinator = self.hass.data[DOMAIN][
-                "coordinator"
-            ]
+            coordinator = await async_get_or_create_coordinator(self.hass)
             vehicle_id = self.config_entry.data["vehicle_id"]
             if user_input.get(CONF_PURCHASE_DATE):
                 try:
@@ -116,8 +112,20 @@ class PitStopLogOptionsFlow(config_entries.OptionsFlow):
                 except ValueError:
                     errors[CONF_PURCHASE_DATE] = "invalid_date"
             if not errors:
-                # Mise à jour des données persistées du véhicule
-                coordinator.set_vehicle(vehicle_id, user_input)
+                # Mise à jour des données persistées du véhicule (modèle normalisé)
+                coordinator.set_vehicle(
+                    vehicle_id,
+                    {
+                        "name": user_input[CONF_VEHICLE_NAME],
+                        "type": user_input.get(CONF_VEHICLE_TYPE, "car"),
+                        "brand": user_input.get(CONF_BRAND, ""),
+                        "model": user_input.get(CONF_MODEL, ""),
+                        "model_year": user_input.get(CONF_MODEL_YEAR),
+                        "purchase_date": user_input.get(CONF_PURCHASE_DATE),
+                        "registration": user_input.get(CONF_REGISTRATION, ""),
+                        "odometer": user_input.get(CONF_ODOMETER, 0),
+                    },
+                )
                 await coordinator.async_save()
                 await coordinator.async_refresh()
                 self.hass.async_create_task(

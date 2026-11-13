@@ -10,14 +10,19 @@ from typing import Any
 import voluptuous as vol
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
 
 from .const import (
     CONF_ACTIONS,
+    CONF_BRAND,
     CONF_COST,
     CONF_DATE,
+    CONF_MODEL,
+    CONF_MODEL_YEAR,
+    CONF_ODOMETER,
+    CONF_PURCHASE_DATE,
+    CONF_REGISTRATION,
     CONF_INVOICE_BASE64,
     CONF_INVOICE_PATH,
     CONF_INTERVAL_KM,
@@ -32,13 +37,15 @@ from .const import (
     DOMAIN,
     INVOICE_DIR,
     INVOICE_URL_PREFIX,
+    PLATFORMS,
     SERVICE_ADD_MAINTENANCE_DONE,
     SERVICE_ADD_MAINTENANCE_PLAN,
     SERVICE_UPDATE_ODOMETER,
 )
-from .coordinator import PitStopDataUpdateCoordinator
-
-PLATFORM = Platform.SENSOR
+from .coordinator import (
+    PitStopDataUpdateCoordinator,
+    async_get_or_create_coordinator,
+)
 
 # Schémas de validation des services
 UPDATE_ODOMETER_SCHEMA = vol.Schema(
@@ -75,9 +82,7 @@ ADD_MAINTENANCE_PLAN_SCHEMA = vol.Schema(
 
 async def async_setup(hass: HomeAssistant, config: dict[str, Any]) -> bool:
     """Initialiser l'intégration : stockage, dossier factures et services."""
-    coordinator = PitStopDataUpdateCoordinator(hass)
-    await coordinator.async_load()
-    hass.data[DOMAIN] = {"coordinator": coordinator}
+    coordinator = await async_get_or_create_coordinator(hass)
 
     # Création du dossier des factures si nécessaire (I/O hors boucle d'événements)
     invoice_dir = os.path.join(hass.config.path(), INVOICE_DIR)
@@ -165,7 +170,7 @@ async def async_setup_entry(
 ) -> bool:
     """Configurer une entrée (un véhicule) et charger la plateforme capteur."""
     # Enregistre le véhicule dans les données persistées du coordinateur
-    coordinator: PitStopDataUpdateCoordinator = hass.data[DOMAIN]["coordinator"]
+    coordinator = await async_get_or_create_coordinator(hass)
     vehicle_id = entry.data["vehicle_id"]
     vehicle = coordinator.get_vehicle(vehicle_id)
     if vehicle is None:
@@ -174,13 +179,12 @@ async def async_setup_entry(
             {
                 "name": entry.data[CONF_VEHICLE_NAME],
                 "type": entry.data.get(CONF_VEHICLE_TYPE, "car"),
-                "brand": entry.data.get("brand", ""),
-                "model": entry.data.get("model", ""),
-                "model_year": entry.data.get("model_year"),
-                "purchase_date": entry.data.get("purchase_date"),
-                "registration": entry.data.get("registration", ""),
-                "odometer": entry.data.get("odometer", 0),
-                "created_at": entry.data.get("created_at"),
+                "brand": entry.data.get(CONF_BRAND, ""),
+                "model": entry.data.get(CONF_MODEL, ""),
+                "model_year": entry.data.get(CONF_MODEL_YEAR),
+                "purchase_date": entry.data.get(CONF_PURCHASE_DATE),
+                "registration": entry.data.get(CONF_REGISTRATION, ""),
+                "odometer": entry.data.get(CONF_ODOMETER, 0),
             },
         )
         await coordinator.async_save()
