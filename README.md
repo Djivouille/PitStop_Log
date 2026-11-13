@@ -5,7 +5,7 @@ carnet d'entretien numérique multi-véhicules (motos, voitures, camping-cars, e
 
 ## Versionnement
 
-Les versions suivent le format **`AAAA.MM.JJ`** (date de publication), par exemple `2026.11.13`. HA et HACS exigeant une version parsable dans `manifest.json`, les séparateurs `-` et `_` sont remplacés par des points et le format est limité à 3 segments (calendrier) ; en cas de plusieurs publications le même jour, l'horodatage du commit fait foi.
+Les versions suivent le format **`AAAA.MM.JJ`** (date de publication), par exemple `2026.11.13`. HA et HACS exigeant une version parsable dans `manifest.json`, les séparateurs `-` et `_` sont remplacés par des points et le format est limité à 3 segments (calendrier) ; si plusieurs versions sont publiées le même jour, la date du jour suivant est utilisée. Une release GitHub du même nom est publiée automatiquement par le workflow du dépôt à chaque changement de version.
 
 ## Fonctionnalités
 

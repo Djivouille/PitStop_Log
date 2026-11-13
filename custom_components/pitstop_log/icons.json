@@ -1,0 +1,15 @@
+{
+    "entity": {
+        "sensor": {
+            "odometer": {
+                "default": "mdi:counter"
+            },
+            "next_maintenance": {
+                "default": "mdi:wrench-clock"
+            },
+            "maintenance_status": {
+                "default": "mdi:calendar-check"
+            }
+        }
+    }
+}
