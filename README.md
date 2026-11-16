@@ -141,6 +141,32 @@ custom_components/pitstop_log/
     └── en.json
 ```
 
+## Carte Lovelace « PitStop Card »
+
+L'intégration embarque une carte Lovelace personnalisée qui affiche toutes les
+informations d'un véhicule : photo, logo de marque, kilométrage, immatriculation,
+statut d'entretien, plans à faire (reste en km et en jours) et derniers entretiens
+réalisés (date, km, actions, coût).
+
+**Installation (une seule fois) :**
+
+1. Paramètres → Tableaux de bord → menu **⋮** → **Ressources** → **Ajouter** :
+   - URL : `/local/pitstop_log/lovelace/pitstop-card.js`
+   - Type : **Module JavaScript**
+2. Rechargez la page (F5).
+
+**Utilisation dans un tableau de bord** (Modifier → ajouter carte → « PitStop Card »,
+ou en YAML) :
+
+```yaml
+type: custom:pitstop-card
+vehicle: Moto JV
+```
+
+`vehicle` doit correspondre au **nom du véhicule** tel que créé dans l'intégration.
+Le fichier JS est copié automatiquement dans `/config/www/pitstop_log/lovelace/`
+au démarrage de Home Assistant.
+
 ## Marques et logos
 
 La liste des marques proposées dans le sélecteur est définie dans

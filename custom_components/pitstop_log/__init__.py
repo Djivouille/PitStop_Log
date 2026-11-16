@@ -102,6 +102,13 @@ async def async_setup(hass: HomeAssistant, config: dict[str, Any]) -> bool:
     photos_dir = os.path.join(hass.config.path(), PHOTOS_DIR)
     await hass.async_add_executor_job(_ensure_invoice_dir, photos_dir)
 
+    # Copie de la carte Lovelace embarquée vers www (servie via /local/)
+    source_lovelace = os.path.join(os.path.dirname(__file__), "lovelace")
+    target_lovelace = os.path.join(hass.config.path(), "www/pitstop_log/lovelace")
+    await hass.async_add_executor_job(
+        _sync_brand_logos, source_lovelace, target_lovelace
+    )
+
     async def handle_update_odometer(call: ServiceCall) -> None:
         """Service : mettre à jour le kilométrage d'un véhicule."""
         vehicle_id = coordinator.find_vehicle_id(call.data["vehicle_id"])
