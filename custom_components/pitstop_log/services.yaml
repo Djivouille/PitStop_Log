@@ -270,3 +270,92 @@ add_maintenance_plan:
       example: "2025-05-01"
       selector:
         date:
+
+update_maintenance:
+  name: Modifier un entretien réalisé
+  description: >-
+    Modifie une entrée de l'historique des entretiens réalisés d'un véhicule
+    (date, kilométrage, nature, coût, facture).
+  fields:
+    vehicle_id:
+      name: Véhicule
+      description: Identifiant ou nom du véhicule.
+      required: true
+      example: "moto_yamaha"
+      selector:
+        text:
+    index:
+      name: Index
+      description: Index de l'entrée dans l'historique (0 = plus récente).
+      required: true
+      example: 0
+      selector:
+        number:
+          min: 0
+          max: 10000
+          step: 1
+    date:
+      name: Date
+      description: Date de l'entretien (AAAA-MM-JJ).
+      required: true
+      example: "2026-11-16"
+      selector:
+        date:
+    km:
+      name: Kilométrage
+      description: Kilométrage au moment de l'entretien.
+      required: true
+      example: 15432
+      selector:
+        number:
+          min: 0
+          max: 2000000
+          step: 1
+          unit_of_measurement: km
+    actions:
+      name: Nature
+      description: Nature de l'entretien ou de la révision.
+      required: true
+      example: "Vidange"
+      selector:
+        text:
+    cost:
+      name: Coût
+      description: Coût de l'entretien. Optionnel.
+      required: false
+      example: 89.5
+      selector:
+        number:
+          min: 0
+          max: 100000
+          step: 0.01
+          unit_of_measurement: "€"
+    invoice_base64:
+      name: Facture (base64)
+      description: Photo ou PDF de la facture encodé en base64. Optionnel.
+      required: false
+      selector:
+        text:
+
+delete_maintenance:
+  name: Supprimer un entretien réalisé
+  description: >-
+    Supprime une entrée de l'historique des entretiens réalisés d'un véhicule.
+  fields:
+    vehicle_id:
+      name: Véhicule
+      description: Identifiant ou nom du véhicule.
+      required: true
+      example: "moto_yamaha"
+      selector:
+        text:
+    index:
+      name: Index
+      description: Index de l'entrée dans l'historique (0 = plus récente).
+      required: true
+      example: 0
+      selector:
+        number:
+          min: 0
+          max: 10000
+          step: 1

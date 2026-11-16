@@ -606,8 +606,6 @@ class PitstopCard extends HTMLElement {
       .join("");
 
     const history = (attrs.history || [])
-      .slice()
-      .reverse()
       .slice(0, 5)
       .map(
         (h) => `
@@ -616,6 +614,7 @@ class PitstopCard extends HTMLElement {
           <td class="num">${h.km != null ? Number(h.km).toLocaleString() + " km" : ""}</td>
           <td>${h.actions || ""}</td>
           <td class="num">${h.cost != null ? Number(h.cost).toLocaleString() + " \u20ac" : ""}</td>
+          <td class="num">${h.invoice_url ? `<a class="inv" href="${h.invoice_url}" target="_blank" title="Facture">\ud83d\udcc4</a>` : ""}</td>
         </tr>`
       )
       .join("");
@@ -686,18 +685,294 @@ class PitstopCard extends HTMLElement {
                <table class="table"><thead><tr><th>Plan</th><th>Statut</th><th>Reste</th><th>\u00c9ch\u00e9ance</th></tr></thead><tbody>${plans}</tbody></table>`
             : ""
         }
+        <div class="section">Derniers entretiens
+          <span class="gear gear-history" title="G\u00e9rer l'historique des entretiens">
+            <svg viewBox="0 0 24 24" width="14" height="14">
+              <path fill="currentColor" d="M19.14 12.94a7.07 7.07 0 0 0 .05-.94 7.07 7.07 0 0 0-.05-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.03 7.03 0 0 0-1.62-.94l-.36-2.54a.5.5 0 0 0-.5-.42h-3.84a.5.5 0 0 0-.5.42l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96a.5.5 0 0 0-.6.22L2.66 8.84a.5.5 0 0 0 .12.64l2.03 1.58c-.03.31-.05.63-.05.94s.02.63.05.94l-2.03 1.58a.5.5 0 0 0-.12.64l1.92 3.32c.13.22.39.31.6.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.04.24.25.42.5.42h3.84c.25 0 .46-.18.5-.42l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.09.47 0 .6-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.58ZM12 15.6A3.6 3.6 0 1 1 12 8.4a3.6 3.6 0 0 1 0 7.2Z"/>
+            </svg>
+          </span>
+        </div>
         ${
           history
-            ? `<div class="section">Derniers entretiens</div>
-               <table class="table"><thead><tr><th>Date</th><th>Km</th><th>Actions</th><th>Co\u00fbt</th></tr></thead><tbody>${history}</tbody></table>`
-            : ""
+            ? `<table class="table"><thead><tr><th>Date</th><th>Km</th><th>Actions</th><th>Co\u00fbt</th><th></th></tr></thead><tbody>${history}</tbody></table>`
+            : `<div class="empty">Aucun entretien enregistr\u00e9.</div>`
         }
+        <div class="addrow">
+          <button class="ps-add" id="ps-add-maint">+ Ajouter un entretien</button>
+        </div>
       </ha-card>`;
     const gearKm = root.querySelector(".gear-km");
     if (gearKm) gearKm.addEventListener("click", () => this._openEditor());
     const gearBrand = root.querySelector(".gear-brand");
     if (gearBrand)
       gearBrand.addEventListener("click", () => this._openBrandEditor());
+    const gearHistory = root.querySelector(".gear-history");
+    if (gearHistory)
+      gearHistory.addEventListener("click", () => this._openHistoryEditor());
+    const addMaint = root.querySelector("#ps-add-maint");
+    if (addMaint)
+      addMaint.addEventListener("click", () => this._openMaintenanceEditor(null));
+  }
+
+  /** Km courant du v\u00e9hicule (pour pr\u00e9-remplir le formulaire). */
+  _currentKm() {
+    const entities = this._findEntities();
+    if (entities.odometer && entities.odometer.state != null) {
+      const n = Number(entities.odometer.state);
+      if (!isNaN(n)) return n;
+    }
+    return "";
+  }
+
+  /** Charge la liste des natures d'entretien (fichier local). */
+  async _loadMaintenanceTypes() {
+    if (this._maint_types !== undefined) return this._maint_types;
+    try {
+      const resp = await fetch("/local/pitstop_log/maintenance_types.json");
+      const data = await resp.json();
+      this._maint_types =
+        data && Array.isArray(data.types) && data.types.length
+          ? data.types
+          : ["Vidange", "R\u00e9vision", "Autre"];
+    } catch (err) {
+      this._maint_types = ["Vidange", "R\u00e9vision", "Autre"];
+    }
+    return this._maint_types;
+  }
+
+  /** Fen\u00eatre : historique complet des entretiens (modifier/supprimer). */
+  async _openHistoryEditor() {
+    await this._loadMaintenanceTypes();
+    const root = this.shadowRoot;
+    const main = this._findMainSensor();
+    const attrs = (main && main.attributes) || {};
+    const entries = attrs.history || [];
+    const rows = entries
+      .map(
+        (h, i) => `
+        <tr>
+          <td>${h.date || ""}</td>
+          <td class="num">${h.km != null ? Number(h.km).toLocaleString() + " km" : ""}</td>
+          <td>${h.actions || ""}</td>
+          <td class="num">${h.cost != null ? Number(h.cost).toLocaleString() + " \u20ac" : ""}</td>
+          <td class="num">
+            ${h.invoice_url ? `<a class="inv" href="${h.invoice_url}" target="_blank" title="Facture">\ud83d\udcc4</a>` : ""}
+            <span class="icon-btn edit" data-index="${i}" title="Modifier">\u270e</span>
+            <span class="icon-btn del" data-index="${i}" title="Supprimer">\u2716</span>
+          </td>
+        </tr>`
+      )
+      .join("");
+    root.innerHTML = `
+      <style>${PitstopCard._styles()}</style>
+      <ha-card>
+        <div class="editor wide">
+          <div class="editor-title">Entretiens r\u00e9alis\u00e9s</div>
+          <div class="editor-sub">${this._deviceOrVehicle()}</div>
+          ${
+            rows
+              ? `<table class="table inner"><thead><tr><th>Date</th><th>Km</th><th>Nature</th><th>Co\u00fbt</th><th></th></tr></thead><tbody>${rows}</tbody></table>`
+              : `<div class="empty">Aucun entretien enregistr\u00e9.</div>`
+          }
+          <div class="editor-actions">
+            <button class="ps-cancel" id="ps-back">Retour</button>
+            <button class="ps-save" id="ps-new">+ Ajouter un entretien</button>
+          </div>
+        </div>
+      </ha-card>`;
+    root.querySelector("#ps-back").addEventListener("click", () => {
+      this._render();
+    });
+    root.querySelector("#ps-new").addEventListener("click", () =>
+      this._openMaintenanceEditor(null)
+    );
+    root.querySelectorAll(".icon-btn.edit").forEach((btn) =>
+      btn.addEventListener("click", () =>
+        this._openMaintenanceEditor(Number(btn.dataset.index))
+      )
+    );
+    root.querySelectorAll(".icon-btn.del").forEach((btn) =>
+      btn.addEventListener("click", () =>
+        this._deleteMaintenance(Number(btn.dataset.index))
+      )
+    );
+  }
+
+  /** Fen\u00eatre : ajout (index null) ou modification (index) d'un entretien. */
+  async _openMaintenanceEditor(index) {
+    const types = await this._loadMaintenanceTypes();
+    const root = this.shadowRoot;
+    const main = this._findMainSensor();
+    const attrs = (main && main.attributes) || {};
+    const entries = attrs.history || [];
+    const entry = index != null ? entries[index] || {} : {};
+    const plans = attrs.plans || [];
+    const currentKm = this._currentKm();
+    const today = new Date().toISOString().slice(0, 10);
+    const nature = entry.actions || "";
+    const natureOptions = types.slice();
+    if (nature && !natureOptions.includes(nature)) {
+      natureOptions.unshift(nature);
+    }
+    const natureSel = natureOptions
+      .map(
+        (t) =>
+          `<option value="${t}"${t === nature ? " selected" : ""}>${t}</option>`
+      )
+      .join("");
+    const planOptions =
+      `<option value="">\u2014 Aucun \u2014</option>` +
+      plans
+        .map(
+          (p) =>
+            `<option value="${p.plan_id}">${p.name || p.plan_id}</option>`
+        )
+        .join("");
+    root.innerHTML = `
+      <style>${PitstopCard._styles()}</style>
+      <ha-card>
+        <div class="editor">
+          <div class="editor-title">${
+            index != null ? "Modifier l'entretien" : "Nouvel entretien"
+          }</div>
+          <div class="editor-sub">${this._deviceOrVehicle()}</div>
+          <div class="field">
+            <label for="ps-m-date">Date</label>
+            <input id="ps-m-date" class="ps-input" type="date" value="${entry.date || today}" />
+          </div>
+          <div class="field">
+            <label for="ps-m-km">Kilom\u00e9trage</label>
+            <input id="ps-m-km" class="ps-input" type="number" min="0" value="${entry.km != null ? entry.km : currentKm}" />
+          </div>
+          <div class="field">
+            <label for="ps-m-nature">Nature de l'entretien</label>
+            <select id="ps-m-nature" class="ps-input">${natureSel}<option value="Autre"${nature === "Autre" ? " selected" : ""}>Autre (pr\u00e9ciser)</option></select>
+          </div>
+          <div class="field" id="ps-m-free-field" style="display:none">
+            <label for="ps-m-free">Pr\u00e9cisez la nature</label>
+            <input id="ps-m-free" class="ps-input" type="text" value="" />
+          </div>
+          <div class="field">
+            <label for="ps-m-cost">Co\u00fbt (\u20ac, optionnel)</label>
+            <input id="ps-m-cost" class="ps-input" type="number" min="0" step="0.01" value="${entry.cost != null ? entry.cost : ""}" />
+          </div>
+          <div class="field">
+            <label for="ps-m-invoice">Facture (photo ou PDF, optionnel)</label>
+            <input id="ps-m-invoice" class="ps-input" type="file" accept="image/*,application/pdf" />
+            ${entry.invoice_url ? `<div class="hint">Une facture est d\u00e9j\u00e0 associ\u00e9e : <a class="inv" href="${entry.invoice_url}" target="_blank">\ud83d\udcc4 voir</a></div>` : ""}
+          </div>
+          ${
+            index == null && plans.length
+              ? `<div class="field">
+                   <label for="ps-m-plan">Plan d'entretien concern\u00e9 (optionnel)</label>
+                   <select id="ps-m-plan" class="ps-input">${planOptions}</select>
+                   <div class="hint">Si s\u00e9lectionn\u00e9, l'\u00e9ch\u00e9ance du plan repart de cet entretien.</div>
+                 </div>`
+              : ""
+          }
+          <div class="editor-error" id="ps-m-error"></div>
+          <div class="editor-actions">
+            <button class="ps-cancel" id="ps-m-cancel">Annuler</button>
+            <button class="ps-save" id="ps-m-save">Sauvegarder</button>
+          </div>
+        </div>
+      </ha-card>`;
+    const natureSelEl = root.querySelector("#ps-m-nature");
+    const freeField = root.querySelector("#ps-m-free-field");
+    natureSelEl.addEventListener("change", () => {
+      freeField.style.display =
+        natureSelEl.value === "Autre" ? "block" : "none";
+    });
+    if (nature === "Autre") freeField.style.display = "block";
+    root.querySelector("#ps-m-cancel").addEventListener("click", () => {
+      if (index != null) this._openHistoryEditor();
+      else this._render();
+    });
+    root.querySelector("#ps-m-save").addEventListener("click", () =>
+      this._saveMaintenance(index)
+    );
+  }
+
+  /** Sauvegarde l'entretien (ajout ou modification) via les services. */
+  async _saveMaintenance(index) {
+    const root = this.shadowRoot;
+    const main = this._findMainSensor();
+    const attrs = (main && main.attributes) || {};
+    const vehicleId = attrs.vehicle_id || this._config.vehicle;
+    const errorBox = root.querySelector("#ps-m-error");
+    const button = root.querySelector("#ps-m-save");
+    errorBox.textContent = "";
+    const date = root.querySelector("#ps-m-date").value;
+    const km = parseInt(root.querySelector("#ps-m-km").value, 10);
+    if (!date || isNaN(km) || km < 0) {
+      errorBox.textContent = "Renseignez la date et le kilom\u00e9trage.";
+      return;
+    }
+    const natureSel = root.querySelector("#ps-m-nature");
+    let actions = natureSel.value;
+    if (actions === "Autre") {
+      const free = root.querySelector("#ps-m-free").value.trim();
+      if (!free) {
+        errorBox.textContent = "Pr\u00e9cisez la nature de l'entretien.";
+        return;
+      }
+      actions = free;
+    }
+    const costVal = root.querySelector("#ps-m-cost").value;
+    const invoiceInput = root.querySelector("#ps-m-invoice");
+    button.disabled = true;
+
+    let invoiceBase64 = null;
+    if (invoiceInput && invoiceInput.files && invoiceInput.files[0]) {
+      invoiceBase64 = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(invoiceInput.files[0]);
+      }).catch(() => null);
+    }
+
+    const data = {
+      vehicle_id: vehicleId,
+      date: date,
+      km: km,
+      actions: actions,
+    };
+    if (costVal !== "") data.cost = parseFloat(costVal);
+    if (invoiceBase64) data.invoice_base64 = invoiceBase64;
+    if (index != null) {
+      data.index = index;
+    } else {
+      const planSel = root.querySelector("#ps-m-plan");
+      if (planSel && planSel.value) data.plan_id = planSel.value;
+    }
+    const service =
+      index != null ? "update_maintenance" : "add_maintenance_done";
+    this._hass.callService("pitstop_log", service, data).then(
+      () => {
+        this._render();
+      },
+      (err) => {
+        button.disabled = false;
+        errorBox.textContent =
+          (err && err.message) || "Erreur lors de la sauvegarde.";
+      }
+    );
+  }
+
+  /** Supprime un entretien apr\u00e8s confirmation. */
+  _deleteMaintenance(index) {
+    const main = this._findMainSensor();
+    const attrs = (main && main.attributes) || {};
+    const vehicleId = attrs.vehicle_id || this._config.vehicle;
+    if (!window.confirm("Supprimer cet entretien ?")) return;
+    this._hass.callService("pitstop_log", "delete_maintenance", {
+      vehicle_id: vehicleId,
+      index: index,
+    }).then(
+      () => this._openHistoryEditor(),
+      () => this._openHistoryEditor()
+    );
   }
 
   /** \u00c9diteur visuel de la carte (WYSIWYG, sans YAML). */
@@ -761,6 +1036,17 @@ class PitstopCard extends HTMLElement {
       .ps-save:disabled { opacity: 0.5; cursor: wait; }
       .editor-section { padding: 10px 0 4px; }
       .editor-table { width: 100%; margin: 0 0 8px; }
+      .editor.wide { max-width: 640px; }
+      .table.inner { width: 100%; margin: 0 0 8px; }
+      .addrow { display: flex; justify-content: center; padding: 0 16px 16px; }
+      .ps-add { font-size: 14px; padding: 8px 18px; border: 1px dashed var(--primary-color, #03a9f4); border-radius: 8px; background: transparent; color: var(--primary-color, #03a9f4); cursor: pointer; }
+      .ps-add:hover { background: rgba(3, 169, 244, 0.08); }
+      .icon-btn { cursor: pointer; margin-left: 8px; display: inline-flex; }
+      .icon-btn.del { color: var(--error-color, #db4437); }
+      .icon-btn.edit { color: var(--primary-color, #03a9f4); }
+      .inv { text-decoration: none; }
+      .empty { padding: 0 16px 8px; font-size: 13px; color: var(--secondary-text-color, #727272); }
+      .hint { font-size: 12px; color: var(--secondary-text-color, #727272); margin-top: 4px; }
     `;
   }
 }

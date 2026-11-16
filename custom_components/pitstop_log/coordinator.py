@@ -515,6 +515,56 @@ class PitStopDataUpdateCoordinator:
         await self.async_save()
         await self.async_refresh()
 
+    async def async_update_maintenance(
+        self,
+        vehicle_id: str,
+        index: int,
+        date: str,
+        km: int,
+        actions: str,
+        cost: float | None = None,
+        invoice_url: str | None = None,
+    ) -> bool:
+        """Mettre \u00e0 jour une entr\u00e9e d'historique (entretien r\u00e9alis\u00e9)."""
+        vehicle = self.get_vehicle(vehicle_id)
+        if vehicle is None:
+            raise HomeAssistantError(f"V\u00e9hicule inconnu : {vehicle_id}")
+        try:
+            entry_date = datetime.strptime(date, "%Y-%m-%d").date()
+        except ValueError as err:
+            raise HomeAssistantError(
+                "Date invalide, format attendu AAAA-MM-JJ"
+            ) from err
+        if km < 0:
+            raise HomeAssistantError("Le kilom\u00e9trage ne peut pas \u00eatre n\u00e9gatif")
+        target = self.get_history_entry(vehicle_id, index)
+        if target is None:
+            raise HomeAssistantError("Entr\u00e9e d'historique introuvable")
+        entry = {
+            "vehicle_id": vehicle_id,
+            "date": entry_date.isoformat(),
+            "km": km,
+            "actions": actions,
+            "cost": cost,
+            "invoice_url": invoice_url or target.get("invoice_url"),
+            "created_at": target.get("created_at"),
+        }
+        if not self.update_history_entry(vehicle_id, index, entry):
+            raise HomeAssistantError("Impossible de mettre \u00e0 jour l'entr\u00e9e")
+        await self.async_save()
+        await self.async_refresh()
+        return True
+
+    async def async_delete_maintenance(
+        self, vehicle_id: str, index: int
+    ) -> bool:
+        """Supprimer une entr\u00e9e d'historique (entretien r\u00e9alis\u00e9)."""
+        if not self.delete_history_entry(vehicle_id, index):
+            raise HomeAssistantError("Entr\u00e9e d'historique introuvable")
+        await self.async_save()
+        await self.async_refresh()
+        return True
+
     def get_history(self, vehicle_id: str) -> list[dict[str, Any]]:
         """Retourner l'historique d'un véhicule, du plus récent au plus ancien."""
         entries = [

@@ -44,6 +44,10 @@ from .const import (
     PLATFORMS,
     SERVICE_ADD_MAINTENANCE_DONE,
     SERVICE_ADD_MAINTENANCE_PLAN,
+    SERVICE_UPDATE_MAINTENANCE,
+    SERVICE_DELETE_MAINTENANCE,
+    CONF_INDEX,
+    MAINTENANCE_TYPES_FILE,
     SERVICE_UPDATE_ODOMETER,
     SERVICE_UPDATE_REGISTRATION,
     SERVICE_UPDATE_PURCHASE_DATE,
@@ -127,6 +131,12 @@ async def _sync_www_assets(hass: HomeAssistant) -> None:
         os.path.join(integration_dir, "brands.json"),
         os.path.join(www_dir, "www/pitstop_log/brands.json"),
     )
+    # Liste des natures d'entretien (lue par la carte pour son menu déroulant)
+    await hass.async_add_executor_job(
+        _sync_single_file,
+        os.path.join(integration_dir, MAINTENANCE_TYPES_FILE),
+        os.path.join(www_dir, "www/pitstop_log/maintenance_types.json"),
+    )
     if not os.path.isdir(source_lovelace):
         _LOGGER.warning(
             "Dossier lovelace/ absent de l'installation ; la carte Lovelace "
@@ -194,11 +204,12 @@ async def async_setup(hass: HomeAssistant, config: dict[str, Any]) -> bool:
         if vehicle_id is None:
             raise ServiceValidationError(f"Véhicule inconnu : {call.data['vehicle_id']}")
         invoice_url = call.data.get(CONF_INVOICE_PATH)
-        # Si une image est fournie en base64, on la sauvegarde dans le dossier local
+        # Si une image ou un PDF est fourni en base64, on le sauvegarde
         image_b64 = call.data.get(CONF_INVOICE_BASE64)
         if image_b64:
             invoice_dir = os.path.join(hass.config.path(), INVOICE_DIR)
-            filename = f"{secrets.token_hex(8)}.jpg"
+            ext = _detect_invoice_ext(image_b64)
+            filename = f"{secrets.token_hex(8)}.{ext}"
             filepath = os.path.join(invoice_dir, filename)
             await hass.async_add_executor_job(
                 _save_invoice_image, filepath, image_b64
@@ -270,6 +281,41 @@ async def async_setup(hass: HomeAssistant, config: dict[str, Any]) -> bool:
             }
         ),
     )
+    async def handle_update_maintenance(call: ServiceCall) -> None:
+        """Service : modifier un entretien réalisé."""
+        vehicle_id = coordinator.find_vehicle_id(call.data["vehicle_id"])
+        if vehicle_id is None:
+            raise ServiceValidationError(f"V\u00e9hicule inconnu : {call.data['vehicle_id']}")
+        invoice_url = None
+        image_b64 = call.data.get(CONF_INVOICE_BASE64)
+        if image_b64:
+            invoice_dir = os.path.join(hass.config.path(), INVOICE_DIR)
+            ext = _detect_invoice_ext(image_b64)
+            filename = f"{secrets.token_hex(8)}.{ext}"
+            filepath = os.path.join(invoice_dir, filename)
+            await hass.async_add_executor_job(
+                _save_invoice_image, filepath, image_b64
+            )
+            invoice_url = f"{INVOICE_URL_PREFIX}/{filename}"
+        await coordinator.async_update_maintenance(
+            vehicle_id=vehicle_id,
+            index=call.data[CONF_INDEX],
+            date=call.data[CONF_DATE],
+            km=call.data[CONF_KM],
+            actions=call.data[CONF_ACTIONS],
+            cost=call.data.get(CONF_COST),
+            invoice_url=invoice_url,
+        )
+
+    async def handle_delete_maintenance(call: ServiceCall) -> None:
+        """Service : supprimer un entretien réalisé."""
+        vehicle_id = coordinator.find_vehicle_id(call.data["vehicle_id"])
+        if vehicle_id is None:
+            raise ServiceValidationError(f"V\u00e9hicule inconnu : {call.data['vehicle_id']}")
+        await coordinator.async_delete_maintenance(
+            vehicle_id, call.data[CONF_INDEX]
+        )
+
     hass.services.async_register(
         DOMAIN, SERVICE_ADD_MAINTENANCE_DONE, handle_add_maintenance_done,
         schema=ADD_MAINTENANCE_DONE_SCHEMA,
@@ -277,6 +323,29 @@ async def async_setup(hass: HomeAssistant, config: dict[str, Any]) -> bool:
     hass.services.async_register(
         DOMAIN, SERVICE_ADD_MAINTENANCE_PLAN, handle_add_maintenance_plan,
         schema=ADD_MAINTENANCE_PLAN_SCHEMA,
+    )
+    hass.services.async_register(
+        DOMAIN, SERVICE_UPDATE_MAINTENANCE, handle_update_maintenance,
+        schema=vol.Schema(
+            {
+                vol.Required("vehicle_id"): str,
+                vol.Required("index"): int,
+                vol.Required("date"): str,
+                vol.Required("km"): int,
+                vol.Required("actions"): str,
+                vol.Optional("cost"): vol.Coerce(float),
+                vol.Optional("invoice_base64"): str,
+            }
+        ),
+    )
+    hass.services.async_register(
+        DOMAIN, SERVICE_DELETE_MAINTENANCE, handle_delete_maintenance,
+        schema=vol.Schema(
+            {
+                vol.Required("vehicle_id"): str,
+                vol.Required("index"): int,
+            }
+        ),
     )
     return True
 
@@ -331,6 +400,26 @@ def _sync_files(source_dir: str, target_dir: str, suffix: str | None = None) -> 
         with open(source, "rb") as src:
             with open(target, "wb") as dst:
                 dst.write(src.read())
+
+
+def _detect_invoice_ext(image_b64: str) -> str:
+    """D\u00e9tecter l'extension d'une facture (jpg/png/pdf) via son contenu."""
+    if image_b64.startswith("data:"):
+        mime = image_b64[5:].split(";", 1)[0]
+        if mime == "application/pdf":
+            return "pdf"
+        if mime == "image/png":
+            return "png"
+        return "jpg"
+    try:
+        payload = base64.b64decode(image_b64[:2048], validate=False)
+    except Exception:
+        return "jpg"
+    if payload[:4] == b"%PDF":
+        return "pdf"
+    if payload[:8] == b"\x89PNG\r\n\x1a\n":
+        return "png"
+    return "jpg"
 
 
 def _save_invoice_image(filepath: str, image_b64: str) -> None:
