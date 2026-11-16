@@ -1,4 +1,99 @@
 /**
+ * \u00c9diteur visuel de la carte PitStop : s\u00e9lection du v\u00e9hicule
+ * dans un menu d\u00e9roulant listant les v\u00e9hicules PitStop Log.
+ */
+class PitstopCardEditor extends HTMLElement {
+  constructor() {
+    super();
+    this.attachShadow({ mode: "open" });
+    this._config = null;
+    this._hass = null;
+  }
+
+  setConfig(config) {
+    this._config = config;
+    this._render();
+  }
+
+  set hass(hass) {
+    this._hass = hass;
+    this._render();
+  }
+
+  _vehicles() {
+    const result = [];
+    if (!this._hass) return result;
+    for (const entityId in this._hass.states) {
+      const state = this._hass.states[entityId];
+      if (
+        entityId.startsWith("sensor.") &&
+        state.attributes &&
+        state.attributes.vehicle !== undefined &&
+        state.attributes.plans !== undefined
+      ) {
+        result.push({
+          name: state.attributes.vehicle,
+          label: state.attributes.friendly_name || entityId,
+        });
+      }
+    }
+    result.sort((a, b) => (a.label < b.label ? -1 : 1));
+    return result;
+  }
+
+  _changed(config) {
+    this._config = config;
+    this.dispatchEvent(
+      new CustomEvent("config-changed", {
+        bubbles: true,
+        composed: true,
+        detail: { config: config },
+      })
+    );
+    this._render();
+  }
+
+  _render() {
+    if (!this._hass || !this._config) return;
+    const root = this.shadowRoot;
+    const vehicles = this._vehicles();
+    const options = vehicles
+      .map(
+        (v) =>
+          `<option value="${v.name}"${v.name === this._config.vehicle ? " selected" : ""}>${v.label}</option>`
+      )
+      .join("");
+    if (!options) {
+      root.innerHTML =
+        "<div>Aucun v\u00e9hicule PitStop Log trouv\u00e9. Cr\u00e9ez-en un dans Param\u00e8tres \u2192 Appareils et services.</div>";
+      return;
+    }
+    root.innerHTML = `
+      <style>
+        .wrapper { display: flex; flex-direction: column; gap: 16px; padding: 4px 0; }
+        label { display: block; font-weight: 500; margin-bottom: 4px; }
+        select, input { width: 100%; font-size: 14px; padding: 8px 10px; border: 1px solid var(--divider-color, #e0e0e0); border-radius: 8px; background: var(--card-background-color, #fff); color: var(--primary-text-color); box-sizing: border-box; }
+      </style>
+      <div class="wrapper">
+        <div>
+          <label>V\u00e9hicule</label>
+          <select id="ps-vehicle">${options}</select>
+        </div>
+        <div>
+          <label>Titre affich\u00e9 (optionnel)</label>
+          <input id="ps-title" type="text" value="${(this._config.title || "").replace(/"/g, "&quot;")}" placeholder="Par d\u00e9faut : nom du v\u00e9hicule" />
+        </div>
+      </div>`;
+    root.querySelector("#ps-vehicle").addEventListener("change", (ev) => {
+      this._changed({ ...this._config, vehicle: ev.target.value });
+    });
+    root.querySelector("#ps-title").addEventListener("change", (ev) => {
+      this._changed({ ...this._config, title: ev.target.value });
+    });
+  }
+}
+
+/**
  * PitStop Card \u2014 carte Lovelace pour l'int\u00e9gration PitStop Log.
  *
  * Affiche toutes les informations d'un v\u00e9hicule : photo, logo de marque,
@@ -530,6 +625,27 @@ class PitstopCard extends HTMLElement {
       gearBrand.addEventListener("click", () => this._openBrandEditor());
   }
 
+  /** \u00c9diteur visuel de la carte (WYSIWYG, sans YAML). */
+  static getConfigElement() {
+    return document.createElement("pitstop-card-editor");
+  }
+
+  /** Configuration propos\u00e9e par d\u00e9faut \u00e0 l'ajout de la carte. */
+  static getStubConfig(hass) {
+    for (const entityId in hass.states) {
+      const state = hass.states[entityId];
+      if (
+        entityId.startsWith("sensor.") &&
+        state.attributes &&
+        state.attributes.vehicle !== undefined &&
+        state.attributes.plans !== undefined
+      ) {
+        return { vehicle: state.attributes.vehicle };
+      }
+    }
+    return { vehicle: "" };
+  }
+
   static _styles() {
     return `
       ha-card { overflow: hidden; }
@@ -574,6 +690,7 @@ class PitstopCard extends HTMLElement {
   }
 }
 
+customElements.define("pitstop-card-editor", PitstopCardEditor);
 customElements.define("pitstop-card", PitstopCard);
 window.customCards = window.customCards || [];
 window.customCards.push({

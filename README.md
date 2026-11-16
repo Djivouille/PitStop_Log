@@ -170,15 +170,10 @@ au km 0 ; chaque mise à jour (service, carte ou interface) ajoute un point
    - Type : **Module JavaScript**
 2. Rechargez la page (F5).
 
-**Utilisation dans un tableau de bord** (Modifier → ajouter carte → « PitStop Card »,
-ou en YAML) :
-
-```yaml
-type: custom:pitstop-card
-vehicle: Moto JV
-```
-
-`vehicle` doit correspondre au **nom du véhicule** tel que créé dans l'intégration.
+**Utilisation dans un tableau de bord** (Modifier → ajouter carte → « PitStop Card ») :
+l'éditeur visuel propose un **menu déroulant listant les véhicules** de
+l'intégration et un champ « Titre affiché » optionnel — aucun YAML n'est
+nécessaire. Le véhicule est présélectionné automatiquement à l'ajout.
 Le fichier JS est copié automatiquement dans `/config/www/pitstop_log/lovelace/`
 au démarrage de Home Assistant.
 
