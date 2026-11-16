@@ -743,7 +743,10 @@ class PitstopCard extends HTMLElement {
   /** Fen\u00eatre : historique complet des entretiens (modifier/supprimer). */
   async _openHistoryEditor() {
     await this._loadMaintenanceTypes();
+    this._render();
     const root = this.shadowRoot;
+    const card = root.querySelector("ha-card");
+    if (!card) return;
     const main = this._findMainSensor();
     const attrs = (main && main.attributes) || {};
     const entries = attrs.history || [];
@@ -757,51 +760,60 @@ class PitstopCard extends HTMLElement {
           <td class="num">${h.cost != null ? Number(h.cost).toLocaleString() + " \u20ac" : ""}</td>
           <td class="num">
             ${h.invoice_url ? `<a class="inv" href="${h.invoice_url}" target="_blank" title="Facture">\ud83d\udcc4</a>` : ""}
-            <span class="icon-btn edit" data-index="${i}" title="Modifier">\u270e</span>
+            <span class="icon-btn edit" data-index="${i}" title="Modifier">\u270E</span>
             <span class="icon-btn del" data-index="${i}" title="Supprimer">\u2716</span>
           </td>
         </tr>`
       )
       .join("");
-    root.innerHTML = `
-      <style>${PitstopCard._styles()}</style>
-      <ha-card>
-        <div class="editor wide">
-          <div class="editor-title">Entretiens r\u00e9alis\u00e9s</div>
-          <div class="editor-sub">${this._deviceOrVehicle()}</div>
-          ${
-            rows
-              ? `<table class="table inner"><thead><tr><th>Date</th><th>Km</th><th>Nature</th><th>Co\u00fbt</th><th></th></tr></thead><tbody>${rows}</tbody></table>`
-              : `<div class="empty">Aucun entretien enregistr\u00e9.</div>`
-          }
-          <div class="editor-actions">
-            <button class="ps-cancel" id="ps-back">Retour</button>
-            <button class="ps-save" id="ps-new">+ Ajouter un entretien</button>
-          </div>
+    const overlay = document.createElement("div");
+    overlay.className = "ps-overlay";
+    overlay.innerHTML = `
+      <div class="ps-modal wide">
+        <div class="editor-title">Entretiens r\u00e9alis\u00e9s</div>
+        <div class="editor-sub">${this._deviceOrVehicle()}</div>
+        ${
+          rows
+            ? `<table class="table inner"><thead><tr><th>Date</th><th>Km</th><th>Nature</th><th>Co\u00fbt</th><th></th></tr></thead><tbody>${rows}</tbody></table>`
+            : `<div class="empty">Aucun entretien enregistr\u00e9.</div>`
+        }
+        <div class="editor-actions">
+          <button class="ps-cancel" data-act="back">Retour</button>
+          <button class="ps-save" data-act="new">+ Ajouter un entretien</button>
         </div>
-      </ha-card>`;
-    root.querySelector("#ps-back").addEventListener("click", () => {
-      this._render();
+      </div>`;
+    card.appendChild(overlay);
+    overlay.addEventListener("click", (ev) => {
+      if (ev.target === overlay) overlay.remove();
     });
-    root.querySelector("#ps-new").addEventListener("click", () =>
-      this._openMaintenanceEditor(null)
+    overlay.querySelector('[data-act="back"]').addEventListener("click", () => {
+      overlay.remove();
+    });
+    overlay.querySelector('[data-act="new"]').addEventListener("click", () => {
+      overlay.remove();
+      this._openMaintenanceEditor(null);
+    });
+    overlay.querySelectorAll(".icon-btn.edit").forEach((btn) =>
+      btn.addEventListener("click", () => {
+        overlay.remove();
+        this._openMaintenanceEditor(Number(btn.dataset.index));
+      })
     );
-    root.querySelectorAll(".icon-btn.edit").forEach((btn) =>
-      btn.addEventListener("click", () =>
-        this._openMaintenanceEditor(Number(btn.dataset.index))
-      )
-    );
-    root.querySelectorAll(".icon-btn.del").forEach((btn) =>
-      btn.addEventListener("click", () =>
-        this._deleteMaintenance(Number(btn.dataset.index))
-      )
+    overlay.querySelectorAll(".icon-btn.del").forEach((btn) =>
+      btn.addEventListener("click", () => {
+        overlay.remove();
+        this._deleteMaintenance(Number(btn.dataset.index));
+      })
     );
   }
 
   /** Fen\u00eatre : ajout (index null) ou modification (index) d'un entretien. */
   async _openMaintenanceEditor(index) {
     const types = await this._loadMaintenanceTypes();
+    this._render();
     const root = this.shadowRoot;
+    const card = root.querySelector("ha-card");
+    if (!card) return;
     const main = this._findMainSensor();
     const attrs = (main && main.attributes) || {};
     const entries = attrs.history || [];
@@ -828,98 +840,101 @@ class PitstopCard extends HTMLElement {
             `<option value="${p.plan_id}">${p.name || p.plan_id}</option>`
         )
         .join("");
-    root.innerHTML = `
-      <style>${PitstopCard._styles()}</style>
-      <ha-card>
-        <div class="editor">
-          <div class="editor-title">${
-            index != null ? "Modifier l'entretien" : "Nouvel entretien"
-          }</div>
-          <div class="editor-sub">${this._deviceOrVehicle()}</div>
-          <div class="field">
-            <label for="ps-m-date">Date</label>
-            <input id="ps-m-date" class="ps-input" type="date" value="${entry.date || today}" />
-          </div>
-          <div class="field">
-            <label for="ps-m-km">Kilom\u00e9trage</label>
-            <input id="ps-m-km" class="ps-input" type="number" min="0" value="${entry.km != null ? entry.km : currentKm}" />
-          </div>
-          <div class="field">
-            <label for="ps-m-nature">Nature de l'entretien</label>
-            <select id="ps-m-nature" class="ps-input">${natureSel}<option value="Autre"${nature === "Autre" ? " selected" : ""}>Autre (pr\u00e9ciser)</option></select>
-          </div>
-          <div class="field" id="ps-m-free-field" style="display:none">
-            <label for="ps-m-free">Pr\u00e9cisez la nature</label>
-            <input id="ps-m-free" class="ps-input" type="text" value="" />
-          </div>
-          <div class="field">
-            <label for="ps-m-cost">Co\u00fbt (\u20ac, optionnel)</label>
-            <input id="ps-m-cost" class="ps-input" type="number" min="0" step="0.01" value="${entry.cost != null ? entry.cost : ""}" />
-          </div>
-          <div class="field">
-            <label for="ps-m-invoice">Facture (photo ou PDF, optionnel)</label>
-            <input id="ps-m-invoice" class="ps-input" type="file" accept="image/*,application/pdf" />
-            ${entry.invoice_url ? `<div class="hint">Une facture est d\u00e9j\u00e0 associ\u00e9e : <a class="inv" href="${entry.invoice_url}" target="_blank">\ud83d\udcc4 voir</a></div>` : ""}
-          </div>
-          ${
-            index == null && plans.length
-              ? `<div class="field">
-                   <label for="ps-m-plan">Plan d'entretien concern\u00e9 (optionnel)</label>
-                   <select id="ps-m-plan" class="ps-input">${planOptions}</select>
-                   <div class="hint">Si s\u00e9lectionn\u00e9, l'\u00e9ch\u00e9ance du plan repart de cet entretien.</div>
-                 </div>`
-              : ""
-          }
-          <div class="editor-error" id="ps-m-error"></div>
-          <div class="editor-actions">
-            <button class="ps-cancel" id="ps-m-cancel">Annuler</button>
-            <button class="ps-save" id="ps-m-save">Sauvegarder</button>
-          </div>
+    const overlay = document.createElement("div");
+    overlay.className = "ps-overlay";
+    overlay.innerHTML = `
+      <div class="ps-modal">
+        <div class="editor-title">${
+          index != null ? "Modifier l'entretien" : "Nouvel entretien"
+        }</div>
+        <div class="editor-sub">${this._deviceOrVehicle()}</div>
+        <div class="field">
+          <label for="ps-m-date">Date</label>
+          <input id="ps-m-date" class="ps-input" type="date" value="${entry.date || today}" />
         </div>
-      </ha-card>`;
-    const natureSelEl = root.querySelector("#ps-m-nature");
-    const freeField = root.querySelector("#ps-m-free-field");
+        <div class="field">
+          <label for="ps-m-km">Kilom\u00e9trage</label>
+          <input id="ps-m-km" class="ps-input" type="number" min="0" value="${entry.km != null ? entry.km : currentKm}" />
+        </div>
+        <div class="field">
+          <label for="ps-m-nature">Nature de l'entretien</label>
+          <select id="ps-m-nature" class="ps-input">${natureSel}<option value="Autre"${nature === "Autre" ? " selected" : ""}>Autre (pr\u00e9ciser)</option></select>
+        </div>
+        <div class="field" id="ps-m-free-field" style="display:none">
+          <label for="ps-m-free">Pr\u00e9cisez la nature</label>
+          <input id="ps-m-free" class="ps-input" type="text" value="" />
+        </div>
+        <div class="field">
+          <label for="ps-m-cost">Co\u00fbt (\u20ac, optionnel)</label>
+          <input id="ps-m-cost" class="ps-input" type="number" min="0" step="0.01" value="${entry.cost != null ? entry.cost : ""}" />
+        </div>
+        <div class="field">
+          <label for="ps-m-invoice">Facture (photo ou PDF, optionnel)</label>
+          <input id="ps-m-invoice" class="ps-input" type="file" accept="image/*,application/pdf" />
+          ${entry.invoice_url ? `<div class="hint">Une facture est d\u00e9j\u00e0 associ\u00e9e : <a class="inv" href="${entry.invoice_url}" target="_blank">\ud83d\udcc4 voir</a></div>` : ""}
+        </div>
+        ${
+          index == null && plans.length
+            ? `<div class="field">
+                 <label for="ps-m-plan">Plan d'entretien concern\u00e9 (optionnel)</label>
+                 <select id="ps-m-plan" class="ps-input">${planOptions}</select>
+                 <div class="hint">Si s\u00e9lectionn\u00e9, l'\u00e9ch\u00e9ance du plan repart de cet entretien.</div>
+               </div>`
+            : ""
+        }
+        <div class="editor-error" id="ps-m-error"></div>
+        <div class="editor-actions">
+          <button class="ps-cancel" id="ps-m-cancel">Annuler</button>
+          <button class="ps-save" id="ps-m-save">Sauvegarder</button>
+        </div>
+      </div>`;
+    card.appendChild(overlay);
+    overlay.addEventListener("click", (ev) => {
+      if (ev.target === overlay) overlay.remove();
+    });
+    const natureSelEl = overlay.querySelector("#ps-m-nature");
+    const freeField = overlay.querySelector("#ps-m-free-field");
     natureSelEl.addEventListener("change", () => {
       freeField.style.display =
         natureSelEl.value === "Autre" ? "block" : "none";
     });
     if (nature === "Autre") freeField.style.display = "block";
-    root.querySelector("#ps-m-cancel").addEventListener("click", () => {
+    overlay.querySelector("#ps-m-cancel").addEventListener("click", () => {
+      overlay.remove();
       if (index != null) this._openHistoryEditor();
-      else this._render();
     });
-    root.querySelector("#ps-m-save").addEventListener("click", () =>
-      this._saveMaintenance(index)
+    overlay.querySelector("#ps-m-save").addEventListener("click", () =>
+      this._saveMaintenance(index, overlay)
     );
   }
 
   /** Sauvegarde l'entretien (ajout ou modification) via les services. */
-  async _saveMaintenance(index) {
+  async _saveMaintenance(index, overlay) {
     const root = this.shadowRoot;
     const main = this._findMainSensor();
     const attrs = (main && main.attributes) || {};
     const vehicleId = attrs.vehicle_id || this._config.vehicle;
-    const errorBox = root.querySelector("#ps-m-error");
-    const button = root.querySelector("#ps-m-save");
+    const errorBox = overlay.querySelector("#ps-m-error");
+    const button = overlay.querySelector("#ps-m-save");
     errorBox.textContent = "";
-    const date = root.querySelector("#ps-m-date").value;
-    const km = parseInt(root.querySelector("#ps-m-km").value, 10);
+    const date = overlay.querySelector("#ps-m-date").value;
+    const km = parseInt(overlay.querySelector("#ps-m-km").value, 10);
     if (!date || isNaN(km) || km < 0) {
       errorBox.textContent = "Renseignez la date et le kilom\u00e9trage.";
       return;
     }
-    const natureSel = root.querySelector("#ps-m-nature");
+    const natureSel = overlay.querySelector("#ps-m-nature");
     let actions = natureSel.value;
     if (actions === "Autre") {
-      const free = root.querySelector("#ps-m-free").value.trim();
+      const free = overlay.querySelector("#ps-m-free").value.trim();
       if (!free) {
         errorBox.textContent = "Pr\u00e9cisez la nature de l'entretien.";
         return;
       }
       actions = free;
     }
-    const costVal = root.querySelector("#ps-m-cost").value;
-    const invoiceInput = root.querySelector("#ps-m-invoice");
+    const costVal = overlay.querySelector("#ps-m-cost").value;
+    const invoiceInput = overlay.querySelector("#ps-m-invoice");
     button.disabled = true;
 
     let invoiceBase64 = null;
@@ -943,13 +958,14 @@ class PitstopCard extends HTMLElement {
     if (index != null) {
       data.index = index;
     } else {
-      const planSel = root.querySelector("#ps-m-plan");
+      const planSel = overlay.querySelector("#ps-m-plan");
       if (planSel && planSel.value) data.plan_id = planSel.value;
     }
     const service =
       index != null ? "update_maintenance" : "add_maintenance_done";
     this._hass.callService("pitstop_log", service, data).then(
       () => {
+        overlay.remove();
         this._render();
       },
       (err) => {
@@ -965,7 +981,10 @@ class PitstopCard extends HTMLElement {
     const main = this._findMainSensor();
     const attrs = (main && main.attributes) || {};
     const vehicleId = attrs.vehicle_id || this._config.vehicle;
-    if (!window.confirm("Supprimer cet entretien ?")) return;
+    if (!window.confirm("Supprimer cet entretien ?")) {
+      this._openHistoryEditor();
+      return;
+    }
     this._hass.callService("pitstop_log", "delete_maintenance", {
       vehicle_id: vehicleId,
       index: index,
@@ -998,7 +1017,7 @@ class PitstopCard extends HTMLElement {
 
   static _styles() {
     return `
-      ha-card { overflow: hidden; }
+      ha-card { overflow: hidden; position: relative; }
       .pad { padding: 16px; }
       .error { color: var(--error-color, #db4437); }
       .header { display: flex; align-items: center; gap: 12px; padding: 16px 16px 8px; }
@@ -1047,6 +1066,10 @@ class PitstopCard extends HTMLElement {
       .inv { text-decoration: none; }
       .empty { padding: 0 16px 8px; font-size: 13px; color: var(--secondary-text-color, #727272); }
       .hint { font-size: 12px; color: var(--secondary-text-color, #727272); margin-top: 4px; }
+ 
+      .ps-overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0, 0, 0, 0.35); z-index: 10; border-radius: var(--ha-card-border-radius, 12px); }
+      .ps-modal { background: var(--card-background-color, #fff); border-radius: 12px; padding: 16px; width: calc(100% - 32px); max-width: 420px; max-height: 85%; overflow-y: auto; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25); }
+      .ps-modal.wide { max-width: 640px; }
     `;
   }
 }
