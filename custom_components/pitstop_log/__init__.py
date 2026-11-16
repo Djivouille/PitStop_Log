@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import base64
+import logging
 import os
 import secrets
 from typing import Any
@@ -83,31 +84,55 @@ ADD_MAINTENANCE_PLAN_SCHEMA = vol.Schema(
 )
 
 
+_LOGGER = logging.getLogger(__name__)
+
+
+async def _sync_www_assets(hass: HomeAssistant) -> None:
+    """Copier les ressources embarquées (logos, carte Lovelace) vers www.
+
+    Idempotent : appelé au démarrage du composant ET à chaque configuration
+    d'entrée, pour couvrir tous les scénarios de chargement.
+    """
+    integration_dir = os.path.dirname(__file__)
+    www_dir = hass.config.path()
+
+    # Dossier des factures et des photos des véhicules
+    await hass.async_add_executor_job(
+        _ensure_invoice_dir, os.path.join(www_dir, INVOICE_DIR)
+    )
+    await hass.async_add_executor_job(
+        _ensure_invoice_dir, os.path.join(www_dir, PHOTOS_DIR)
+    )
+
+    # Logos de marques embarqués (SVG servis via /local/)
+    await hass.async_add_executor_job(
+        _sync_brand_logos,
+        os.path.join(integration_dir, "brands"),
+        os.path.join(www_dir, BRANDS_DIR),
+    )
+
+    # Carte Lovelace embarquée (JS servi via /local/)
+    source_lovelace = os.path.join(integration_dir, "lovelace")
+    target_lovelace = os.path.join(www_dir, "www/pitstop_log/lovelace")
+    await hass.async_add_executor_job(_sync_files, source_lovelace, target_lovelace)
+    if not os.path.isdir(source_lovelace):
+        _LOGGER.warning(
+            "Dossier lovelace/ absent de l'installation ; la carte Lovelace "
+            "PitStop Card ne sera pas disponible. Réinstallez l'intégration."
+        )
+    elif not os.path.isfile(os.path.join(target_lovelace, "pitstop-card.js")):
+        _LOGGER.error(
+            "La carte Lovelace n'a pas pu être copiée dans %s",
+            target_lovelace,
+        )
+
+
 async def async_setup(hass: HomeAssistant, config: dict[str, Any]) -> bool:
     """Initialiser l'intégration : stockage, dossier factures et services."""
     coordinator = await async_get_or_create_coordinator(hass)
 
-    # Création du dossier des factures si nécessaire (I/O hors boucle d'événements)
-    invoice_dir = os.path.join(hass.config.path(), INVOICE_DIR)
-    await hass.async_add_executor_job(_ensure_invoice_dir, invoice_dir)
-
-    # Copie des logos de marques embarqués vers www (servis via /local/)
-    source_brands = os.path.join(os.path.dirname(__file__), "brands")
-    target_brands = os.path.join(hass.config.path(), BRANDS_DIR)
-    await hass.async_add_executor_job(
-        _sync_brand_logos, source_brands, target_brands
-    )
-
-    # Dossier des photos des véhicules (téléversées depuis l'interface)
-    photos_dir = os.path.join(hass.config.path(), PHOTOS_DIR)
-    await hass.async_add_executor_job(_ensure_invoice_dir, photos_dir)
-
-    # Copie de la carte Lovelace embarquée vers www (servie via /local/)
-    source_lovelace = os.path.join(os.path.dirname(__file__), "lovelace")
-    target_lovelace = os.path.join(hass.config.path(), "www/pitstop_log/lovelace")
-    await hass.async_add_executor_job(
-        _sync_files, source_lovelace, target_lovelace
-    )
+    # Ressources www : factures, photos, logos de marques, carte Lovelace
+    await _sync_www_assets(hass)
 
     async def handle_update_odometer(call: ServiceCall) -> None:
         """Service : mettre à jour le kilométrage d'un véhicule."""
@@ -243,6 +268,8 @@ async def async_setup_entry(
             },
         )
         await coordinator.async_save()
+    # Ressources www : couvre aussi le cas d'un composant non encore initialisé
+    await _sync_www_assets(hass)
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     return True
 
