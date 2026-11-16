@@ -69,24 +69,43 @@ class PitstopCard extends HTMLElement {
       .replace(/[\u0300-\u036f]/g, "")
       .replace(/[^a-z0-9]+/g, "_")
       .replace(/^_|_$/g, "");
-    const found = {
-      odometer:
-        this._hass.states[`sensor.${slug}_kilometrage`] || null,
-      plans: [],
-      history: null,
-    };
+    const found = { odometer: null, plans: [], history: null };
     for (const entityId in this._hass.states) {
       const state = this._hass.states[entityId];
-      if (entityId === `sensor.${slug}_kilometrage`) {
+      if (!entityId.startsWith("sensor.") || !state.attributes) {
+        continue;
+      }
+      const attrs = state.attributes;
+      // Capteur kilom\u00e9trique : par entity_id directe ou par attributs
+      if (
+        entityId === `sensor.${slug}_kilometrage` ||
+        (attrs.odometer === true && attrs.vehicle === this._config.vehicle)
+      ) {
         found.odometer = state;
         continue;
       }
+      // Capteurs des plans d'entretien
       if (
-        state.attributes &&
-        state.attributes.vehicle === this._config.vehicle &&
-        state.attributes.km_remaining !== undefined
+        attrs.vehicle === this._config.vehicle &&
+        attrs.km_remaining !== undefined
       ) {
         found.plans.push(state);
+      }
+    }
+    // Secours : capteur kilom\u00e9trique introuvable -> lire l'attribut du principal
+    if (!found.odometer) {
+      const main = this._findMainSensor();
+      if (main && main.attributes && main.attributes.history) {
+        let maxKm = null;
+        for (const h of main.attributes.history) {
+          if (h.km != null && (maxKm === null || h.km > maxKm)) maxKm = h.km;
+        }
+        if (maxKm !== null) {
+          found.odometer = {
+            state: maxKm,
+            attributes: {},
+          };
+        }
       }
     }
     return found;

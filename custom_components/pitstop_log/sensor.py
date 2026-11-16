@@ -105,9 +105,12 @@ class PitStopOdometerSensor(PitStopEntity):
 
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
-        """Attributs : date de dernière mise à jour du kilométrage."""
+        """Attributs : identification du véhicule et dernière mise à jour."""
         vehicle = self.coordinator.get_vehicle(self.vehicle_id) or {}
         return {
+            "vehicle": vehicle.get("name"),
+            "vehicle_id": self.vehicle_id,
+            "odometer": True,
             "updated_at": vehicle.get("odometer_updated_at"),
         }
 
