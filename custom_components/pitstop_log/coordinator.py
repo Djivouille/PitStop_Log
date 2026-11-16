@@ -189,6 +189,33 @@ class PitStopDataUpdateCoordinator:
         await self.async_save()
         await self.async_refresh()
 
+    async def async_update_purchase_date(
+        self, vehicle_id: str, purchase_date: str
+    ) -> None:
+        """Mettre à jour la date d'achat (mise en service) d'un véhicule.
+
+        Le premier point de l'historique du kilométrage (date de mise en
+        service, km 0) suit la nouvelle date s'il correspondait à l'ancienne.
+        """
+        vehicle = self.get_vehicle(vehicle_id)
+        if vehicle is None:
+            raise HomeAssistantError(f"Véhicule inconnu : {vehicle_id}")
+        try:
+            datetime.strptime(purchase_date, "%Y-%m-%d")
+        except ValueError as err:
+            raise HomeAssistantError(
+                f"Date invalide ({purchase_date}), format attendu : AAAA-MM-JJ"
+            ) from err
+        old_date = vehicle.get("purchase_date")
+        vehicle["purchase_date"] = purchase_date
+        # Suit le point d'amorçage de l'historique du kilométrage
+        history: list[dict[str, Any]] = list(vehicle.get("odometer_history") or [])
+        if history and history[0].get("km") == 0 and history[0].get("date") == old_date:
+            history[0] = {"date": purchase_date, "km": 0}
+            vehicle["odometer_history"] = history
+        await self.async_save()
+        await self.async_refresh()
+
     def delete_vehicle(self, vehicle_id: str) -> None:
         """Supprimer un véhicule, ses plans et son historique."""
         self.data["vehicles"].pop(vehicle_id, None)

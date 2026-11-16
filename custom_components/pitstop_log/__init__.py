@@ -46,6 +46,7 @@ from .const import (
     SERVICE_ADD_MAINTENANCE_PLAN,
     SERVICE_UPDATE_ODOMETER,
     SERVICE_UPDATE_REGISTRATION,
+    SERVICE_UPDATE_PURCHASE_DATE,
 )
 from .coordinator import (
     PitStopDataUpdateCoordinator,
@@ -154,6 +155,15 @@ async def async_setup(hass: HomeAssistant, config: dict[str, Any]) -> bool:
             vehicle_id, call.data["registration"]
         )
 
+    async def handle_update_purchase_date(call: ServiceCall) -> None:
+        """Service : mettre à jour la date d'achat d'un véhicule."""
+        vehicle_id = coordinator.find_vehicle_id(call.data["vehicle_id"])
+        if vehicle_id is None:
+            raise ServiceValidationError(f"Véhicule inconnu : {call.data['vehicle_id']}")
+        await coordinator.async_update_purchase_date(
+            vehicle_id, call.data["date"]
+        )
+
     async def handle_add_maintenance_done(call: ServiceCall) -> None:
         """Service : enregistrer un entretien réalisé."""
         vehicle_id = coordinator.find_vehicle_id(call.data["vehicle_id"])
@@ -206,6 +216,17 @@ async def async_setup(hass: HomeAssistant, config: dict[str, Any]) -> bool:
             {
                 vol.Required("vehicle_id"): str,
                 vol.Required("registration"): str,
+            }
+        ),
+    )
+    hass.services.async_register(
+        DOMAIN,
+        SERVICE_UPDATE_PURCHASE_DATE,
+        handle_update_purchase_date,
+        schema=vol.Schema(
+            {
+                vol.Required("vehicle_id"): str,
+                vol.Required("date"): str,
             }
         ),
     )

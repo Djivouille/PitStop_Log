@@ -51,6 +51,26 @@ update_registration:
       selector:
         text:
 
+update_purchase_date:
+  name: Mettre à jour la date d'achat
+  description: >-
+    Met à jour la date d'achat (mise en service) d'un véhicule.
+  fields:
+    vehicle_id:
+      name: Véhicule
+      description: Identifiant ou nom du véhicule.
+      required: true
+      example: "moto_yamaha"
+      selector:
+        text:
+    date:
+      name: Date
+      description: Nouvelle date d'achat (AAAA-MM-JJ).
+      required: true
+      example: "2020-01-01"
+      selector:
+        date:
+
 add_maintenance_done:
   name: Enregistrer un entretien réalisé
   description: >-
