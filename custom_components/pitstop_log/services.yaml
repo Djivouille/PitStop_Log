@@ -98,6 +98,27 @@ update_brand_model:
       example: "MT-07"
       selector:
         text:
+    model_year:
+      name: Année-modèle
+      description: Année-modèle du véhicule. Optionnel.
+      required: false
+      example: 2022
+      selector:
+        number:
+          min: 1900
+          max: 2100
+          step: 1
+          mode: box
+    photo_base64:
+      name: Photo du véhicule (base64)
+      description: >-
+        Photo du véhicule encodée en base64 (ou data URL).
+        Sauvegardée automatiquement dans /config/www/pitstop_log/photos/.
+        Optionnel.
+      required: false
+      selector:
+        text:
+          multiline: true
 
 add_maintenance_done:
   name: Enregistrer un entretien réalisé

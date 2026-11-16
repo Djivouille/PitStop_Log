@@ -6,6 +6,7 @@ le calcul des échéances et la mise à jour des capteurs.
 
 from __future__ import annotations
 
+import base64
 import os
 import shutil
 from datetime import date, datetime, timedelta
@@ -29,6 +30,12 @@ from .const import (
 )
 
 DEFAULT_SAVE_DELAY = 30  # Secondes avant écriture différée sur le disque
+
+
+def _write_file(path: str, payload: bytes) -> None:
+    """Écrire des octets sur le disque (exécuté hors boucle d'événements)."""
+    with open(path, "wb") as file:
+        file.write(payload)
 
 
 async def async_save_uploaded_photo(
@@ -217,14 +224,20 @@ class PitStopDataUpdateCoordinator:
         await self.async_refresh()
 
     async def async_update_brand_model(
-        self, vehicle_id: str, brand: str, model: str
+        self,
+        vehicle_id: str,
+        brand: str,
+        model: str,
+        model_year: int | None = None,
+        photo_base64: str | None = None,
     ) -> None:
-        """Mettre à jour la marque et le modèle d'un véhicule.
+        """Mettre à jour la marque, le modèle, l'année et la photo d'un véhicule.
 
         La marque doit exister dans brands.json ; le logo associé est
-        mis à jour automatiquement.
+        mis à jour automatiquement. Si photo_base64 est fourni, l'image
+        est décodée et sauvegardée dans www/pitstop_log/photos/.
         """
-        from .const import BRANDS, brand_logo
+        from .const import BRANDS, PHOTOS_DIR, PHOTOS_URL_PREFIX, brand_logo
 
         vehicle = self.get_vehicle(vehicle_id)
         if vehicle is None:
@@ -234,6 +247,36 @@ class PitStopDataUpdateCoordinator:
         vehicle["brand"] = brand
         vehicle["model"] = model
         vehicle["brand_logo"] = brand_logo(brand)
+        if model_year is not None:
+            vehicle["model_year"] = model_year
+        if photo_base64:
+            # Retire l'éventuel préfixe data URL (data:image/xxx;base64,)
+            payload_b64 = photo_base64
+            if payload_b64.startswith("data:"):
+                header, _, payload_b64 = payload_b64.partition(",")
+            try:
+                payload = base64.b64decode(payload_b64)
+            except Exception as err:
+                raise HomeAssistantError("Image base64 invalide") from err
+            # Extension depuis le type MIME du préfixe ou la signature
+            ext = ".jpg"
+            if header and "image/" in header:
+                ext = "." + header.split("image/")[1].split(";")[0]
+                if ext == ".jpeg+xml" or ext == ".svg":
+                    ext = ".svg" if "svg" in ext else ext
+            if payload[:3] == b"\xff\xd8\xff":
+                ext = ".jpg"
+            elif payload[:8] == b"\x89PNG\r\n\x1a\n":
+                ext = ".png"
+            elif payload[:4] == b"RIFF" and payload[8:12] == b"WEBP":
+                ext = ".webp"
+            photos_dir = os.path.join(self.hass.config.path(), PHOTOS_DIR)
+            os.makedirs(photos_dir, exist_ok=True)
+            target = os.path.join(photos_dir, f"{vehicle_id}{ext}")
+            await self.hass.async_add_executor_job(
+                _write_file, target, payload
+            )
+            vehicle["photo"] = f"{PHOTOS_URL_PREFIX}/{vehicle_id}{ext}"
         await self.async_save()
         await self.async_refresh()
 

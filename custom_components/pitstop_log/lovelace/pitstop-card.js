@@ -346,6 +346,14 @@ class PitstopCard extends HTMLElement {
             <label for="ps-model">Mod\u00e8le</label>
             <input id="ps-model" class="ps-input" type="text" value="${currentModel}" />
           </div>
+          <div class="field">
+            <label for="ps-year">Ann\u00e9e-mod\u00e8le (optionnel)</label>
+            <input id="ps-year" class="ps-input" type="number" min="1900" max="2100" value="${(attrs.model_year || "") || ""}" />
+          </div>
+          <div class="field">
+            <label for="ps-photo">Photo du v\u00e9hicule (optionnel)</label>
+            <input id="ps-photo" class="ps-input" type="file" accept="image/*" />
+          </div>
           <div class="editor-error" id="ps-error"></div>
           <div class="editor-actions">
             <button class="ps-cancel" id="ps-cancel">Annuler</button>
@@ -364,11 +372,13 @@ class PitstopCard extends HTMLElement {
     });
   }
 
-  /** Sauvegarde la marque et le mod\u00e8le via le service. */
-  _saveBrandModel(vehicleId) {
+  /** Sauvegarde la marque, le mod\u00e8le, l'ann\u00e9e et la photo via le service. */
+  async _saveBrandModel(vehicleId) {
     const root = this.shadowRoot;
     const brand = root.querySelector("#ps-brand").value;
     const model = root.querySelector("#ps-model").value.trim();
+    const year = root.querySelector("#ps-year").value;
+    const photoInput = root.querySelector("#ps-photo");
     const errorBox = root.querySelector("#ps-error");
     errorBox.textContent = "";
     if (!model) {
@@ -377,22 +387,32 @@ class PitstopCard extends HTMLElement {
     }
     const button = root.querySelector("#ps-save");
     button.disabled = true;
-    this._hass
-      .callService("pitstop_log", "update_brand_model", {
-        vehicle_id: vehicleId,
-        brand: brand,
-        model: model,
-      })
-      .then(
-        () => {
-          this._render();
-        },
-        (err) => {
-          button.disabled = false;
-          errorBox.textContent =
-            (err && err.message) || "Erreur lors de la sauvegarde.";
-        }
-      );
+
+    // Lecture de la photo en base64 si un fichier est choisi
+    let photoBase64 = null;
+    if (photoInput && photoInput.files && photoInput.files[0]) {
+      photoBase64 = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(photoInput.files[0]);
+      }).catch(() => null);
+    }
+
+    const data = { vehicle_id: vehicleId, brand: brand, model: model };
+    if (year) data.model_year = parseInt(year, 10);
+    if (photoBase64) data.photo_base64 = photoBase64;
+
+    this._hass.callService("pitstop_log", "update_brand_model", data).then(
+      () => {
+        this._render();
+      },
+      (err) => {
+        button.disabled = false;
+        errorBox.textContent =
+          (err && err.message) || "Erreur lors de la sauvegarde.";
+      }
+    );
   }
 
   _render() {

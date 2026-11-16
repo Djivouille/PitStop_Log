@@ -179,7 +179,11 @@ async def async_setup(hass: HomeAssistant, config: dict[str, Any]) -> bool:
         if vehicle_id is None:
             raise ServiceValidationError(f"Véhicule inconnu : {call.data['vehicle_id']}")
         await coordinator.async_update_brand_model(
-            vehicle_id, call.data["brand"], call.data["model"]
+            vehicle_id,
+            call.data["brand"],
+            call.data["model"],
+            model_year=call.data.get("model_year"),
+            photo_base64=call.data.get("photo_base64"),
         )
 
     async def handle_add_maintenance_done(call: ServiceCall) -> None:
@@ -257,6 +261,8 @@ async def async_setup(hass: HomeAssistant, config: dict[str, Any]) -> bool:
                 vol.Required("vehicle_id"): str,
                 vol.Required("brand"): str,
                 vol.Required("model"): str,
+                vol.Optional("model_year"): int,
+                vol.Optional("photo_base64"): str,
             }
         ),
     )
