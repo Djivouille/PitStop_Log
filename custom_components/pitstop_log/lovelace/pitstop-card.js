@@ -1,8 +1,8 @@
 /**
- * PitStop Card — carte Lovelace pour l'intégration PitStop Log.
+ * PitStop Card \u2014 carte Lovelace pour l'int\u00e9gration PitStop Log.
  *
- * Affiche toutes les informations d'un véhicule : photo, logo de marque,
- * kilométrage, statut d'entretien, plans à faire et historique.
+ * Affiche toutes les informations d'un v\u00e9hicule : photo, logo de marque,
+ * kilom\u00e9trage, statut d'entretien, plans \u00e0 faire et historique.
  *
  * Utilisation :
  *   type: custom:pitstop-card
@@ -18,7 +18,7 @@ class PitstopCard extends HTMLElement {
 
   setConfig(config) {
     if (!config.vehicle) {
-      throw new Error("Vous devez définir 'vehicle: <nom du véhicule>'");
+      throw new Error("Vous devez d\u00e9finir 'vehicle: <nom du v\u00e9hicule>'");
     }
     this._config = config;
     this._render();
@@ -37,7 +37,7 @@ class PitstopCard extends HTMLElement {
     return { columns: "full" };
   }
 
-  /** Trouve le capteur « Prochain entretien » du véhicule. */
+  /** Trouve le capteur \u00ab Prochain entretien \u00bb du v\u00e9hicule. */
   _findMainSensor() {
     const slug = this._config.vehicle
       .toLowerCase()
@@ -61,7 +61,7 @@ class PitstopCard extends HTMLElement {
     return null;
   }
 
-  /** Trouve les entités du véhicule par préfixe de nom. */
+  /** Trouve les entit\u00e9s du v\u00e9hicule par pr\u00e9fixe de nom. */
   _findEntities() {
     const slug = this._config.vehicle
       .toLowerCase()
@@ -94,8 +94,8 @@ class PitstopCard extends HTMLElement {
         <style>${PitstopCard._styles()}</style>
         <ha-card>
           <div class="pad error">
-            Véhicule « ${this._config.vehicle} » introuvable.
-            Vérifiez le nom dans la configuration de la carte.
+            V\u00e9hicule \u00ab ${this._config.vehicle} \u00bb introuvable.
+            V\u00e9rifiez le nom dans la configuration de la carte.
           </div>
         </ha-card>`;
       return;
@@ -104,7 +104,7 @@ class PitstopCard extends HTMLElement {
     const attrs = main.attributes || {};
     const statusColors = {
       "OK": "var(--label-badge-green, #13ba6e)",
-      "Bientôt dû": "var(--label-badge-yellow, #ffab40)",
+      "Bient\u00f4t d\u00fb": "var(--label-badge-yellow, #ffab40)",
       "En retard": "var(--label-badge-red, #fce588)",
       "Due soon": "var(--label-badge-yellow, #ffab40)",
       "Overdue": "var(--label-badge-red, #fce588)",
@@ -118,8 +118,8 @@ class PitstopCard extends HTMLElement {
         <tr>
           <td>${p.attributes.friendly_name || p.entity_id}</td>
           <td><span class="badge" style="background:${statusColors[p.state] || "var(--primary-color)"}">${p.state}</span></td>
-          <td class="num">${p.attributes.km_remaining != null ? p.attributes.km_remaining.toLocaleString() + " km" : "—"}</td>
-          <td class="num">${p.attributes.days_remaining != null ? p.attributes.days_remaining + " j" : "—"}</td>
+          <td class="num">${p.attributes.km_remaining != null ? p.attributes.km_remaining.toLocaleString() + " km" : "\u2014"}</td>
+          <td class="num">${p.attributes.days_remaining != null ? p.attributes.days_remaining + " j" : "\u2014"}</td>
         </tr>`
       )
       .join("");
@@ -134,7 +134,7 @@ class PitstopCard extends HTMLElement {
           <td>${h.date || ""}</td>
           <td class="num">${h.km != null ? Number(h.km).toLocaleString() + " km" : ""}</td>
           <td>${h.actions || ""}</td>
-          <td class="num">${h.cost != null ? Number(h.cost).toLocaleString() + " €" : ""}</td>
+          <td class="num">${h.cost != null ? Number(h.cost).toLocaleString() + " \u20ac" : ""}</td>
         </tr>`
       )
       .join("");
@@ -152,7 +152,7 @@ class PitstopCard extends HTMLElement {
         <div class="header">
           ${logo}
           <div class="titles">
-            <div class="brand">${attrs.brand || ""}${attrs.brand ? " · " : ""}${attrs.model || ""}</div>
+            <div class="brand">${attrs.brand || ""}${attrs.brand ? " \u00b7 " : ""}${attrs.model || ""}</div>
             <div class="name">${this._config.title || this._config.vehicle}</div>
           </div>
           <div class="statusbox">
@@ -162,36 +162,36 @@ class PitstopCard extends HTMLElement {
         ${photo}
         <div class="grid">
           <div class="cell">
-            <div class="label">Kilométrage</div>
+            <div class="label">Kilom\u00e9trage</div>
             <div class="value">${
               entities.odometer
                 ? Number(entities.odometer.state).toLocaleString() + " km"
-                : "—"
+                : "\u2014"
             }</div>
           </div>
           <div class="cell">
             <div class="label">Immatriculation</div>
-            <div class="value small">${attrs.registration || "—"}</div>
+            <div class="value small">${attrs.registration || "\u2014"}</div>
           </div>
           <div class="cell">
             <div class="label">Date d'achat</div>
-            <div class="value small">${attrs.purchase_date || "—"}</div>
+            <div class="value small">${attrs.purchase_date || "\u2014"}</div>
           </div>
           <div class="cell">
-            <div class="label">Entretiens réalisés</div>
-            <div class="value">${attrs.history_count != null ? attrs.history_count : "—"}</div>
+            <div class="label">Entretiens r\u00e9alis\u00e9s</div>
+            <div class="value">${attrs.history_count != null ? attrs.history_count : "\u2014"}</div>
           </div>
         </div>
         ${
           plans
-            ? `<div class="section">Entretiens à faire</div>
-               <table class="table"><thead><tr><th>Plan</th><th>Statut</th><th>Reste</th><th>Échéance</th></tr></thead><tbody>${plans}</tbody></table>`
+            ? `<div class="section">Entretiens \u00e0 faire</div>
+               <table class="table"><thead><tr><th>Plan</th><th>Statut</th><th>Reste</th><th>\u00c9ch\u00e9ance</th></tr></thead><tbody>${plans}</tbody></table>`
             : ""
         }
         ${
           history
             ? `<div class="section">Derniers entretiens</div>
-               <table class="table"><thead><tr><th>Date</th><th>Km</th><th>Actions</th><th>Coût</th></tr></thead><tbody>${history}</tbody></table>`
+               <table class="table"><thead><tr><th>Date</th><th>Km</th><th>Actions</th><th>Co\u00fbt</th></tr></thead><tbody>${history}</tbody></table>`
             : ""
         }
       </ha-card>`;
@@ -229,5 +229,5 @@ window.customCards = window.customCards || [];
 window.customCards.push({
   type: "pitstop-card",
   name: "PitStop Card",
-  description: "Affiche toutes les informations d'un véhicule PitStop Log.",
+  description: "Affiche toutes les informations d'un v\u00e9hicule PitStop Log.",
 });
