@@ -26,6 +26,7 @@ Une release GitHub du même nom que la version du `manifest.json` est publiée a
 - **Édition complète via l'interface** (Options Flow) : métadonnées du véhicule,
   plans d'entretien (ajout/modification/suppression) et historique des entretiens
   (modification/suppression) — sans passer par les services YAML.
+- **Saisie des entretiens depuis la carte** : bouton « + Ajouter un entretien » (date, kilométrage, nature via liste déroulante issue de `maintenance_types.json`, coût, facture photo ou PDF stockée localement) ; historique complet modifiable et supprimable depuis la carte.
 - **Entretiens à faire** : échéances basées sur un intervalle en kilomètres
   et/ou en mois, avec calcul automatique du reste à faire (km restants, jours
   restants) et statut d'alerte : `OK`, `Bientôt dû`, `En retard` (états traduits
