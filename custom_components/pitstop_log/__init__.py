@@ -184,6 +184,8 @@ async def async_setup(hass: HomeAssistant, config: dict[str, Any]) -> bool:
             call.data["model"],
             model_year=call.data.get("model_year"),
             photo_base64=call.data.get("photo_base64"),
+            registration=call.data.get("registration"),
+            purchase_date=call.data.get("purchase_date"),
         )
 
     async def handle_add_maintenance_done(call: ServiceCall) -> None:
@@ -263,6 +265,8 @@ async def async_setup(hass: HomeAssistant, config: dict[str, Any]) -> bool:
                 vol.Required("model"): str,
                 vol.Optional("model_year"): int,
                 vol.Optional("photo_base64"): str,
+                vol.Optional("registration"): str,
+                vol.Optional("purchase_date"): str,
             }
         ),
     )

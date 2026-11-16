@@ -119,6 +119,20 @@ update_brand_model:
       selector:
         text:
           multiline: true
+    registration:
+      name: Immatriculation
+      description: Nouvelle immatriculation (carte grise). Optionnel.
+      required: false
+      example: "AB-123-CD"
+      selector:
+        text:
+    purchase_date:
+      name: Date d'achat
+      description: Nouvelle date d'achat / mise en service (AAAA-MM-JJ). Optionnel.
+      required: false
+      example: "2020-01-01"
+      selector:
+        date:
 
 add_maintenance_done:
   name: Enregistrer un entretien réalisé

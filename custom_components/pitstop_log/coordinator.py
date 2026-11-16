@@ -230,8 +230,14 @@ class PitStopDataUpdateCoordinator:
         model: str,
         model_year: int | None = None,
         photo_base64: str | None = None,
+        registration: str | None = None,
+        purchase_date: str | None = None,
     ) -> None:
-        """Mettre à jour la marque, le modèle, l'année et la photo d'un véhicule.
+        """Mettre à jour les informations d'identification d'un véhicule.
+
+        Marque (validée contre brands.json, logo recalculé), modèle,
+        année-modèle, photo (base64), immatriculation et date d'achat
+        (avec suivi du point d'amorçage de l'historique km).
 
         La marque doit exister dans brands.json ; le logo associé est
         mis à jour automatiquement. Si photo_base64 est fourni, l'image
@@ -249,6 +255,29 @@ class PitStopDataUpdateCoordinator:
         vehicle["brand_logo"] = brand_logo(brand)
         if model_year is not None:
             vehicle["model_year"] = model_year
+        if registration is not None:
+            vehicle["registration"] = registration
+        if purchase_date:
+            try:
+                datetime.strptime(purchase_date, "%Y-%m-%d")
+            except ValueError as err:
+                raise HomeAssistantError(
+                    f"Date invalide ({purchase_date}), "
+                    "format attendu : AAAA-MM-JJ"
+                ) from err
+            old_date = vehicle.get("purchase_date")
+            vehicle["purchase_date"] = purchase_date
+            # Suit le point d'amorçage de l'historique du kilométrage
+            history: list[dict[str, Any]] = list(
+                vehicle.get("odometer_history") or []
+            )
+            if (
+                history
+                and history[0].get("km") == 0
+                and history[0].get("date") == old_date
+            ):
+                history[0] = {"date": purchase_date, "km": 0}
+                vehicle["odometer_history"] = history
         if photo_base64:
             # Retire l'éventuel préfixe data URL (data:image/xxx;base64,)
             payload_b64 = photo_base64
