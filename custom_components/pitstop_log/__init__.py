@@ -138,6 +138,18 @@ async def _sync_www_assets(hass: HomeAssistant) -> None:
         os.path.join(integration_dir, MAINTENANCE_TYPES_FILE),
         os.path.join(www_dir, "www/pitstop_log/maintenance_types.json"),
     )
+    # Localisation de la carte Lovelace (locales/<langue>.json)
+    locales_src = os.path.join(integration_dir, "locales")
+    if os.path.isdir(locales_src):
+        for locale_file in os.listdir(locales_src):
+            if locale_file.endswith(".json"):
+                await hass.async_add_executor_job(
+                    _sync_single_file,
+                    os.path.join(locales_src, locale_file),
+                    os.path.join(
+                        www_dir, "www/pitstop_log/locales", locale_file
+                    ),
+                )
     if not os.path.isdir(source_lovelace):
         _LOGGER.warning(
             "Dossier lovelace/ absent de l'installation ; la carte Lovelace "

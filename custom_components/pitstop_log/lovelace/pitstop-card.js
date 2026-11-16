@@ -1,5 +1,5 @@
 /**
- * \u00c9diteur visuel de la carte PitStop Log : s\u00e9lection du v\u00e9hicule
+ * \u00c9diteur visuel de la carte ${psT("editor_title")}
  * dans un menu d\u00e9roulant listant les v\u00e9hicules PitStop Log.
  */
 class PitstopCardEditor extends HTMLElement {
@@ -18,6 +18,9 @@ class PitstopCardEditor extends HTMLElement {
   set hass(hass) {
     this._hass = hass;
     this._render();
+    psLoadStrings(this._hass).then((s) => {
+      if (s) this._render();
+    });
   }
 
   /** Liste les v\u00e9hicules : nom de l'appareil (registre d'appareils HA). */
@@ -95,7 +98,7 @@ class PitstopCardEditor extends HTMLElement {
       .join("");
     if (!options) {
       root.innerHTML =
-        "<div>Aucun v\u00e9hicule PitStop Log trouv\u00e9. Cr\u00e9ez-en un dans Param\u00e8tres \u2192 Appareils et services.</div>";
+        "<div>" + psT("no_vehicle") + "</div>";
       return;
     }
     root.innerHTML = `
@@ -110,8 +113,8 @@ class PitstopCardEditor extends HTMLElement {
           <select id="ps-vehicle">${options}</select>
         </div>
         <div>
-          <label>Titre affich\u00e9 (optionnel)</label>
-          <input id="ps-title" type="text" value="${(this._config.title || "").replace(/"/g, "&quot;")}" placeholder="Par d\u00e9faut : nom du v\u00e9hicule" />
+          <label>${psT("title_optional")}</label>
+          <input id="ps-title" type="text" value="${(this._config.title || "").replace(/"/g, "&quot;")}" placeholder="${psT("title_hint")}" />
         </div>
       </div>`;
     root.querySelector("#ps-vehicle").addEventListener("change", (ev) => {
@@ -135,6 +138,98 @@ class PitstopCardEditor extends HTMLElement {
  *   type: custom:pitstop-card
  *   vehicle: Moto JV
  */
+/* Localisation de la carte : les textes sont charg\u00e9s depuis
+ * /local/pitstop_log/locales/<langue>.json (synchronis\u00e9s par l'int\u00e9gration).
+ * Repli : fran\u00e7ais embarqu\u00e9 ci-dessous. Contribuer une langue = un fichier
+ * JSON dans custom_components/pitstop_log/locales/, sans toucher au JS.
+ */
+const PS_DEFAULT_STRINGS = {
+  "err_vehicle_required": "Vous devez d\u00e9finir 'vehicle: <nom du v\u00e9hicule>'",
+  "vehicle_not_found_pre": "V\u00e9hicule",
+  "vehicle_not_found_post": "introuvable. V\u00e9rifiez le nom dans la configuration de la carte.",
+  "km": "Kilom\u00e9trage",
+  "km_update_hint": "Mettre \u00e0 jour le kilom\u00e9trage",
+  "km_history_hint": "Voir l'historique du kilom\u00e9trage",
+  "maintenances_done": "Entretiens r\u00e9alis\u00e9s",
+  "last_maintenances": "Derniers entretiens",
+  "manage_history_hint": "G\u00e9rer l'historique des entretiens",
+  "no_maintenance": "Aucun entretien enregistr\u00e9.",
+  "add_maintenance": "Ajouter un entretien",
+  "plans_title": "Entretiens \u00e0 faire",
+  "th_date": "Date",
+  "th_km": "Km",
+  "th_actions": "Actions",
+  "th_cost": "Co\u00fbt",
+  "th_nature": "Nature",
+  "th_plan": "Plan",
+  "th_status": "Statut",
+  "th_remaining": "Reste",
+  "th_due": "\u00c9ch\u00e9ance",
+  "edit": "Modifier",
+  "delete": "Supprimer",
+  "back": "Retour",
+  "cancel": "Annuler",
+  "save": "Sauvegarder",
+  "new_maintenance": "Nouvel entretien",
+  "edit_maintenance": "Modifier l'entretien",
+  "date": "Date",
+  "natures": "Natures de l'entretien",
+  "other_natures": "Autre (pr\u00e9ciser, s\u00e9par\u00e9 par des virgules)",
+  "cost_optional": "Co\u00fbt (\u20ac, optionnel)",
+  "invoice_optional": "Facture (photo ou PDF, optionnel)",
+  "invoice_attached": "Une facture est d\u00e9j\u00e0 associ\u00e9e :",
+  "see": "voir",
+  "plans_reset": "Plans r\u00e9initialis\u00e9s : ",
+  "err_date_km": "Renseignez la date et le kilom\u00e9trage.",
+  "err_nature": "Cochez au moins une nature d'entretien.",
+  "err_save": "Erreur lors de la sauvegarde.",
+  "confirm_delete_maintenance": "Supprimer cet entretien ?",
+  "badge_maintenance": "Entretien",
+  "badge_maintenance_hint": "Cr\u00e9\u00e9 par un entretien \u2014 modifiable depuis la rubrique Derniers entretiens",
+  "km_update_title": "Mise \u00e0 jour du kilom\u00e9trage",
+  "reading_date": "Date du relev\u00e9",
+  "km_field": "Kilom\u00e9trage (km)",
+  "km_history_title": "Historique des valeurs",
+  "err_date": "Choisissez une date.",
+  "err_km": "Kilom\u00e9trage invalide.",
+  "confirm_delete_reading": "Supprimer le relev\u00e9 du",
+  "vehicle_edit_title": "Modification du v\u00e9hicule",
+  "brand": "Marque",
+  "model": "Mod\u00e8le",
+  "year_optional": "Ann\u00e9e-mod\u00e8le (optionnel)",
+  "photo_optional": "Photo du v\u00e9hicule (optionnel)",
+  "registration": "Immatriculation (carte grise)",
+  "purchase_date": "Date d'achat (mise en service)",
+  "err_model": "Saisissez un mod\u00e8le.",
+  "editor_title": "PitStop Log : s\u00e9lection du v\u00e9hicule",
+  "title_optional": "Titre affich\u00e9 (optionnel)",
+  "title_hint": "Par d\u00e9faut : nom du v\u00e9hicule",
+  "no_vehicle": "Aucun v\u00e9hicule PitStop Log trouv\u00e9. Cr\u00e9ez-en un dans Param\u00e8tres \u2192 Appareils et services.",
+  "vehicle": "V\u00e9hicule",
+};
+let PS_STRINGS = null;
+
+async function psLoadStrings(hass) {
+  if (PS_STRINGS) return null;
+  const lang = ((hass && hass.locale && hass.locale.language) || "fr")
+    .split("-")[0];
+  const fetchLang = async (l) => {
+    try {
+      const resp = await fetch(`/local/pitstop_log/locales/${l}.json`);
+      if (resp.ok) return await resp.json();
+    } catch (err) {}
+    return null;
+  };
+  let data = await fetchLang(lang);
+  if (!data && lang !== "fr") data = await fetchLang("fr");
+  PS_STRINGS = Object.assign({}, PS_DEFAULT_STRINGS, data || {});
+  return PS_STRINGS;
+}
+
+function psT(key) {
+  return (PS_STRINGS && PS_STRINGS[key]) || PS_DEFAULT_STRINGS[key] || key;
+}
+
 class PitstopCard extends HTMLElement {
   constructor() {
     super();
@@ -147,7 +242,7 @@ class PitstopCard extends HTMLElement {
 
   setConfig(config) {
     if (!config.vehicle) {
-      throw new Error("Vous devez d\u00e9finir 'vehicle: <nom du v\u00e9hicule>'");
+      throw new Error(psT("err_vehicle_required"));
     }
     this._config = config;
     this._render();
@@ -157,6 +252,9 @@ class PitstopCard extends HTMLElement {
     this._hass = hass;
     this._render();
     this._loadDeviceName();
+    psLoadStrings(this._hass).then((s) => {
+      if (s) this._render();
+    });
   }
 
   /** R\u00e9cup\u00e8re le nom de l'appareil (registre HA), mis en cache. */
@@ -302,8 +400,8 @@ class PitstopCard extends HTMLElement {
         (p, i) =>
           `<tr><td>${p.date}</td><td class="num">${Number(p.km).toLocaleString()} km</td><td class="num">${
             p.source === "maintenance"
-              ? `<span class="src-badge" title="Cr\u00e9\u00e9 par un entretien \u2014 modifiable depuis la rubrique Derniers entretiens">Entretien</span>`
-              : `<span class="icon-btn edit" data-date="${p.date}" data-km="${p.km}" title="Modifier">\u270e</span><span class="icon-btn del" data-date="${p.date}" title="Supprimer">\u2716</span>`
+              ? `<span class="src-badge" title="${psT("badge_maintenance_hint")}">${psT("badge_maintenance")}</span>`
+              : `<span class="icon-btn edit" data-date="${p.date}" data-km="${p.km}" title="${psT("edit")}">\u270e</span><span class="icon-btn del" data-date="${p.date}" title="${psT("delete")}">\u2716</span>`
           }</td></tr>`
       )
       .join("");
@@ -311,27 +409,27 @@ class PitstopCard extends HTMLElement {
     overlay.className = "ps-overlay";
     overlay.innerHTML = `
       <div class="ps-modal">
-        <div class="editor-title">Mise \u00e0 jour du kilom\u00e9trage</div>
+        <div class="editor-title">${psT("km_update_title")}</div>
         <div class="editor-sub">${this._deviceOrVehicle()}</div>
         <div class="field">
-          <label for="ps-date">Date du relev\u00e9</label>
+          <label for="ps-date">${psT("reading_date")}</label>
           <input id="ps-date" class="ps-input" type="date" value="${today}" />
         </div>
         <div class="field">
-          <label for="ps-km">Kilom\u00e9trage (km)</label>
+          <label for="ps-km">${psT("km_field")}</label>
           <input id="ps-km" class="ps-input" type="number" min="0" step="1" placeholder="${currentKm}" value="${currentKm}" />
         </div>
-        <div class="section editor-section">Historique des valeurs</div>
+        <div class="section editor-section">${psT("km_history_title")}</div>
         <table class="table editor-table">
-          <thead><tr><th>Date</th><th class="num">Kilom\u00e9trage</th><th></th></tr></thead>
+          <thead><tr><th>${psT("th_date")}</th><th class="num">${psT("km")}</th><th></th></tr></thead>
           <tbody id="ps-odo-rows">
             ${rows}
           </tbody>
         </table>
         <div class="editor-error" id="ps-error"></div>
         <div class="editor-actions">
-          <button class="ps-cancel" id="ps-cancel">Annuler</button>
-          <button class="ps-save" id="ps-save">Sauvegarder</button>
+          <button class="ps-cancel" id="ps-cancel">${psT("cancel")}</button>
+          <button class="ps-save" id="ps-save">${psT("save")}</button>
         </div>
       </div>`;
     card.appendChild(overlay);
@@ -359,7 +457,7 @@ class PitstopCard extends HTMLElement {
     );
     overlay.querySelectorAll(".icon-btn.del").forEach((btn) =>
       btn.addEventListener("click", () => {
-        if (!window.confirm("Supprimer le relev\u00e9 du " + btn.dataset.date + " ?"))
+        if (!window.confirm(psT("confirm_delete_reading") + " " + btn.dataset.date + " ?"))
           return;
         this._hass
           .callService("pitstop_log", "delete_odometer_point", {
@@ -381,11 +479,11 @@ class PitstopCard extends HTMLElement {
     const errorBox = overlay.querySelector("#ps-error");
     errorBox.textContent = "";
     if (!dateValue) {
-      errorBox.textContent = "Choisissez une date.";
+      errorBox.textContent = psT("err_date");
       return;
     }
     if (isNaN(kmValue) || kmValue < 0) {
-      errorBox.textContent = "Kilom\u00e9trage invalide.";
+      errorBox.textContent = psT("err_km");
       return;
     }
     const button = overlay.querySelector("#ps-save");
@@ -397,7 +495,7 @@ class PitstopCard extends HTMLElement {
     const fail = (err) => {
       button.disabled = false;
       errorBox.textContent =
-        (err && err.message) || "Erreur lors de la sauvegarde.";
+        (err && err.message) || psT("err_save");
     };
     // \u00c9dition d'un relev\u00e9 dont on change la date : on supprime l'ancien
     const editDate = this._odo_edit_date;
@@ -480,36 +578,36 @@ class PitstopCard extends HTMLElement {
       <style>${PitstopCard._styles()}</style>
       <ha-card>
         <div class="editor">
-          <div class="editor-title">Modification du v\u00e9hicule</div>
+          <div class="editor-title">${psT("vehicle_edit_title")}</div>
           <div class="editor-sub">${this._deviceOrVehicle()}</div>
           <div class="field">
-            <label for="ps-brand">Marque</label>
+            <label for="ps-brand">${psT("brand")}</label>
             <select id="ps-brand" class="ps-input">${options}</select>
           </div>
           <div class="field">
-            <label for="ps-model">Mod\u00e8le</label>
+            <label for="ps-model">${psT("model")}</label>
             <input id="ps-model" class="ps-input" type="text" value="${currentModel}" />
           </div>
           <div class="field">
-            <label for="ps-year">Ann\u00e9e-mod\u00e8le (optionnel)</label>
+            <label for="ps-year">${psT("year_optional")}</label>
             <input id="ps-year" class="ps-input" type="number" min="1900" max="2100" value="${(attrs.model_year || "") || ""}" />
           </div>
           <div class="field">
-            <label for="ps-photo">Photo du v\u00e9hicule (optionnel)</label>
+            <label for="ps-photo">${psT("photo_optional")}</label>
             <input id="ps-photo" class="ps-input" type="file" accept="image/*" />
           </div>
           <div class="field">
-            <label for="ps-reg">Immatriculation (carte grise)</label>
+            <label for="ps-reg">${psT("registration")}</label>
             <input id="ps-reg" class="ps-input" type="text" value="${attrs.registration || ""}" />
           </div>
           <div class="field">
-            <label for="ps-pdate">Date d'achat (mise en service)</label>
+            <label for="ps-pdate">${psT("purchase_date")}</label>
             <input id="ps-pdate" class="ps-input" type="date" value="${attrs.purchase_date || ""}" />
           </div>
           <div class="editor-error" id="ps-error"></div>
           <div class="editor-actions">
-            <button class="ps-cancel" id="ps-cancel">Annuler</button>
-            <button class="ps-save" id="ps-save">Sauvegarder</button>
+            <button class="ps-cancel" id="ps-cancel">${psT("cancel")}</button>
+            <button class="ps-save" id="ps-save">${psT("save")}</button>
           </div>
         </div>
       </ha-card>`;
@@ -534,7 +632,7 @@ class PitstopCard extends HTMLElement {
     const errorBox = root.querySelector("#ps-error");
     errorBox.textContent = "";
     if (!model) {
-      errorBox.textContent = "Saisissez un mod\u00e8le.";
+      errorBox.textContent = psT("err_model");
       return;
     }
     const button = root.querySelector("#ps-save");
@@ -566,7 +664,7 @@ class PitstopCard extends HTMLElement {
       (err) => {
         button.disabled = false;
         errorBox.textContent =
-          (err && err.message) || "Erreur lors de la sauvegarde.";
+          (err && err.message) || psT("err_save");
       }
     );
   }
@@ -582,8 +680,7 @@ class PitstopCard extends HTMLElement {
         <style>${PitstopCard._styles()}</style>
         <ha-card>
           <div class="pad error">
-            V\u00e9hicule \u00ab ${this._deviceOrVehicle()} \u00bb introuvable.
-            V\u00e9rifiez le nom dans la configuration de la carte.
+            ${psT("vehicle_not_found_pre")} \u00ab ${this._deviceOrVehicle()} \u00bb ${psT("vehicle_not_found_post")}
           </div>
         </ha-card>`;
       return;
@@ -657,9 +754,9 @@ class PitstopCard extends HTMLElement {
         </div>
         ${photo}
         <div class="grid">
-          <div class="cell cell-km" title="Voir l'historique du kilom\u00e9trage">
-            <div class="label">Kilom\u00e9trage
-              <span class="gear gear-km" title="Mettre \u00e0 jour le kilom\u00e9trage">
+          <div class="cell cell-km" title="${psT("km_history_hint")}">
+            <div class="label">${psT("km")}
+              <span class="gear gear-km" title="${psT("km_update_hint")}">
                 <svg viewBox="0 0 24 24" width="16" height="16">
                   <path fill="currentColor" d="M19.14 12.94a7.07 7.07 0 0 0 .05-.94 7.07 7.07 0 0 0-.05-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.03 7.03 0 0 0-1.62-.94l-.36-2.54a.5.5 0 0 0-.5-.42h-3.84a.5.5 0 0 0-.5.42l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96a.5.5 0 0 0-.6.22L2.66 8.84a.5.5 0 0 0 .12.64l2.03 1.58c-.03.31-.05.63-.05.94s.02.63.05.94l-2.03 1.58a.5.5 0 0 0-.12.64l1.92 3.32c.13.22.39.31.6.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.04.24.25.42.5.42h3.84c.25 0 .46-.18.5-.42l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.09.47 0 .6-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.58ZM12 15.6A3.6 3.6 0 1 1 12 8.4a3.6 3.6 0 0 1 0 7.2Z"/>
                 </svg>
@@ -672,18 +769,18 @@ class PitstopCard extends HTMLElement {
             }</div>
           </div>
           <div class="cell">
-            <div class="label">Entretiens r\u00e9alis\u00e9s</div>
+            <div class="label">${psT("maintenances_done")}</div>
             <div class="value">${attrs.history_count != null ? attrs.history_count : "\u2014"}</div>
           </div>
         </div>
         ${
           plans
-            ? `<div class="section">Entretiens \u00e0 faire</div>
-               <table class="table"><thead><tr><th>Plan</th><th>Statut</th><th>Reste</th><th>\u00c9ch\u00e9ance</th></tr></thead><tbody>${plans}</tbody></table>`
+            ? `<div class="section">${psT("plans_title")}</div>
+               <table class="table"><thead><tr><th>${psT("th_plan")}</th><th>${psT("th_status")}</th><th>${psT("th_remaining")}</th><th>${psT("th_due")}</th></tr></thead><tbody>${plans}</tbody></table>`
             : ""
         }
-        <div class="section">Derniers entretiens
-          <span class="gear gear-history" title="G\u00e9rer l'historique des entretiens">
+        <div class="section">${psT("last_maintenances")}
+          <span class="gear gear-history" title="${psT("manage_history_hint")}">
             <svg viewBox="0 0 24 24" width="14" height="14">
               <path fill="currentColor" d="M19.14 12.94a7.07 7.07 0 0 0 .05-.94 7.07 7.07 0 0 0-.05-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.03 7.03 0 0 0-1.62-.94l-.36-2.54a.5.5 0 0 0-.5-.42h-3.84a.5.5 0 0 0-.5.42l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96a.5.5 0 0 0-.6.22L2.66 8.84a.5.5 0 0 0 .12.64l2.03 1.58c-.03.31-.05.63-.05.94s.02.63.05.94l-2.03 1.58a.5.5 0 0 0-.12.64l1.92 3.32c.13.22.39.31.6.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.04.24.25.42.5.42h3.84c.25 0 .46-.18.5-.42l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.09.47 0 .6-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.58ZM12 15.6A3.6 3.6 0 1 1 12 8.4a3.6 3.6 0 0 1 0 7.2Z"/>
             </svg>
@@ -691,11 +788,11 @@ class PitstopCard extends HTMLElement {
         </div>
         ${
           history
-            ? `<table class="table"><thead><tr><th>Date</th><th>Km</th><th>Actions</th><th>Co\u00fbt</th><th></th></tr></thead><tbody>${history}</tbody></table>`
-            : `<div class="empty">Aucun entretien enregistr\u00e9.</div>`
+            ? `<table class="table"><thead><tr><th>${psT("th_date")}</th><th>${psT("th_km")}</th><th>${psT("th_actions")}</th><th>${psT("th_cost")}</th><th></th></tr></thead><tbody>${history}</tbody></table>`
+            : `<div class="empty">${psT("no_maintenance")}</div>`
         }
         <div class="addrow">
-          <button class="ps-add" id="ps-add-maint">+ Ajouter un entretien</button>
+          <button class="ps-add" id="ps-add-maint">+ ${psT("add_maintenance")}</button>
         </div>
       </ha-card>`;
     const gearKm = root.querySelector(".gear-km");
@@ -779,8 +876,8 @@ class PitstopCard extends HTMLElement {
           <td class="num">${h.cost != null ? Number(h.cost).toLocaleString() + " \u20ac" : ""}</td>
           <td class="num">
             ${h.invoice_url ? `<a class="inv" href="${h.invoice_url}" target="_blank" title="Facture">\ud83d\udcc4</a>` : ""}
-            <span class="icon-btn edit" data-index="${i}" title="Modifier">\u270e</span>
-            <span class="icon-btn del" data-index="${i}" title="Supprimer">\u2716</span>
+            <span class="icon-btn edit" data-index="${i}" title="${psT("edit")}">\u270e</span>
+            <span class="icon-btn del" data-index="${i}" title="${psT("delete")}">\u2716</span>
           </td>
         </tr>`
       )
@@ -789,16 +886,16 @@ class PitstopCard extends HTMLElement {
     overlay.className = "ps-overlay";
     overlay.innerHTML = `
       <div class="ps-modal wide">
-        <div class="editor-title">Entretiens r\u00e9alis\u00e9s</div>
+        <div class="editor-title">${psT("maintenances_done")}</div>
         <div class="editor-sub">${this._deviceOrVehicle()}</div>
         ${
           rows
-            ? `<table class="table inner"><thead><tr><th>Date</th><th>Km</th><th>Nature</th><th>Co\u00fbt</th><th></th></tr></thead><tbody>${rows}</tbody></table>`
-            : `<div class="empty">Aucun entretien enregistr\u00e9.</div>`
+            ? `<table class="table inner"><thead><tr><th>${psT("th_date")}</th><th>${psT("th_km")}</th><th>${psT("th_nature")}</th><th>${psT("th_cost")}</th><th></th></tr></thead><tbody>${rows}</tbody></table>`
+            : `<div class="empty">${psT("no_maintenance")}</div>`
         }
         <div class="editor-actions">
-          <button class="ps-cancel" data-act="back">Retour</button>
-          <button class="ps-save" data-act="new">+ Ajouter un entretien</button>
+          <button class="ps-cancel" data-act="back">${psT("back")}</button>
+          <button class="ps-save" data-act="new">+ ${psT("add_maintenance")}</button>
         </div>
       </div>`;
     card.appendChild(overlay);
@@ -860,39 +957,39 @@ class PitstopCard extends HTMLElement {
     overlay.innerHTML = `
       <div class="ps-modal">
         <div class="editor-title">${
-          index != null ? "Modifier l'entretien" : "Nouvel entretien"
+          index != null ? psT("edit_maintenance") : psT("new_maintenance")
         }</div>
         <div class="editor-sub">${this._deviceOrVehicle()}</div>
         <div class="field">
-          <label for="ps-m-date">Date</label>
+          <label for="ps-m-date">${psT("date")}</label>
           <input id="ps-m-date" class="ps-input" type="date" value="${entry.date || today}" />
         </div>
         <div class="field">
-          <label for="ps-m-km">Kilom\u00e9trage</label>
+          <label for="ps-m-km">${psT("km")}</label>
           <input id="ps-m-km" class="ps-input" type="number" min="0" value="${entry.km != null ? entry.km : currentKm}" />
         </div>
         <div class="field">
-          <label>Natures de l'entretien</label>
+          <label>${psT("natures")}</label>
           <div class="chips">${natureBoxes}</div>
         </div>
         <div class="field">
-          <label for="ps-m-free">Autre (pr\u00e9ciser, s\u00e9par\u00e9 par des virgules)</label>
+          <label for="ps-m-free">${psT("other_natures")}</label>
           <input id="ps-m-free" class="ps-input" type="text" value="${natureList.filter((t) => !known.includes(t)).join(", ")}" />
         </div>
         ${index == null && plans.length ? `<div class="hint" id="ps-m-plans-hint"></div>` : ""}
         <div class="field">
-          <label for="ps-m-cost">Co\u00fbt (\u20ac, optionnel)</label>
+          <label for="ps-m-cost">${psT("cost_optional")}</label>
           <input id="ps-m-cost" class="ps-input" type="number" min="0" step="0.01" value="${entry.cost != null ? entry.cost : ""}" />
         </div>
         <div class="field">
-          <label for="ps-m-invoice">Facture (photo ou PDF, optionnel)</label>
+          <label for="ps-m-invoice">${psT("invoice_optional")}</label>
           <input id="ps-m-invoice" class="ps-input" type="file" accept="image/*,application/pdf" />
-          ${entry.invoice_url ? `<div class="hint">Une facture est d\u00e9j\u00e0 associ\u00e9e : <a class="inv" href="${entry.invoice_url}" target="_blank">\ud83d\udcc4 voir</a></div>` : ""}
+          ${entry.invoice_url ? `<div class="hint">${psT("invoice_attached")} <a class="inv" href="${entry.invoice_url}" target="_blank">\ud83d\udcc4 ${psT("see")}</a></div>` : ""}
         </div>
 <div class="editor-error" id="ps-m-error"></div>
         <div class="editor-actions">
-          <button class="ps-cancel" id="ps-m-cancel">Annuler</button>
-          <button class="ps-save" id="ps-m-save">Sauvegarder</button>
+          <button class="ps-cancel" id="ps-m-cancel">${psT("cancel")}</button>
+          <button class="ps-save" id="ps-m-save">${psT("save")}</button>
         </div>
       </div>`;
     card.appendChild(overlay);
@@ -909,7 +1006,7 @@ class PitstopCard extends HTMLElement {
         .filter((p) => p.name && selected.includes(p.name.toLowerCase()))
         .map((p) => p.name);
       plansHint.textContent = matches.length
-        ? "Plans r\u00e9initialis\u00e9s : " + matches.join(", ")
+        ? psT("plans_reset") + matches.join(", ")
         : "";
     };
     overlay.querySelectorAll(".ps-nature").forEach((chk) =>
@@ -937,7 +1034,7 @@ class PitstopCard extends HTMLElement {
     const date = overlay.querySelector("#ps-m-date").value;
     const km = parseInt(overlay.querySelector("#ps-m-km").value, 10);
     if (!date || isNaN(km) || km < 0) {
-      errorBox.textContent = "Renseignez la date et le kilom\u00e9trage.";
+      errorBox.textContent = psT("err_date_km");
       return;
     }
     const checked = [...overlay.querySelectorAll(".ps-nature:checked")].map(
@@ -950,7 +1047,7 @@ class PitstopCard extends HTMLElement {
       .filter((t) => t && t !== "Autre");
     const actions = [...new Set([...checked, ...freeNatures])];
     if (actions.length === 0) {
-      errorBox.textContent = "Cochez au moins une nature d'entretien.";
+      errorBox.textContent = psT("err_nature");
       return;
     }
     const costVal = overlay.querySelector("#ps-m-cost").value;
@@ -988,7 +1085,7 @@ class PitstopCard extends HTMLElement {
       (err) => {
         button.disabled = false;
         errorBox.textContent =
-          (err && err.message) || "Erreur lors de la sauvegarde.";
+          (err && err.message) || psT("err_save");
       }
     );
   }
@@ -998,7 +1095,7 @@ class PitstopCard extends HTMLElement {
     const main = this._findMainSensor();
     const attrs = (main && main.attributes) || {};
     const vehicleId = attrs.vehicle_id || this._config.vehicle;
-    if (!window.confirm("Supprimer cet entretien ?")) {
+    if (!window.confirm(psT("confirm_delete_maintenance"))) {
       this._openHistoryEditor();
       return;
     }

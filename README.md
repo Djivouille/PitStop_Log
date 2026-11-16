@@ -210,3 +210,22 @@ tableaux de bord Lovelace.
 ## Licence
 
 Fourni tel quel, sans garantie. Utilisation libre.
+
+## Contribuer (traductions, marques, natures d'entretien)
+
+L'intégration est conçue pour être enrichie par de simples Pull Requests, sans toucher au code :
+
+| Sujet | Fichier à modifier | Comment |
+|---|---|---|
+| Traductions de l'intégration (assistant de config, options, services) | `custom_components/pitstop_log/translations/<langue>.json` | Dupliquez `fr.json`, traduisez les valeurs (gardez les clés). |
+| Traductions de la carte Lovelace | `custom_components/pitstop_log/locales/<langue>.json` | Dupliquez `locales/fr.json` et traduisez les valeurs. La carte charge automatiquement la langue de Home Assistant. |
+| Marques et logos | `custom_components/pitstop_log/brands.json` (+ logo SVG dans `brands/`) | Ajoutez la marque avec sa catégorie (`moto`, `car`, `camper`, `other`) et le chemin du logo. |
+| Natures d'entretien | `custom_components/pitstop_log/maintenance_types.json` | Ajoutez la nature dans la liste `types`. |
+
+Avant d'ouvrir la PR, vérifiez la cohérence des traductions :
+
+```bash
+python3 scripts/check_translations.py
+```
+
+Le script contrôle que toutes les langues contiennent les mêmes clés (intégration et carte) et qu'aucune valeur n'est vide.

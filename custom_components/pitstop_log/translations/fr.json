@@ -1,177 +1,389 @@
 {
-    "title": "PitStop Log",
-    "config": {
-        "step": {
-            "user": {
-                "title": "Étape 1/2 — Type de véhicule",
-                "description": "Choisissez le type de véhicule à ajouter.",
-                "data": {
-                    "vehicle_type": "Type de véhicule"
-                }
-            },
-            "vehicle_brand": {
-                "title": "Étape 1/2 — Marque",
-                "description": "Choisissez la marque du véhicule.",
-                "data": {
-                    "brand": "Marque"
-                }
-            },
-            "vehicle_model": {
-                "title": "Étape 1/2 — Modèle",
-                "description": "Saisissez le modèle du véhicule.",
-                "data": {
-                    "model": "Modèle"
-                }
-            },
-            "vehicle_details": {
-                "title": "Étape 2/2 — Informations du véhicule",
-                "description": "Renseignez les informations de votre véhicule.",
-                "data": {
-                    "vehicle_name": "Nom du véhicule",
-                    "model_year": "Année-modèle",
-                    "purchase_date": "Date d'achat (AAAA-MM-JJ)",
-                    "registration": "Immatriculation / carte grise",
-                    "odometer": "Kilométrage actuel",
-                    "photo": "Photo du véhicule (téléverser une image)"
-                }
-            }
-        },
-        "error": {
-            "name_already_used": "Un véhicule porte déjà ce nom.",
-            "invalid_date": "Date invalide, format attendu : AAAA-MM-JJ."
-        },
-        "abort": {
-            "already_configured": "Ce véhicule est déjà configuré."
+  "title": "PitStop Log",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Étape 1/2 — Type de véhicule",
+        "description": "Choisissez le type de véhicule à ajouter.",
+        "data": {
+          "vehicle_type": "Type de véhicule"
         }
+      },
+      "vehicle_brand": {
+        "title": "Étape 1/2 — Marque",
+        "description": "Choisissez la marque du véhicule.",
+        "data": {
+          "brand": "Marque"
+        }
+      },
+      "vehicle_model": {
+        "title": "Étape 1/2 — Modèle",
+        "description": "Saisissez le modèle du véhicule.",
+        "data": {
+          "model": "Modèle"
+        }
+      },
+      "vehicle_details": {
+        "title": "Étape 2/2 — Informations du véhicule",
+        "description": "Renseignez les informations de votre véhicule.",
+        "data": {
+          "vehicle_name": "Nom du véhicule",
+          "model_year": "Année-modèle",
+          "purchase_date": "Date d'achat (AAAA-MM-JJ)",
+          "registration": "Immatriculation / carte grise",
+          "odometer": "Kilométrage actuel",
+          "photo": "Photo du véhicule (téléverser une image)"
+        }
+      }
     },
-    "options": {
-        "step": {
-            "init": {
-                "title": "PitStop Log",
-                "menu_options": {
-                    "vehicle": "Modifier le véhicule",
-                    "plans": "Plans d'entretien",
-                    "history": "Historique des entretiens",
-                    "done": "Terminé"
-                }
-            },
-            "vehicle": {
-                "title": "Étape 1/2 — Type de véhicule",
-                "description": "Choisissez le type de véhicule à ajouter.",
-                "data": {
-                    "vehicle_type": "Type de véhicule"
-                }
-            },
-            "plans": {
-                "title": "Plans d'entretien",
-                "description": "Sélectionnez un plan à modifier ou ajoutez-en un.",
-                "data": {
-                    "choice": "Plan d'entretien"
-                }
-            },
-            "add_plan": {
-                "title": "Ajouter un plan d'entretien",
-                "description": "Définissez un intervalle en kilomètres et/ou en mois.",
-                "data": {
-                    "plan_name": "Nom du plan",
-                    "interval_km": "Intervalle (km)",
-                    "interval_months": "Intervalle (mois)",
-                    "last_km": "Dernier kilométrage effectué",
-                    "last_date": "Date de la dernière réalisation (AAAA-MM-JJ)"
-                }
-            },
-            "plan": {
-                "title": "Modifier le plan d'entretien",
-                "description": "Cochez « Supprimer » pour supprimer ce plan.",
-                "data": {
-                    "plan_name": "Nom du plan",
-                    "interval_km": "Intervalle (km)",
-                    "interval_months": "Intervalle (mois)",
-                    "last_km": "Dernier kilométrage effectué",
-                    "last_date": "Date de la dernière réalisation (AAAA-MM-JJ)",
-                    "delete": "Supprimer ce plan"
-                }
-            },
-            "history": {
-                "title": "Historique des entretiens",
-                "description": "Sélectionnez un entretien à modifier.",
-                "data": {
-                    "choice": "Entretien réalisé"
-                }
-            },
-            "history_entry": {
-                "title": "Modifier l'entretien",
-                "description": "Cochez « Supprimer » pour supprimer cette entrée.",
-                "data": {
-                    "date": "Date (AAAA-MM-JJ)",
-                    "km": "Kilométrage",
-                    "actions": "Actions effectuées",
-                    "cost": "Coût",
-                    "invoice_path": "Chemin / URL de la facture",
-                    "delete": "Supprimer cette entrée"
-                }
-            },
-            "vehicle_details": {
-                "title": "Étape 2/2 — Informations du véhicule",
-                "description": "Renseignez les informations de votre véhicule.",
-                "data": {
-                    "vehicle_name": "Nom du véhicule",
-                    "model_year": "Année-modèle",
-                    "purchase_date": "Date d'achat (AAAA-MM-JJ)",
-                    "registration": "Immatriculation / carte grise",
-                    "odometer": "Kilométrage actuel",
-                    "photo": "Photo du véhicule (téléverser une image)"
-                }
-            },
-            "vehicle_brand": {
-                "title": "Étape 1/2 — Marque",
-                "description": "Choisissez la marque du véhicule.",
-                "data": {
-                    "brand": "Marque"
-                }
-            },
-            "vehicle_model": {
-                "title": "Étape 1/2 — Modèle",
-                "description": "Saisissez le modèle du véhicule.",
-                "data": {
-                    "model": "Modèle"
-                }
-            }
-        },
-        "error": {
-            "invalid_date": "Date invalide, format attendu : AAAA-MM-JJ.",
-            "interval_required": "Un intervalle en km ou en mois doit être défini."
-        }
+    "error": {
+      "name_already_used": "Un véhicule porte déjà ce nom.",
+      "invalid_date": "Date invalide, format attendu : AAAA-MM-JJ."
     },
-    "entity": {
-        "sensor": {
-            "odometer": {
-                "name": "Kilométrage"
-            },
-            "next_maintenance": {
-                "name": "Prochain entretien",
-                "state": {
-                    "ok": "OK",
-                    "due_soon": "Bientôt dû",
-                    "overdue": "En retard"
-                }
-            },
-            "maintenance_status": {
-                "name": "Entretien : {plan_name}",
-                "state": {
-                    "ok": "OK",
-                    "due_soon": "Bientôt dû",
-                    "overdue": "En retard"
-                }
-            }
-        },
-        "image": {
-            "vehicle_photo": {
-                "name": "Photo du véhicule"
-            },
-            "brand_logo": {
-                "name": "Logo de marque"
-            }
-        }
+    "abort": {
+      "already_configured": "Ce véhicule est déjà configuré."
     }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "PitStop Log",
+        "menu_options": {
+          "vehicle": "Modifier le véhicule",
+          "plans": "Plans d'entretien",
+          "history": "Historique des entretiens",
+          "done": "Terminé"
+        }
+      },
+      "vehicle": {
+        "title": "Étape 1/2 — Type de véhicule",
+        "description": "Choisissez le type de véhicule à ajouter.",
+        "data": {
+          "vehicle_type": "Type de véhicule"
+        }
+      },
+      "plans": {
+        "title": "Plans d'entretien",
+        "description": "Sélectionnez un plan à modifier ou ajoutez-en un.",
+        "data": {
+          "choice": "Plan d'entretien"
+        }
+      },
+      "add_plan": {
+        "title": "Ajouter un plan d'entretien",
+        "description": "Définissez un intervalle en kilomètres et/ou en mois.",
+        "data": {
+          "plan_name": "Nom du plan",
+          "interval_km": "Intervalle (km)",
+          "interval_months": "Intervalle (mois)",
+          "last_km": "Dernier kilométrage effectué",
+          "last_date": "Date de la dernière réalisation (AAAA-MM-JJ)"
+        }
+      },
+      "plan": {
+        "title": "Modifier le plan d'entretien",
+        "description": "Cochez « Supprimer » pour supprimer ce plan.",
+        "data": {
+          "plan_name": "Nom du plan",
+          "interval_km": "Intervalle (km)",
+          "interval_months": "Intervalle (mois)",
+          "last_km": "Dernier kilométrage effectué",
+          "last_date": "Date de la dernière réalisation (AAAA-MM-JJ)",
+          "delete": "Supprimer ce plan"
+        }
+      },
+      "history": {
+        "title": "Historique des entretiens",
+        "description": "Sélectionnez un entretien à modifier.",
+        "data": {
+          "choice": "Entretien réalisé"
+        }
+      },
+      "history_entry": {
+        "title": "Modifier l'entretien",
+        "description": "Cochez « Supprimer » pour supprimer cette entrée.",
+        "data": {
+          "date": "Date (AAAA-MM-JJ)",
+          "km": "Kilométrage",
+          "actions": "Actions effectuées",
+          "cost": "Coût",
+          "invoice_path": "Chemin / URL de la facture",
+          "delete": "Supprimer cette entrée"
+        }
+      },
+      "vehicle_details": {
+        "title": "Étape 2/2 — Informations du véhicule",
+        "description": "Renseignez les informations de votre véhicule.",
+        "data": {
+          "vehicle_name": "Nom du véhicule",
+          "model_year": "Année-modèle",
+          "purchase_date": "Date d'achat (AAAA-MM-JJ)",
+          "registration": "Immatriculation / carte grise",
+          "odometer": "Kilométrage actuel",
+          "photo": "Photo du véhicule (téléverser une image)"
+        }
+      },
+      "vehicle_brand": {
+        "title": "Étape 1/2 — Marque",
+        "description": "Choisissez la marque du véhicule.",
+        "data": {
+          "brand": "Marque"
+        }
+      },
+      "vehicle_model": {
+        "title": "Étape 1/2 — Modèle",
+        "description": "Saisissez le modèle du véhicule.",
+        "data": {
+          "model": "Modèle"
+        }
+      }
+    },
+    "error": {
+      "invalid_date": "Date invalide, format attendu : AAAA-MM-JJ.",
+      "interval_required": "Un intervalle en km ou en mois doit être défini."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "odometer": {
+        "name": "Kilométrage"
+      },
+      "next_maintenance": {
+        "name": "Prochain entretien",
+        "state": {
+          "ok": "OK",
+          "due_soon": "Bientôt dû",
+          "overdue": "En retard"
+        }
+      },
+      "maintenance_status": {
+        "name": "Entretien : {plan_name}",
+        "state": {
+          "ok": "OK",
+          "due_soon": "Bientôt dû",
+          "overdue": "En retard"
+        }
+      }
+    },
+    "image": {
+      "vehicle_photo": {
+        "name": "Photo du véhicule"
+      },
+      "brand_logo": {
+        "name": "Logo de marque"
+      }
+    }
+  },
+  "services": {
+    "update_odometer": {
+      "name": "Mettre à jour le kilométrage",
+      "description": "Met à jour le kilométrage d'un véhicule. Sans date, met à jour le kilométrage actuel ; avec une date, enregistre ou modifie le point de l'historique pour cette date.",
+      "fields": {
+        "vehicle_id": {
+          "name": "Véhicule",
+          "description": "Identifiant ou nom du véhicule."
+        },
+        "km": {
+          "name": "Kilométrage",
+          "description": "Nouveau kilométrage (km)."
+        },
+        "date": {
+          "name": "Date",
+          "description": "Date du relevé (AAAA-MM-JJ). Optionnel — aujourd'hui par défaut."
+        }
+      }
+    },
+    "update_registration": {
+      "name": "Mettre à jour l'immatriculation",
+      "description": "Met à jour l'immatriculation (carte grise) d'un véhicule.",
+      "fields": {
+        "vehicle_id": {
+          "name": "Véhicule",
+          "description": "Identifiant ou nom du véhicule."
+        },
+        "registration": {
+          "name": "Immatriculation",
+          "description": "Nouvelle immatriculation (carte grise)."
+        }
+      }
+    },
+    "update_purchase_date": {
+      "name": "Mettre à jour la date d'achat",
+      "description": "Met à jour la date d'achat (mise en service) d'un véhicule.",
+      "fields": {
+        "vehicle_id": {
+          "name": "Véhicule",
+          "description": "Identifiant ou nom du véhicule."
+        },
+        "date": {
+          "name": "Date",
+          "description": "Nouvelle date d'achat (AAAA-MM-JJ)."
+        }
+      }
+    },
+    "update_brand_model": {
+      "name": "Mettre à jour la marque et le modèle",
+      "description": "Met à jour la marque et le modèle d'un véhicule. La marque doit faire partie de la liste brands.json ; le logo est mis à jour automatiquement.",
+      "fields": {
+        "vehicle_id": {
+          "name": "Véhicule",
+          "description": "Identifiant ou nom du véhicule."
+        },
+        "brand": {
+          "name": "Marque",
+          "description": "Nouvelle marque (issue de la liste brands.json)."
+        },
+        "model": {
+          "name": "Modèle",
+          "description": "Nouveau modèle du véhicule."
+        },
+        "model_year": {
+          "name": "Année-modèle",
+          "description": "Année-modèle du véhicule. Optionnel."
+        },
+        "photo_base64": {
+          "name": "Photo du véhicule (base64)",
+          "description": "Photo du véhicule encodée en base64 (ou data URL). Sauvegardée automatiquement dans /config/www/pitstop_log/photos/. Optionnel."
+        },
+        "registration": {
+          "name": "Immatriculation",
+          "description": "Nouvelle immatriculation (carte grise). Optionnel."
+        },
+        "purchase_date": {
+          "name": "Date d'achat",
+          "description": "Nouvelle date d'achat / mise en service (AAAA-MM-JJ). Optionnel."
+        }
+      }
+    },
+    "add_maintenance_done": {
+      "name": "Enregistrer un entretien réalisé",
+      "description": "Ajoute une intervention réalisée à l'historique du véhicule.",
+      "fields": {
+        "vehicle_id": {
+          "name": "Véhicule",
+          "description": "Identifiant ou nom du véhicule."
+        },
+        "date": {
+          "name": "Date",
+          "description": "Date de l'intervention (AAAA-MM-JJ)."
+        },
+        "km": {
+          "name": "Kilométrage",
+          "description": "Kilométrage au moment de l'intervention."
+        },
+        "actions": {
+          "name": "Actions effectuées",
+          "description": "Description des actions réalisées."
+        },
+        "cost": {
+          "name": "Coût",
+          "description": "Coût de l'intervention (optionnel)."
+        },
+        "invoice_path": {
+          "name": "Chemin de la facture",
+          "description": "Chemin ou URL locale de la photo de facture (ex. /local/pitstop_log/invoices/mafacture.jpg). Optionnel."
+        },
+        "invoice_base64": {
+          "name": "Image de facture (base64)",
+          "description": "Contenu de la photo de facture encodé en base64. Sauvegardé automatiquement dans /config/www/pitstop_log/invoices/. Optionnel."
+        },
+        "plan_id": {
+          "name": "Plan d'entretien",
+          "description": "Identifiant du plan d'entretien à réinitialiser (entretien périodique). Optionnel."
+        }
+      }
+    },
+    "add_maintenance_plan": {
+      "name": "Ajouter un plan d'entretien",
+      "description": "Ajoute une règle d'entretien périodique (en km et/ou en mois).",
+      "fields": {
+        "vehicle_id": {
+          "name": "Véhicule",
+          "description": "Identifiant ou nom du véhicule."
+        },
+        "plan_name": {
+          "name": "Nom du plan",
+          "description": "Nom de l'entretien périodique."
+        },
+        "interval_km": {
+          "name": "Intervalle (km)",
+          "description": "Fréquence en kilomètres. Optionnel si l'intervalle en mois est défini."
+        },
+        "interval_months": {
+          "name": "Intervalle (mois)",
+          "description": "Fréquence en mois. Optionnel si l'intervalle en km est défini."
+        },
+        "last_km": {
+          "name": "Dernier kilométrage effectué",
+          "description": "Kilométrage de la dernière réalisation. Optionnel."
+        },
+        "last_date": {
+          "name": "Date de la dernière réalisation",
+          "description": "Date de la dernière réalisation (AAAA-MM-JJ). Optionnel."
+        }
+      }
+    },
+    "update_maintenance": {
+      "name": "Modifier un entretien réalisé",
+      "description": "Modifie une entrée de l'historique des entretiens réalisés d'un véhicule (date, kilométrage, nature, coût, facture).",
+      "fields": {
+        "vehicle_id": {
+          "name": "Véhicule",
+          "description": "Identifiant ou nom du véhicule."
+        },
+        "index": {
+          "name": "Index",
+          "description": "Index de l'entrée dans l'historique (0 = plus récente)."
+        },
+        "date": {
+          "name": "Date",
+          "description": "Date de l'entretien (AAAA-MM-JJ)."
+        },
+        "km": {
+          "name": "Kilométrage",
+          "description": "Kilométrage au moment de l'entretien."
+        },
+        "actions": {
+          "name": "Natures",
+          "description": "Nature(s) de l'entretien — une chaîne ou une liste de chaînes (ex. [\"Vidange\", \"Filtre à huile\"])."
+        },
+        "cost": {
+          "name": "Coût",
+          "description": "Coût de l'entretien. Optionnel."
+        },
+        "invoice_base64": {
+          "name": "Facture (base64)",
+          "description": "Photo ou PDF de la facture encodé en base64. Optionnel."
+        }
+      }
+    },
+    "delete_maintenance": {
+      "name": "Supprimer un entretien réalisé",
+      "description": "Supprime une entrée de l'historique des entretiens réalisés d'un véhicule.",
+      "fields": {
+        "vehicle_id": {
+          "name": "Véhicule",
+          "description": "Identifiant ou nom du véhicule."
+        },
+        "index": {
+          "name": "Index",
+          "description": "Index de l'entrée dans l'historique (0 = plus récente)."
+        }
+      }
+    },
+    "delete_odometer_point": {
+      "name": "Supprimer un relevé de kilométrage",
+      "description": "Supprime le point d'historique du kilométrage correspondant à la date donnée. Si c'était le relevé le plus récent, le kilométrage actuel redevient le maximum des relevés restants.",
+      "fields": {
+        "vehicle_id": {
+          "name": "Véhicule",
+          "description": "Identifiant ou nom du véhicule."
+        },
+        "date": {
+          "name": "Date",
+          "description": "Date du relevé à supprimer (AAAA-MM-JJ)."
+        }
+      }
+    }
+  }
 }

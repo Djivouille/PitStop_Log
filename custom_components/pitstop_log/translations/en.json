@@ -1,177 +1,389 @@
 {
-    "title": "PitStop Log",
-    "config": {
-        "step": {
-            "user": {
-                "title": "Step 1/2 — Vehicle type",
-                "description": "Choose the type of vehicle to add.",
-                "data": {
-                    "vehicle_type": "Vehicle type"
-                }
-            },
-            "vehicle_brand": {
-                "title": "Step 1/2 — Brand",
-                "description": "Choose the brand of the vehicle.",
-                "data": {
-                    "brand": "Brand"
-                }
-            },
-            "vehicle_model": {
-                "title": "Step 1/2 — Model",
-                "description": "Enter the model of the vehicle.",
-                "data": {
-                    "model": "Model"
-                }
-            },
-            "vehicle_details": {
-                "title": "Step 2/2 — Vehicle information",
-                "description": "Enter your vehicle information.",
-                "data": {
-                    "vehicle_name": "Vehicle name",
-                    "model_year": "Model year",
-                    "purchase_date": "Purchase date (YYYY-MM-DD)",
-                    "registration": "Registration / vehicle title",
-                    "odometer": "Current mileage",
-                    "photo": "Vehicle photo (upload an image)"
-                }
-            }
-        },
-        "error": {
-            "name_already_used": "A vehicle with this name already exists.",
-            "invalid_date": "Invalid date, expected format: YYYY-MM-DD."
-        },
-        "abort": {
-            "already_configured": "This vehicle is already configured."
+  "title": "PitStop Log",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Step 1/2 — Vehicle type",
+        "description": "Choose the type of vehicle to add.",
+        "data": {
+          "vehicle_type": "Vehicle type"
         }
+      },
+      "vehicle_brand": {
+        "title": "Step 1/2 — Brand",
+        "description": "Choose the brand of the vehicle.",
+        "data": {
+          "brand": "Brand"
+        }
+      },
+      "vehicle_model": {
+        "title": "Step 1/2 — Model",
+        "description": "Enter the model of the vehicle.",
+        "data": {
+          "model": "Model"
+        }
+      },
+      "vehicle_details": {
+        "title": "Step 2/2 — Vehicle information",
+        "description": "Enter your vehicle information.",
+        "data": {
+          "vehicle_name": "Vehicle name",
+          "model_year": "Model year",
+          "purchase_date": "Purchase date (YYYY-MM-DD)",
+          "registration": "Registration / vehicle title",
+          "odometer": "Current mileage",
+          "photo": "Vehicle photo (upload an image)"
+        }
+      }
     },
-    "options": {
-        "step": {
-            "init": {
-                "title": "PitStop Log",
-                "menu_options": {
-                    "vehicle": "Edit vehicle",
-                    "plans": "Maintenance plans",
-                    "history": "Maintenance history",
-                    "done": "Done"
-                }
-            },
-            "vehicle": {
-                "title": "Step 1/2 — Vehicle type",
-                "description": "Choose the type of vehicle to add.",
-                "data": {
-                    "vehicle_type": "Vehicle type"
-                }
-            },
-            "plans": {
-                "title": "Maintenance plans",
-                "description": "Select a plan to edit or add a new one.",
-                "data": {
-                    "choice": "Maintenance plan"
-                }
-            },
-            "add_plan": {
-                "title": "Add a maintenance plan",
-                "description": "Define an interval in kilometers and/or months.",
-                "data": {
-                    "plan_name": "Plan name",
-                    "interval_km": "Interval (km)",
-                    "interval_months": "Interval (months)",
-                    "last_km": "Last mileage done",
-                    "last_date": "Date of last completion (YYYY-MM-DD)"
-                }
-            },
-            "plan": {
-                "title": "Edit maintenance plan",
-                "description": "Check \"Delete\" to remove this plan.",
-                "data": {
-                    "plan_name": "Plan name",
-                    "interval_km": "Interval (km)",
-                    "interval_months": "Interval (months)",
-                    "last_km": "Last mileage done",
-                    "last_date": "Date of last completion (YYYY-MM-DD)",
-                    "delete": "Delete this plan"
-                }
-            },
-            "history": {
-                "title": "Maintenance history",
-                "description": "Select a completed maintenance to edit.",
-                "data": {
-                    "choice": "Completed maintenance"
-                }
-            },
-            "history_entry": {
-                "title": "Edit maintenance",
-                "description": "Check \"Delete\" to remove this entry.",
-                "data": {
-                    "date": "Date (YYYY-MM-DD)",
-                    "km": "Mileage",
-                    "actions": "Actions performed",
-                    "cost": "Cost",
-                    "invoice_path": "Invoice path / URL",
-                    "delete": "Delete this entry"
-                }
-            },
-            "vehicle_details": {
-                "title": "Step 2/2 — Vehicle information",
-                "description": "Enter your vehicle information.",
-                "data": {
-                    "vehicle_name": "Vehicle name",
-                    "model_year": "Model year",
-                    "purchase_date": "Purchase date (YYYY-MM-DD)",
-                    "registration": "Registration / vehicle title",
-                    "odometer": "Current mileage",
-                    "photo": "Vehicle photo (upload an image)"
-                }
-            },
-            "vehicle_brand": {
-                "title": "Step 1/2 — Brand",
-                "description": "Choose the brand of the vehicle.",
-                "data": {
-                    "brand": "Brand"
-                }
-            },
-            "vehicle_model": {
-                "title": "Step 1/2 — Model",
-                "description": "Enter the model of the vehicle.",
-                "data": {
-                    "model": "Model"
-                }
-            }
-        },
-        "error": {
-            "invalid_date": "Invalid date, expected format: YYYY-MM-DD.",
-            "interval_required": "An interval in km or months must be defined."
-        }
+    "error": {
+      "name_already_used": "A vehicle with this name already exists.",
+      "invalid_date": "Invalid date, expected format: YYYY-MM-DD."
     },
-    "entity": {
-        "sensor": {
-            "odometer": {
-                "name": "Mileage"
-            },
-            "next_maintenance": {
-                "name": "Next maintenance",
-                "state": {
-                    "ok": "OK",
-                    "due_soon": "Due soon",
-                    "overdue": "Overdue"
-                }
-            },
-            "maintenance_status": {
-                "name": "Maintenance: {plan_name}",
-                "state": {
-                    "ok": "OK",
-                    "due_soon": "Due soon",
-                    "overdue": "Overdue"
-                }
-            }
-        },
-        "image": {
-            "vehicle_photo": {
-                "name": "Vehicle photo"
-            },
-            "brand_logo": {
-                "name": "Brand logo"
-            }
-        }
+    "abort": {
+      "already_configured": "This vehicle is already configured."
     }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "PitStop Log",
+        "menu_options": {
+          "vehicle": "Edit vehicle",
+          "plans": "Maintenance plans",
+          "history": "Maintenance history",
+          "done": "Done"
+        }
+      },
+      "vehicle": {
+        "title": "Step 1/2 — Vehicle type",
+        "description": "Choose the type of vehicle to add.",
+        "data": {
+          "vehicle_type": "Vehicle type"
+        }
+      },
+      "plans": {
+        "title": "Maintenance plans",
+        "description": "Select a plan to edit or add a new one.",
+        "data": {
+          "choice": "Maintenance plan"
+        }
+      },
+      "add_plan": {
+        "title": "Add a maintenance plan",
+        "description": "Define an interval in kilometers and/or months.",
+        "data": {
+          "plan_name": "Plan name",
+          "interval_km": "Interval (km)",
+          "interval_months": "Interval (months)",
+          "last_km": "Last mileage done",
+          "last_date": "Date of last completion (YYYY-MM-DD)"
+        }
+      },
+      "plan": {
+        "title": "Edit maintenance plan",
+        "description": "Check \"Delete\" to remove this plan.",
+        "data": {
+          "plan_name": "Plan name",
+          "interval_km": "Interval (km)",
+          "interval_months": "Interval (months)",
+          "last_km": "Last mileage done",
+          "last_date": "Date of last completion (YYYY-MM-DD)",
+          "delete": "Delete this plan"
+        }
+      },
+      "history": {
+        "title": "Maintenance history",
+        "description": "Select a completed maintenance to edit.",
+        "data": {
+          "choice": "Completed maintenance"
+        }
+      },
+      "history_entry": {
+        "title": "Edit maintenance",
+        "description": "Check \"Delete\" to remove this entry.",
+        "data": {
+          "date": "Date (YYYY-MM-DD)",
+          "km": "Mileage",
+          "actions": "Actions performed",
+          "cost": "Cost",
+          "invoice_path": "Invoice path / URL",
+          "delete": "Delete this entry"
+        }
+      },
+      "vehicle_details": {
+        "title": "Step 2/2 — Vehicle information",
+        "description": "Enter your vehicle information.",
+        "data": {
+          "vehicle_name": "Vehicle name",
+          "model_year": "Model year",
+          "purchase_date": "Purchase date (YYYY-MM-DD)",
+          "registration": "Registration / vehicle title",
+          "odometer": "Current mileage",
+          "photo": "Vehicle photo (upload an image)"
+        }
+      },
+      "vehicle_brand": {
+        "title": "Step 1/2 — Brand",
+        "description": "Choose the brand of the vehicle.",
+        "data": {
+          "brand": "Brand"
+        }
+      },
+      "vehicle_model": {
+        "title": "Step 1/2 — Model",
+        "description": "Enter the model of the vehicle.",
+        "data": {
+          "model": "Model"
+        }
+      }
+    },
+    "error": {
+      "invalid_date": "Invalid date, expected format: YYYY-MM-DD.",
+      "interval_required": "An interval in km or months must be defined."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "odometer": {
+        "name": "Mileage"
+      },
+      "next_maintenance": {
+        "name": "Next maintenance",
+        "state": {
+          "ok": "OK",
+          "due_soon": "Due soon",
+          "overdue": "Overdue"
+        }
+      },
+      "maintenance_status": {
+        "name": "Maintenance: {plan_name}",
+        "state": {
+          "ok": "OK",
+          "due_soon": "Due soon",
+          "overdue": "Overdue"
+        }
+      }
+    },
+    "image": {
+      "vehicle_photo": {
+        "name": "Vehicle photo"
+      },
+      "brand_logo": {
+        "name": "Brand logo"
+      }
+    }
+  },
+  "services": {
+    "update_odometer": {
+      "name": "Update odometer",
+      "description": "Updates a vehicle's odometer. Without a date, updates the current odometer; with a date, records or edits the history point for that date.",
+      "fields": {
+        "vehicle_id": {
+          "name": "Vehicle",
+          "description": "Vehicle id or name."
+        },
+        "km": {
+          "name": "Odometer",
+          "description": "New odometer value (km)."
+        },
+        "date": {
+          "name": "Date",
+          "description": "Reading date (YYYY-MM-DD). Optional — defaults to today."
+        }
+      }
+    },
+    "update_registration": {
+      "name": "Update registration",
+      "description": "Updates the registration (registration card) of a vehicle.",
+      "fields": {
+        "vehicle_id": {
+          "name": "Vehicle",
+          "description": "Vehicle id or name."
+        },
+        "registration": {
+          "name": "Registration",
+          "description": "New registration number."
+        }
+      }
+    },
+    "update_purchase_date": {
+      "name": "Update purchase date",
+      "description": "Updates the purchase date (service start) of a vehicle.",
+      "fields": {
+        "vehicle_id": {
+          "name": "Vehicle",
+          "description": "Vehicle id or name."
+        },
+        "date": {
+          "name": "Date",
+          "description": "New purchase date (YYYY-MM-DD)."
+        }
+      }
+    },
+    "update_brand_model": {
+      "name": "Update brand and model",
+      "description": "Updates the brand, model and optionally the photo, registration and purchase date of a vehicle.",
+      "fields": {
+        "vehicle_id": {
+          "name": "Vehicle",
+          "description": "Vehicle id or name."
+        },
+        "brand": {
+          "name": "Brand",
+          "description": "New brand (must exist in brands.json)."
+        },
+        "model": {
+          "name": "Model",
+          "description": "New model."
+        },
+        "model_year": {
+          "name": "Model year",
+          "description": "Model year (optional)."
+        },
+        "photo_base64": {
+          "name": "Photo (base64)",
+          "description": "Vehicle photo encoded in base64 (optional)."
+        },
+        "registration": {
+          "name": "Registration",
+          "description": "Registration (optional)."
+        },
+        "purchase_date": {
+          "name": "Purchase date",
+          "description": "Purchase date (optional)."
+        }
+      }
+    },
+    "add_maintenance_done": {
+      "name": "Record a completed maintenance",
+      "description": "Records a completed maintenance. If plan_id is provided, the associated maintenance plan is reset.",
+      "fields": {
+        "vehicle_id": {
+          "name": "Vehicle",
+          "description": "Vehicle id or name."
+        },
+        "date": {
+          "name": "Date",
+          "description": "Date of the maintenance (YYYY-MM-DD)."
+        },
+        "km": {
+          "name": "Odometer",
+          "description": "Odometer at the time of the maintenance."
+        },
+        "actions": {
+          "name": "Natures",
+          "description": "Maintenance nature(s) — a string or a list of strings."
+        },
+        "cost": {
+          "name": "Cost",
+          "description": "Cost of the maintenance (optional)."
+        },
+        "invoice_path": {
+          "name": "Invoice (URL)",
+          "description": "Path or URL of an existing invoice (optional)."
+        },
+        "invoice_base64": {
+          "name": "Invoice (base64)",
+          "description": "Invoice photo or PDF encoded in base64 (optional)."
+        },
+        "plan_id": {
+          "name": "Maintenance plan",
+          "description": "Plan to reset (optional, name matching is automatic)."
+        }
+      }
+    },
+    "add_maintenance_plan": {
+      "name": "Add a maintenance plan",
+      "description": "Adds a periodic maintenance rule (at least one interval required).",
+      "fields": {
+        "vehicle_id": {
+          "name": "Vehicle",
+          "description": "Vehicle id or name."
+        },
+        "plan_name": {
+          "name": "Plan name",
+          "description": "Name of the maintenance plan."
+        },
+        "interval_km": {
+          "name": "Interval (km)",
+          "description": "Frequency in kilometers (optional if months set)."
+        },
+        "interval_months": {
+          "name": "Interval (months)",
+          "description": "Frequency in months (optional if km set)."
+        },
+        "last_km": {
+          "name": "Last odometer",
+          "description": "Odometer of the last completion (optional)."
+        },
+        "last_date": {
+          "name": "Last date",
+          "description": "Date of the last completion (YYYY-MM-DD, optional)."
+        }
+      }
+    },
+    "update_maintenance": {
+      "name": "Edit a completed maintenance",
+      "description": "Edits an entry of the maintenance history of a vehicle (date, odometer, natures, cost, invoice).",
+      "fields": {
+        "vehicle_id": {
+          "name": "Vehicle",
+          "description": "Vehicle id or name."
+        },
+        "index": {
+          "name": "Index",
+          "description": "Index of the entry in the history (0 = most recent)."
+        },
+        "date": {
+          "name": "Date",
+          "description": "Date of the maintenance (YYYY-MM-DD)."
+        },
+        "km": {
+          "name": "Odometer",
+          "description": "Odometer at the time of the maintenance."
+        },
+        "actions": {
+          "name": "Natures",
+          "description": "Maintenance nature(s) — a string or a list of strings."
+        },
+        "cost": {
+          "name": "Cost",
+          "description": "Cost of the maintenance (optional)."
+        },
+        "invoice_base64": {
+          "name": "Invoice (base64)",
+          "description": "Invoice photo or PDF encoded in base64 (optional)."
+        }
+      }
+    },
+    "delete_maintenance": {
+      "name": "Delete a completed maintenance",
+      "description": "Deletes an entry of the maintenance history of a vehicle.",
+      "fields": {
+        "vehicle_id": {
+          "name": "Vehicle",
+          "description": "Vehicle id or name."
+        },
+        "index": {
+          "name": "Index",
+          "description": "Index of the entry in the history (0 = most recent)."
+        }
+      }
+    },
+    "delete_odometer_point": {
+      "name": "Delete an odometer reading",
+      "description": "Deletes the odometer history point for the given date. If it was the latest reading, the current odometer falls back to the maximum of the remaining readings.",
+      "fields": {
+        "vehicle_id": {
+          "name": "Vehicle",
+          "description": "Vehicle id or name."
+        },
+        "date": {
+          "name": "Date",
+          "description": "Date of the reading to delete (YYYY-MM-DD)."
+        }
+      }
+    }
+  }
 }
