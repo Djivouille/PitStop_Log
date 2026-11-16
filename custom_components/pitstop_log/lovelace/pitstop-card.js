@@ -20,9 +20,10 @@ class PitstopCardEditor extends HTMLElement {
     this._render();
   }
 
-  _vehicles() {
-    const result = [];
-    if (!this._hass) return result;
+  /** Liste les v\u00e9hicules : nom de l'appareil (registre d'appareils HA). */
+  async _vehicles() {
+    if (!this._hass) return [];
+    const sensors = [];
     for (const entityId in this._hass.states) {
       const state = this._hass.states[entityId];
       if (
@@ -31,12 +32,41 @@ class PitstopCardEditor extends HTMLElement {
         state.attributes.vehicle !== undefined &&
         state.attributes.plans !== undefined
       ) {
-        result.push({
-          name: state.attributes.vehicle,
-          label: state.attributes.vehicle || state.attributes.friendly_name || entityId,
-        });
+        sensors.push(state);
       }
     }
+    if (sensors.length === 0) return [];
+    let devices = this._devices_cache;
+    if (!devices) {
+      try {
+        devices = await this._hass.callWS({
+          type: "config/device_registry/list",
+        });
+        this._devices_cache = devices;
+      } catch (err) {
+        devices = [];
+      }
+    }
+    const labelFor = (vehicleId, fallback) => {
+      const device = (devices || []).find(
+        (d) =>
+          Array.isArray(d.identifiers) &&
+          d.identifiers.some(
+            (i) => i[0] === "pitstop_log" && i[1] === vehicleId
+          )
+      );
+      if (device) return device.name_by_user || device.name || fallback;
+      return fallback;
+    };
+    const result = sensors.map((state) => {
+      const vehicleId = state.attributes.vehicle_id;
+      const fallback =
+        state.attributes.vehicle || state.attributes.friendly_name;
+      return {
+        name: state.attributes.vehicle,
+        label: vehicleId ? labelFor(vehicleId, fallback) : fallback,
+      };
+    });
     result.sort((a, b) => (a.label < b.label ? -1 : 1));
     return result;
   }
@@ -53,10 +83,10 @@ class PitstopCardEditor extends HTMLElement {
     this._render();
   }
 
-  _render() {
+  async _render() {
     if (!this._hass || !this._config) return;
     const root = this.shadowRoot;
-    const vehicles = this._vehicles();
+    const vehicles = await this._vehicles();
     const options = vehicles
       .map(
         (v) =>
