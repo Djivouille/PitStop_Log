@@ -313,10 +313,12 @@ update_maintenance:
           step: 1
           unit_of_measurement: km
     actions:
-      name: Nature
-      description: Nature de l'entretien ou de la révision.
+      name: Natures
+      description: >-
+        Nature(s) de l'entretien — une chaîne ou une liste de chaînes
+        (ex. ["Vidange", "Filtre à huile"]).
       required: true
-      example: "Vidange"
+      example: '["Vidange", "Filtre à huile"]'
       selector:
         text:
     cost:

@@ -73,7 +73,7 @@ ADD_MAINTENANCE_DONE_SCHEMA = vol.Schema(
         vol.Required("vehicle_id"): str,
         vol.Required("date"): str,
         vol.Required("km"): int,
-        vol.Required("actions"): str,
+        vol.Required("actions"): vol.Any(str, [str]),
         vol.Optional("cost"): vol.Coerce(float),
         vol.Optional("invoice_path"): str,
         vol.Optional("invoice_base64"): str,
@@ -351,7 +351,7 @@ async def async_setup(hass: HomeAssistant, config: dict[str, Any]) -> bool:
                 vol.Required("index"): int,
                 vol.Required("date"): str,
                 vol.Required("km"): int,
-                vol.Required("actions"): str,
+                vol.Required("actions"): vol.Any(str, [str]),
                 vol.Optional("cost"): vol.Coerce(float),
                 vol.Optional("invoice_base64"): str,
             }

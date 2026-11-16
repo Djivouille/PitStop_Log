@@ -498,17 +498,34 @@ class PitStopDataUpdateCoordinator:
     # ------------------------------------------------------------------
     # Historique (entretiens faits)
     # ------------------------------------------------------------------
+    @staticmethod
+    def _normalize_actions(actions: list[str] | str) -> list[str]:
+        """Normaliser les natures d'entretien en liste de chaînes."""
+        if isinstance(actions, str):
+            actions = [actions]
+        result: list[str] = []
+        for action in actions:
+            action = (action or "").strip()
+            if action and action not in result:
+                result.append(action)
+        if not result:
+            raise HomeAssistantError(
+                "Renseignez au moins une nature d'entretien"
+            )
+        return result
+
     async def async_add_maintenance_done(
         self,
         vehicle_id: str,
         date: str,
         km: int,
-        actions: str,
+        actions: list[str] | str,
         cost: float | None = None,
         invoice_url: str | None = None,
         plan_id: str | None = None,
     ) -> None:
         """Enregistrer un entretien réalisé et mettre à jour le kilométrage."""
+        actions = self._normalize_actions(actions)
         vehicle = self.get_vehicle(vehicle_id)
         if vehicle is None:
             raise HomeAssistantError(f"Véhicule inconnu : {vehicle_id}")
@@ -550,11 +567,17 @@ class PitStopDataUpdateCoordinator:
         odo_history.sort(key=lambda point: point.get("date", ""))
         vehicle["odometer_history"] = odo_history
 
-        # Réinitialisation du plan d'entretien associé, s'il existe
-        if plan_id and plan_id in self.data["plans"]:
-            plan = self.data["plans"][plan_id]
-            plan["last_km"] = km
-            plan["last_date"] = entry_date.isoformat()
+        # Réinitialisation des plans d'entretien correspondants :
+        # tout plan dont le nom figure parmi les natures de l'entretien
+        # repart de ce point (km/date). Un plan_id explicite est aussi honoré.
+        actions_lower = [a.lower() for a in actions if a]
+        for plan_id_, plan in self.data["plans"].items():
+            if plan.get("vehicle_id") != vehicle_id:
+                continue
+            name = (plan.get("name") or "").lower()
+            if name and name in actions_lower or plan_id_ == plan_id:
+                plan["last_km"] = km
+                plan["last_date"] = entry_date.isoformat()
 
         await self.async_save()
         await self.async_refresh()
@@ -565,11 +588,12 @@ class PitStopDataUpdateCoordinator:
         index: int,
         date: str,
         km: int,
-        actions: str,
+        actions: list[str] | str,
         cost: float | None = None,
         invoice_url: str | None = None,
     ) -> bool:
         """Mettre \u00e0 jour une entr\u00e9e d'historique (entretien r\u00e9alis\u00e9)."""
+        actions = self._normalize_actions(actions)
         vehicle = self.get_vehicle(vehicle_id)
         if vehicle is None:
             raise HomeAssistantError(f"V\u00e9hicule inconnu : {vehicle_id}")

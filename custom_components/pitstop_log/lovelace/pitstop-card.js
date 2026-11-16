@@ -619,7 +619,7 @@ class PitstopCard extends HTMLElement {
         <tr>
           <td>${h.date || ""}</td>
           <td class="num">${h.km != null ? Number(h.km).toLocaleString() + " km" : ""}</td>
-          <td>${h.actions || ""}</td>
+          <td>${this._fmtActions(h.actions)}</td>
           <td class="num">${h.cost != null ? Number(h.cost).toLocaleString() + " \u20ac" : ""}</td>
           <td class="num">${h.invoice_url ? `<a class="inv" href="${h.invoice_url}" target="_blank" title="Facture">\ud83d\udcc4</a>` : ""}</td>
         </tr>`
@@ -727,6 +727,12 @@ class PitstopCard extends HTMLElement {
       addMaint.addEventListener("click", () => this._openMaintenanceEditor(null));
   }
 
+  /** Formate les natures d'un entretien (liste ou cha\u00eene). */
+  _fmtActions(actions) {
+    if (Array.isArray(actions)) return actions.join(" + ");
+    return actions || "";
+  }
+
   /** Km courant du v\u00e9hicule (pour pr\u00e9-remplir le formulaire). */
   _currentKm() {
     const entities = this._findEntities();
@@ -769,7 +775,7 @@ class PitstopCard extends HTMLElement {
         <tr>
           <td>${h.date || ""}</td>
           <td class="num">${h.km != null ? Number(h.km).toLocaleString() + " km" : ""}</td>
-          <td>${h.actions || ""}</td>
+          <td>${this._fmtActions(h.actions)}</td>
           <td class="num">${h.cost != null ? Number(h.cost).toLocaleString() + " \u20ac" : ""}</td>
           <td class="num">
             ${h.invoice_url ? `<a class="inv" href="${h.invoice_url}" target="_blank" title="Facture">\ud83d\udcc4</a>` : ""}
@@ -834,25 +840,21 @@ class PitstopCard extends HTMLElement {
     const plans = attrs.plans || [];
     const currentKm = this._currentKm();
     const today = new Date().toISOString().slice(0, 10);
-    const nature = entry.actions || "";
-    const natureOptions = types.slice();
-    if (nature && !natureOptions.includes(nature)) {
-      natureOptions.unshift(nature);
+    const natureList = Array.isArray(entry.actions)
+      ? entry.actions
+      : entry.actions
+      ? [entry.actions]
+      : [];
+    const known = types.slice();
+    for (const nat of natureList) {
+      if (nat !== "Autre" && !known.includes(nat)) known.unshift(nat);
     }
-    const natureSel = natureOptions
+    const natureBoxes = known
       .map(
         (t) =>
-          `<option value="${t}"${t === nature ? " selected" : ""}>${t}</option>`
+          `<label class="chk"><input type="checkbox" class="ps-nature" value="${t}"${natureList.includes(t) ? " checked" : ""}/> ${t}</label>`
       )
-      .join("");
-    const planOptions =
-      `<option value="">\u2014 Aucun \u2014</option>` +
-      plans
-        .map(
-          (p) =>
-            `<option value="${p.plan_id}">${p.name || p.plan_id}</option>`
-        )
-        .join("");
+      .join(" ");
     const overlay = document.createElement("div");
     overlay.className = "ps-overlay";
     overlay.innerHTML = `
@@ -870,13 +872,14 @@ class PitstopCard extends HTMLElement {
           <input id="ps-m-km" class="ps-input" type="number" min="0" value="${entry.km != null ? entry.km : currentKm}" />
         </div>
         <div class="field">
-          <label for="ps-m-nature">Nature de l'entretien</label>
-          <select id="ps-m-nature" class="ps-input">${natureSel}<option value="Autre"${nature === "Autre" ? " selected" : ""}>Autre (pr\u00e9ciser)</option></select>
+          <label>Natures de l'entretien</label>
+          <div class="chips">${natureBoxes}</div>
         </div>
-        <div class="field" id="ps-m-free-field" style="display:none">
-          <label for="ps-m-free">Pr\u00e9cisez la nature</label>
-          <input id="ps-m-free" class="ps-input" type="text" value="" />
+        <div class="field">
+          <label for="ps-m-free">Autre (pr\u00e9ciser, s\u00e9par\u00e9 par des virgules)</label>
+          <input id="ps-m-free" class="ps-input" type="text" value="${natureList.filter((t) => !known.includes(t)).join(", ")}" />
         </div>
+        ${index == null && plans.length ? `<div class="hint" id="ps-m-plans-hint"></div>` : ""}
         <div class="field">
           <label for="ps-m-cost">Co\u00fbt (\u20ac, optionnel)</label>
           <input id="ps-m-cost" class="ps-input" type="number" min="0" step="0.01" value="${entry.cost != null ? entry.cost : ""}" />
@@ -886,16 +889,7 @@ class PitstopCard extends HTMLElement {
           <input id="ps-m-invoice" class="ps-input" type="file" accept="image/*,application/pdf" />
           ${entry.invoice_url ? `<div class="hint">Une facture est d\u00e9j\u00e0 associ\u00e9e : <a class="inv" href="${entry.invoice_url}" target="_blank">\ud83d\udcc4 voir</a></div>` : ""}
         </div>
-        ${
-          index == null && plans.length
-            ? `<div class="field">
-                 <label for="ps-m-plan">Plan d'entretien concern\u00e9 (optionnel)</label>
-                 <select id="ps-m-plan" class="ps-input">${planOptions}</select>
-                 <div class="hint">Si s\u00e9lectionn\u00e9, l'\u00e9ch\u00e9ance du plan repart de cet entretien.</div>
-               </div>`
-            : ""
-        }
-        <div class="editor-error" id="ps-m-error"></div>
+<div class="editor-error" id="ps-m-error"></div>
         <div class="editor-actions">
           <button class="ps-cancel" id="ps-m-cancel">Annuler</button>
           <button class="ps-save" id="ps-m-save">Sauvegarder</button>
@@ -905,13 +899,23 @@ class PitstopCard extends HTMLElement {
     overlay.addEventListener("click", (ev) => {
       if (ev.target === overlay) overlay.remove();
     });
-    const natureSelEl = overlay.querySelector("#ps-m-nature");
-    const freeField = overlay.querySelector("#ps-m-free-field");
-    natureSelEl.addEventListener("change", () => {
-      freeField.style.display =
-        natureSelEl.value === "Autre" ? "block" : "none";
-    });
-    if (nature === "Autre") freeField.style.display = "block";
+    const plansHint = overlay.querySelector("#ps-m-plans-hint");
+    const updatePlansHint = () => {
+      if (!plansHint) return;
+      const selected = [...overlay.querySelectorAll(".ps-nature:checked")].map(
+        (el) => el.value.toLowerCase()
+      );
+      const matches = plans
+        .filter((p) => p.name && selected.includes(p.name.toLowerCase()))
+        .map((p) => p.name);
+      plansHint.textContent = matches.length
+        ? "Plans r\u00e9initialis\u00e9s : " + matches.join(", ")
+        : "";
+    };
+    overlay.querySelectorAll(".ps-nature").forEach((chk) =>
+      chk.addEventListener("change", updatePlansHint)
+    );
+    updatePlansHint();
     overlay.querySelector("#ps-m-cancel").addEventListener("click", () => {
       overlay.remove();
       if (index != null) this._openHistoryEditor();
@@ -936,15 +940,18 @@ class PitstopCard extends HTMLElement {
       errorBox.textContent = "Renseignez la date et le kilom\u00e9trage.";
       return;
     }
-    const natureSel = overlay.querySelector("#ps-m-nature");
-    let actions = natureSel.value;
-    if (actions === "Autre") {
-      const free = overlay.querySelector("#ps-m-free").value.trim();
-      if (!free) {
-        errorBox.textContent = "Pr\u00e9cisez la nature de l'entretien.";
-        return;
-      }
-      actions = free;
+    const checked = [...overlay.querySelectorAll(".ps-nature:checked")].map(
+      (el) => el.value
+    );
+    const free = overlay.querySelector("#ps-m-free").value;
+    const freeNatures = free
+      .split(",")
+      .map((t) => t.trim())
+      .filter((t) => t && t !== "Autre");
+    const actions = [...new Set([...checked, ...freeNatures])];
+    if (actions.length === 0) {
+      errorBox.textContent = "Cochez au moins une nature d'entretien.";
+      return;
     }
     const costVal = overlay.querySelector("#ps-m-cost").value;
     const invoiceInput = overlay.querySelector("#ps-m-invoice");
@@ -970,9 +977,6 @@ class PitstopCard extends HTMLElement {
     if (invoiceBase64) data.invoice_base64 = invoiceBase64;
     if (index != null) {
       data.index = index;
-    } else {
-      const planSel = overlay.querySelector("#ps-m-plan");
-      if (planSel && planSel.value) data.plan_id = planSel.value;
     }
     const service =
       index != null ? "update_maintenance" : "add_maintenance_done";
@@ -1080,6 +1084,8 @@ class PitstopCard extends HTMLElement {
       .inv { text-decoration: none; }
       .empty { padding: 0 16px 8px; font-size: 13px; color: var(--secondary-text-color, #727272); }
       .hint { font-size: 12px; color: var(--secondary-text-color, #727272); margin-top: 4px; }
+      .chips { display: flex; flex-wrap: wrap; gap: 8px 12px; }
+      .chk { font-size: 14px; display: inline-flex; align-items: center; gap: 4px; cursor: pointer; }
  
       .ps-overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0, 0, 0, 0.35); z-index: 10; border-radius: var(--ha-card-border-radius, 12px); }
       .ps-modal { background: var(--card-background-color, #fff); border-radius: 12px; padding: 16px; width: calc(100% - 32px); max-width: 420px; max-height: 85%; overflow-y: auto; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25); }
