@@ -215,3 +215,7 @@ automatiquement par le workflow du dépôt à chaque changement de version.
 ## 📄 Licence
 
 Fourni tel quel, sans garantie. Utilisation libre.
+
+---
+
+☕ Vous aimez PitStop Log ? [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/C8U82AST4R)
