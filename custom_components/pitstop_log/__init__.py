@@ -56,6 +56,7 @@ UPDATE_ODOMETER_SCHEMA = vol.Schema(
     {
         vol.Required("vehicle_id"): str,
         vol.Required("km"): int,
+        vol.Optional("date"): str,
     }
 )
 
@@ -139,7 +140,9 @@ async def async_setup(hass: HomeAssistant, config: dict[str, Any]) -> bool:
         vehicle_id = coordinator.find_vehicle_id(call.data["vehicle_id"])
         if vehicle_id is None:
             raise ServiceValidationError(f"Véhicule inconnu : {call.data['vehicle_id']}")
-        await coordinator.async_update_odometer(vehicle_id, call.data["km"])
+        await coordinator.async_update_odometer(
+            vehicle_id, call.data["km"], call.data.get("date")
+        )
 
     async def handle_add_maintenance_done(call: ServiceCall) -> None:
         """Service : enregistrer un entretien réalisé."""

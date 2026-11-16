@@ -192,21 +192,47 @@ class PitStopDataUpdateCoordinator:
             if entry.get("vehicle_id") != vehicle_id
         ]
 
-    async def async_update_odometer(self, vehicle_id: str, km: int) -> None:
-        """Mettre à jour le kilométrage actuel d'un véhicule."""
+    async def async_update_odometer(
+        self, vehicle_id: str, km: int, entry_date: str | None = None
+    ) -> None:
+        """Mettre à jour le kilométrage d'un véhicule.
+
+        Sans date (ou date du jour) : met à jour le kilométrage actuel et
+        l'historique. Avec une date passée : enregistre/remplace le point de
+        l'historique pour cette date sans diminuer le kilométrage actuel
+        (sauf si le point devient le plus récent et le plus élevé).
+        """
         vehicle = self.get_vehicle(vehicle_id)
         if vehicle is None:
             raise HomeAssistantError(f"Véhicule inconnu : {vehicle_id}")
         if km < 0:
             raise HomeAssistantError("Le kilométrage ne peut pas être négatif")
-        if km < vehicle.get("odometer", 0):
-            raise HomeAssistantError(
-                "Le kilométrage ne peut pas diminuer "
-                f"({km} < {vehicle.get('odometer', 0)})"
+
+        today = date.today().isoformat()
+        if entry_date and entry_date != today:
+            # Point d'historique à une date passée (création ou édition)
+            history: list[dict[str, Any]] = list(
+                vehicle.get("odometer_history") or []
             )
-        vehicle["odometer"] = km
-        vehicle["odometer_updated_at"] = dt_util.utcnow().isoformat()
-        self._append_odometer_point(vehicle_id, km)
+            history = [
+                point for point in history if point.get("date") != entry_date
+            ]
+            history.append({"date": entry_date, "km": km})
+            history.sort(key=lambda point: point.get("date", ""))
+            vehicle["odometer_history"] = history
+            # Le point devient le plus récent : il définit le kilométrage actuel
+            if history[-1]["date"] == entry_date and km > vehicle.get("odometer", 0):
+                vehicle["odometer"] = km
+                vehicle["odometer_updated_at"] = dt_util.utcnow().isoformat()
+        else:
+            if km < vehicle.get("odometer", 0):
+                raise HomeAssistantError(
+                    "Le kilométrage ne peut pas diminuer "
+                    f"({km} < {vehicle.get('odometer', 0)})"
+                )
+            vehicle["odometer"] = km
+            vehicle["odometer_updated_at"] = dt_util.utcnow().isoformat()
+            self._append_odometer_point(vehicle_id, km)
         await self.async_save()
         await self.async_refresh()
 

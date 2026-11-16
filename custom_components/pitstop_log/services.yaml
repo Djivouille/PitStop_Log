@@ -1,7 +1,9 @@
 update_odometer:
   name: Mettre à jour le kilométrage
   description: >-
-    Met à jour le kilométrage actuel d'un véhicule.
+    Met à jour le kilométrage d'un véhicule. Sans date, met à jour le
+    kilométrage actuel ; avec une date, enregistre ou modifie le point
+    de l'historique pour cette date.
   fields:
     vehicle_id:
       name: Véhicule
@@ -21,6 +23,13 @@ update_odometer:
           max: 2000000
           step: 1
           unit_of_measurement: km
+    date:
+      name: Date
+      description: Date du relevé (AAAA-MM-JJ). Optionnel — aujourd'hui par défaut.
+      required: false
+      example: "2026-11-16"
+      selector:
+        date:
 
 add_maintenance_done:
   name: Enregistrer un entretien réalisé
