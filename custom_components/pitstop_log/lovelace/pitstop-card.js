@@ -141,6 +141,8 @@ class PitstopCard extends HTMLElement {
     this.attachShadow({ mode: "open" });
     this._config = null;
     this._hass = null;
+    this._device_label = null;
+    this._device_promise = null;
   }
 
   setConfig(config) {
@@ -154,6 +156,49 @@ class PitstopCard extends HTMLElement {
   set hass(hass) {
     this._hass = hass;
     this._render();
+    this._loadDeviceName();
+  }
+
+  /** R\u00e9cup\u00e8re le nom de l'appareil (registre HA), mis en cache. */
+  _loadDeviceName() {
+    if (!this._hass || this._device_promise) return;
+    const main = this._findMainSensor();
+    if (!main || !main.attributes || !main.attributes.vehicle_id) return;
+    const vehicleId = main.attributes.vehicle_id;
+    this._device_promise = this._hass
+      .callWS({ type: "config/device_registry/list" })
+      .then(
+        (devices) => {
+          const device = (devices || []).find(
+            (dv) =>
+              Array.isArray(dv.identifiers) &&
+              dv.identifiers.some(
+                (i) => i[0] === "pitstop_log" && i[1] === vehicleId
+              )
+          );
+          this._device_label = device
+            ? device.name_by_user || device.name || null
+            : null;
+          this._render();
+        },
+        () => {
+          this._device_promise = null;
+        }
+      );
+  }
+
+  /** Nom affich\u00e9 : titre de la carte, sinon nom de l'appareil, sinon nom interne. */
+  _displayName() {
+    return (
+      this._config.title ||
+      this._device_label ||
+      this._config.vehicle
+    );
+  }
+
+  /** Nom de l'appareil avec repli sur le nom interne. */
+  _deviceOrVehicle() {
+    return this._device_label || this._config.vehicle;
   }
 
   getCardSize() {
@@ -304,7 +349,7 @@ class PitstopCard extends HTMLElement {
       <ha-card>
         <div class="editor">
           <div class="editor-title">Mise \u00e0 jour du kilom\u00e9trage</div>
-          <div class="editor-sub">${this._config.vehicle}</div>
+          <div class="editor-sub">${this._deviceOrVehicle()}</div>
           <div class="field">
             <label for="ps-date">Date du relev\u00e9</label>
             <input id="ps-date" class="ps-input" type="date" value="${today}" />
@@ -429,7 +474,7 @@ class PitstopCard extends HTMLElement {
       <ha-card>
         <div class="editor">
           <div class="editor-title">Modification du v\u00e9hicule</div>
-          <div class="editor-sub">${this._config.vehicle}</div>
+          <div class="editor-sub">${this._deviceOrVehicle()}</div>
           <div class="field">
             <label for="ps-brand">Marque</label>
             <select id="ps-brand" class="ps-input">${options}</select>
@@ -530,7 +575,7 @@ class PitstopCard extends HTMLElement {
         <style>${PitstopCard._styles()}</style>
         <ha-card>
           <div class="pad error">
-            V\u00e9hicule \u00ab ${this._config.vehicle} \u00bb introuvable.
+            V\u00e9hicule \u00ab ${this._deviceOrVehicle()} \u00bb introuvable.
             V\u00e9rifiez le nom dans la configuration de la carte.
           </div>
         </ha-card>`;
@@ -583,7 +628,7 @@ class PitstopCard extends HTMLElement {
       ? `<img class="logo" src="${attrs.brand_logo}" alt="${attrs.brand || ""}">`
       : "";
     const photo = attrs.photo
-      ? `<img class="photo" src="${attrs.photo}" alt="${this._config.vehicle}">`
+      ? `<img class="photo" src="${attrs.photo}" alt="${this._deviceOrVehicle()}">`
       : "";
 
     root.innerHTML = `
@@ -592,7 +637,7 @@ class PitstopCard extends HTMLElement {
         <div class="header">
           ${logo}
           <div class="titles">
-            <div class="name">${this._config.title || this._config.vehicle}</div>
+            <div class="name">${this._displayName()}</div>
             <div class="brand">${attrs.brand || ""}${attrs.brand ? " \u00b7 " : ""}${attrs.model || ""}${attrs.model_year ? " (" + attrs.model_year + ")" : ""} <span class="gear gear-brand" title="Mettre \u00e0 jour la marque et le mod\u00e8le">
                 <svg viewBox="0 0 24 24" width="13" height="13">
                   <path fill="currentColor" d="M19.14 12.94a7.07 7.07 0 0 0 .05-.94 7.07 7.07 0 0 0-.05-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.03 7.03 0 0 0-1.62-.94l-.36-2.54a.5.5 0 0 0-.5-.42h-3.84a.5.5 0 0 0-.5.42l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96a.5.5 0 0 0-.6.22L2.66 8.84a.5.5 0 0 0 .12.64l2.03 1.58c-.03.31-.05.63-.05.94s.02.63.05.94l-2.03 1.58a.5.5 0 0 0-.12.64l1.92 3.32c.13.22.39.31.6.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.04.24.25.42.5.42h3.84c.25 0 .46-.18.5-.42l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.09.47 0 .6-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.58ZM12 15.6A3.6 3.6 0 1 1 12 8.4a3.6 3.6 0 0 1 0 7.2Z"/>
