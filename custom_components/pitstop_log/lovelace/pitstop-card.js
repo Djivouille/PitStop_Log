@@ -276,6 +276,463 @@ class PitstopCard extends HTMLElement {
     return found;
   }
 
+  /** Ouvre la fen\u00eatre d'\u00e9dition du kilom\u00e9trage (overlay). */
+  _openEditor() {
+    this._odo_edit_date = null;
+    this._render();
+    const root = this.shadowRoot;
+    const card = root.querySelector("ha-card");
+    if (!card) return;
+    const main = this._findMainSensor();
+    const entities = this._findEntities();
+    const today = new Date().toISOString().slice(0, 10);
+    const currentKm = entities.odometer
+      ? Math.round(Number(entities.odometer.state))
+      : "";
+    const vehicleId =
+      main && main.attributes && main.attributes.vehicle_id
+        ? main.attributes.vehicle_id
+        : this._config.vehicle;
+    const rows = (entities.odometer && entities.odometer.attributes
+      ? entities.odometer.attributes.odometer_history || []
+      : [])
+      .slice()
+      .sort((a, b) => (a.date < b.date ? 1 : -1))
+      .map(
+        (p, i) =>
+          `<tr><td>${p.date}</td><td class="num">${Number(p.km).toLocaleString()} km</td><td class="num"><span class="icon-btn edit" data-date="${p.date}" data-km="${p.km}" title="Modifier">\u270e</span><span class="icon-btn del" data-date="${p.date}" title="Supprimer">\u2716</span></td></tr>`
+      )
+      .join("");
+    const overlay = document.createElement("div");
+    overlay.className = "ps-overlay";
+    overlay.innerHTML = `
+      <div class="ps-modal">
+        <div class="editor-title">Mise \u00e0 jour du kilom\u00e9trage</div>
+        <div class="editor-sub">${this._deviceOrVehicle()}</div>
+        <div class="field">
+          <label for="ps-date">Date du relev\u00e9</label>
+          <input id="ps-date" class="ps-input" type="date" value="${today}" />
+        </div>
+        <div class="field">
+          <label for="ps-km">Kilom\u00e9trage (km)</label>
+          <input id="ps-km" class="ps-input" type="number" min="0" step="1" placeholder="${currentKm}" value="${currentKm}" />
+        </div>
+        <div class="section editor-section">Historique des valeurs</div>
+        <table class="table editor-table">
+          <thead><tr><th>Date</th><th class="num">Kilom\u00e9trage</th><th></th></tr></thead>
+          <tbody id="ps-odo-rows">
+            ${rows}
+          </tbody>
+        </table>
+        <div class="editor-error" id="ps-error"></div>
+        <div class="editor-actions">
+          <button class="ps-cancel" id="ps-cancel">Annuler</button>
+          <button class="ps-save" id="ps-save">Sauvegarder</button>
+        </div>
+      </div>`;
+    card.appendChild(overlay);
+    overlay.addEventListener("click", (ev) => {
+      if (ev.target === overlay) overlay.remove();
+    });
+    overlay.querySelector("#ps-cancel").addEventListener("click", () => {
+      overlay.remove();
+    });
+    overlay.querySelector("#ps-save").addEventListener("click", () =>
+      this._saveOdometer(vehicleId, overlay)
+    );
+    overlay.querySelector("#ps-km").addEventListener("keydown", (ev) => {
+      if (ev.key === "Enter") this._saveOdometer(vehicleId, overlay);
+    });
+    overlay.querySelector("#ps-date").addEventListener("keydown", (ev) => {
+      if (ev.key === "Enter") this._saveOdometer(vehicleId, overlay);
+    });
+    overlay.querySelectorAll(".icon-btn.edit").forEach((btn) =>
+      btn.addEventListener("click", () => {
+        this._odo_edit_date = btn.dataset.date;
+        overlay.querySelector("#ps-date").value = btn.dataset.date;
+        overlay.querySelector("#ps-km").value = btn.dataset.km;
+      })
+    );
+    overlay.querySelectorAll(".icon-btn.del").forEach((btn) =>
+      btn.addEventListener("click", () => {
+        if (!window.confirm("Supprimer le relev\u00e9 du " + btn.dataset.date + " ?"))
+          return;
+        this._hass
+          .callService("pitstop_log", "delete_odometer_point", {
+            vehicle_id: vehicleId,
+            date: btn.dataset.date,
+          })
+          .then(
+            () => this._openEditor(),
+            () => this._openEditor()
+          );
+      })
+    );
+  }
+
+  /** Valide la saisie d'un nouveau kilom\u00e9trage et appelle le service. */
+  _saveOdometer(vehicleId, overlay) {
+    const dateValue = overlay.querySelector("#ps-date").value;
+    const kmValue = parseFloat(overlay.querySelector("#ps-km").value);
+    const errorBox = overlay.querySelector("#ps-error");
+    errorBox.textContent = "";
+    if (!dateValue) {
+      errorBox.textContent = "Choisissez une date.";
+      return;
+    }
+    if (isNaN(kmValue) || kmValue < 0) {
+      errorBox.textContent = "Kilom\u00e9trage invalide.";
+      return;
+    }
+    const button = overlay.querySelector("#ps-save");
+    button.disabled = true;
+    const done = () => {
+      overlay.remove();
+      this._render();
+    };
+    const fail = (err) => {
+      button.disabled = false;
+      errorBox.textContent =
+        (err && err.message) || "Erreur lors de la sauvegarde.";
+    };
+    // \u00c9dition d'un relev\u00e9 dont on change la date : on supprime l'ancien
+    const editDate = this._odo_edit_date;
+    this._odo_edit_date = null;
+    if (editDate && editDate !== dateValue) {
+      this._hass
+        .callService("pitstop_log", "delete_odometer_point", {
+          vehicle_id: vehicleId,
+          date: editDate,
+        })
+        .then(() =>
+          this._hass
+            .callService("pitstop_log", "update_odometer", {
+              vehicle_id: vehicleId,
+              km: kmValue,
+              date: dateValue,
+            })
+            .then(done, fail)
+        , fail);
+      return;
+    }
+    this._hass
+      .callService("pitstop_log", "update_odometer", {
+        vehicle_id: vehicleId,
+        km: kmValue,
+        date: dateValue,
+      })
+      .then(done, fail);
+  }
+
+  /** Charge la liste des marques (identique au flux de cr\u00e9ation). */
+  async _loadBrands() {
+    if (this._brands !== undefined) return this._brands;
+    try {
+      const resp = await fetch("/local/pitstop_log/brands.json");
+      const data = await resp.json();
+      this._brands = data && data.brands ? data.brands : null;
+    } catch (err) {
+      this._brands = null;
+    }
+    return this._brands;
+  }
+
+  /** Ouvre la fen\u00eatre de modification de la marque et du mod\u00e8le. */
+  async _openBrandEditor() {
+    const brands = await this._loadBrands();
+    const root = this.shadowRoot;
+    const main = this._findMainSensor();
+    const attrs = (main && main.attributes) || {};
+    const vehicleType = attrs.type || "";
+    const currentBrand = attrs.brand || "";
+    const currentModel = attrs.model || "";
+    const vehicleId = attrs.vehicle_id || this._config.vehicle;
+
+    // M\u00eames valeurs que le flux de cr\u00e9ation : cat\u00e9gorie du type + Autre
+    let names = [];
+    if (brands) {
+      if (vehicleType === "other" || !vehicleType) {
+        names = Object.keys(brands);
+      } else {
+        names = Object.keys(brands).filter(
+          (n) =>
+            (brands[n] && brands[n].category === vehicleType) || n === "Autre"
+        );
+      }
+    }
+    if (currentBrand && !names.includes(currentBrand)) {
+      names.unshift(currentBrand);
+    }
+    const options = names
+      .map(
+        (n) =>
+          `<option value="${n}"${n === currentBrand ? " selected" : ""}>${
+            (brands && brands[n] && brands[n].label) || n
+          }</option>`
+      )
+      .join("");
+
+    root.innerHTML = `
+      <style>${PitstopCard._styles()}</style>
+      <ha-card>
+        <div class="editor">
+          <div class="editor-title">Modification du v\u00e9hicule</div>
+          <div class="editor-sub">${this._deviceOrVehicle()}</div>
+          <div class="field">
+            <label for="ps-brand">Marque</label>
+            <select id="ps-brand" class="ps-input">${options}</select>
+          </div>
+          <div class="field">
+            <label for="ps-model">Mod\u00e8le</label>
+            <input id="ps-model" class="ps-input" type="text" value="${currentModel}" />
+          </div>
+          <div class="field">
+            <label for="ps-year">Ann\u00e9e-mod\u00e8le (optionnel)</label>
+            <input id="ps-year" class="ps-input" type="number" min="1900" max="2100" value="${(attrs.model_year || "") || ""}" />
+          </div>
+          <div class="field">
+            <label for="ps-photo">Photo du v\u00e9hicule (optionnel)</label>
+            <input id="ps-photo" class="ps-input" type="file" accept="image/*" />
+          </div>
+          <div class="field">
+            <label for="ps-reg">Immatriculation (carte grise)</label>
+            <input id="ps-reg" class="ps-input" type="text" value="${attrs.registration || ""}" />
+          </div>
+          <div class="field">
+            <label for="ps-pdate">Date d'achat (mise en service)</label>
+            <input id="ps-pdate" class="ps-input" type="date" value="${attrs.purchase_date || ""}" />
+          </div>
+          <div class="editor-error" id="ps-error"></div>
+          <div class="editor-actions">
+            <button class="ps-cancel" id="ps-cancel">Annuler</button>
+            <button class="ps-save" id="ps-save">Sauvegarder</button>
+          </div>
+        </div>
+      </ha-card>`;
+    root.querySelector("#ps-cancel").addEventListener("click", () => {
+      this._render();
+    });
+    root.querySelector("#ps-save").addEventListener("click", () =>
+      this._saveBrandModel(vehicleId)
+    );
+    root.querySelector("#ps-model").addEventListener("keydown", (ev) => {
+      if (ev.key === "Enter") this._saveBrandModel(vehicleId);
+    });
+  }
+
+  /** Sauvegarde la marque, le mod\u00e8le, l'ann\u00e9e et la photo via le service. */
+  async _saveBrandModel(vehicleId) {
+    const root = this.shadowRoot;
+    const brand = root.querySelector("#ps-brand").value;
+    const model = root.querySelector("#ps-model").value.trim();
+    const year = root.querySelector("#ps-year").value;
+    const photoInput = root.querySelector("#ps-photo");
+    const errorBox = root.querySelector("#ps-error");
+    errorBox.textContent = "";
+    if (!model) {
+      errorBox.textContent = "Saisissez un mod\u00e8le.";
+      return;
+    }
+    const button = root.querySelector("#ps-save");
+    button.disabled = true;
+
+    // Lecture de la photo en base64 si un fichier est choisi
+    let photoBase64 = null;
+    if (photoInput && photoInput.files && photoInput.files[0]) {
+      photoBase64 = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(photoInput.files[0]);
+      }).catch(() => null);
+    }
+
+    const reg = root.querySelector("#ps-reg").value.trim();
+    const pdate = root.querySelector("#ps-pdate").value;
+    const data = { vehicle_id: vehicleId, brand: brand, model: model };
+    if (year) data.model_year = parseInt(year, 10);
+    if (photoBase64) data.photo_base64 = photoBase64;
+    if (reg) data.registration = reg;
+    if (pdate) data.purchase_date = pdate;
+
+    this._hass.callService("pitstop_log", "update_brand_model", data).then(
+      () => {
+        this._render();
+      },
+      (err) => {
+        button.disabled = false;
+        errorBox.textContent =
+          (err && err.message) || "Erreur lors de la sauvegarde.";
+      }
+    );
+  }
+
+  _render() {
+    if (!this._hass || !this._config) return;
+    const main = this._findMainSensor();
+    const entities = this._findEntities();
+    const root = this.shadowRoot;
+
+    if (!main) {
+      root.innerHTML = `
+        <style>${PitstopCard._styles()}</style>
+        <ha-card>
+          <div class="pad error">
+            V\u00e9hicule \u00ab ${this._deviceOrVehicle()} \u00bb introuvable.
+            V\u00e9rifiez le nom dans la configuration de la carte.
+          </div>
+        </ha-card>`;
+      return;
+    }
+
+    const attrs = main.attributes || {};
+    const statusColors = {
+      OK: "var(--label-badge-green, #13ba6e)",
+      "Bient\u00f4t d\u00fb": "var(--label-badge-yellow, #ffab40)",
+      "En retard": "var(--label-badge-red, #fce588)",
+      "Due soon": "var(--label-badge-yellow, #ffab40)",
+      Overdue: "var(--label-badge-red, #fce588)",
+    };
+    const statusColor =
+      statusColors[main.state] || "var(--primary-color, #03a9f4)";
+
+    const plans = entities.plans
+      .map(
+        (p) => `
+        <tr>
+          <td>${p.attributes.friendly_name || p.entity_id}</td>
+          <td><span class="badge" style="background:${statusColors[p.state] || "var(--primary-color)"}">${p.state}</span></td>
+          <td class="num">${p.attributes.km_remaining != null ? p.attributes.km_remaining.toLocaleString() + " km" : "\u2014"}</td>
+          <td class="num">${p.attributes.days_remaining != null ? p.attributes.days_remaining + " j" : "\u2014"}</td>
+        </tr>`
+      )
+      .join("");
+
+    const history = (attrs.history || [])
+      .slice(0, 5)
+      .map(
+        (h) => `
+        <tr>
+          <td>${h.date || ""}</td>
+          <td class="num">${h.km != null ? Number(h.km).toLocaleString() + " km" : ""}</td>
+          <td>${h.actions || ""}</td>
+          <td class="num">${h.cost != null ? Number(h.cost).toLocaleString() + " \u20ac" : ""}</td>
+          <td class="num">${h.invoice_url ? `<a class="inv" href="${h.invoice_url}" target="_blank" title="Facture">\ud83d\udcc4</a>` : ""}</td>
+        </tr>`
+      )
+      .join("");
+
+    const logo = attrs.brand_logo
+      ? `<img class="logo" src="${attrs.brand_logo}" alt="${attrs.brand || ""}">`
+      : "";
+    const photo = attrs.photo
+      ? `<img class="photo" src="${attrs.photo}" alt="${this._deviceOrVehicle()}">`
+      : "";
+
+    root.innerHTML = `
+      <style>${PitstopCard._styles()}</style>
+      <ha-card>
+        <div class="header">
+          ${logo}
+          <div class="titles">
+            <div class="name">${this._displayName()}</div>
+            <div class="brand">${attrs.brand || ""}${attrs.brand ? " \u00b7 " : ""}${attrs.model || ""}${attrs.model_year ? " (" + attrs.model_year + ")" : ""} <span class="gear gear-brand" title="Mettre \u00e0 jour la marque et le mod\u00e8le">
+                <svg viewBox="0 0 24 24" width="13" height="13">
+                  <path fill="currentColor" d="M19.14 12.94a7.07 7.07 0 0 0 .05-.94 7.07 7.07 0 0 0-.05-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.03 7.03 0 0 0-1.62-.94l-.36-2.54a.5.5 0 0 0-.5-.42h-3.84a.5.5 0 0 0-.5.42l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96a.5.5 0 0 0-.6.22L2.66 8.84a.5.5 0 0 0 .12.64l2.03 1.58c-.03.31-.05.63-.05.94s.02.63.05.94l-2.03 1.58a.5.5 0 0 0-.12.64l1.92 3.32c.13.22.39.31.6.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.04.24.25.42.5.42h3.84c.25 0 .46-.18.5-.42l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.09.47 0 .6-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.58ZM12 15.6A3.6 3.6 0 1 1 12 8.4a3.6 3.6 0 0 1 0 7.2Z"/>
+                </svg>
+              </span></div>
+            <div class="meta">${
+              (attrs.purchase_date || "\u2014") +
+              " - " +
+              (attrs.registration || "\u2014")
+            }</div>
+          </div>
+          <div class="statusbox">
+            <div class="status" style="border-color:${statusColor};color:${statusColor}">${main.state}</div>
+          </div>
+        </div>
+        ${photo}
+        <div class="grid">
+          <div class="cell cell-km" title="Voir l'historique du kilom\u00e9trage">
+            <div class="label">Kilom\u00e9trage
+              <span class="gear gear-km" title="Mettre \u00e0 jour le kilom\u00e9trage">
+                <svg viewBox="0 0 24 24" width="16" height="16">
+                  <path fill="currentColor" d="M19.14 12.94a7.07 7.07 0 0 0 .05-.94 7.07 7.07 0 0 0-.05-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.03 7.03 0 0 0-1.62-.94l-.36-2.54a.5.5 0 0 0-.5-.42h-3.84a.5.5 0 0 0-.5.42l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96a.5.5 0 0 0-.6.22L2.66 8.84a.5.5 0 0 0 .12.64l2.03 1.58c-.03.31-.05.63-.05.94s.02.63.05.94l-2.03 1.58a.5.5 0 0 0-.12.64l1.92 3.32c.13.22.39.31.6.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.04.24.25.42.5.42h3.84c.25 0 .46-.18.5-.42l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.09.47 0 .6-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.58ZM12 15.6A3.6 3.6 0 1 1 12 8.4a3.6 3.6 0 0 1 0 7.2Z"/>
+                </svg>
+              </span>
+            </div>
+            <div class="value">${
+              entities.odometer
+                ? Number(entities.odometer.state).toLocaleString() + " km"
+                : "\u2014"
+            }</div>
+          </div>
+          <div class="cell">
+            <div class="label">Entretiens r\u00e9alis\u00e9s</div>
+            <div class="value">${attrs.history_count != null ? attrs.history_count : "\u2014"}</div>
+          </div>
+        </div>
+        ${
+          plans
+            ? `<div class="section">Entretiens \u00e0 faire</div>
+               <table class="table"><thead><tr><th>Plan</th><th>Statut</th><th>Reste</th><th>\u00c9ch\u00e9ance</th></tr></thead><tbody>${plans}</tbody></table>`
+            : ""
+        }
+        <div class="section">Derniers entretiens
+          <span class="gear gear-history" title="G\u00e9rer l'historique des entretiens">
+            <svg viewBox="0 0 24 24" width="14" height="14">
+              <path fill="currentColor" d="M19.14 12.94a7.07 7.07 0 0 0 .05-.94 7.07 7.07 0 0 0-.05-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.03 7.03 0 0 0-1.62-.94l-.36-2.54a.5.5 0 0 0-.5-.42h-3.84a.5.5 0 0 0-.5.42l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96a.5.5 0 0 0-.6.22L2.66 8.84a.5.5 0 0 0 .12.64l2.03 1.58c-.03.31-.05.63-.05.94s.02.63.05.94l-2.03 1.58a.5.5 0 0 0-.12.64l1.92 3.32c.13.22.39.31.6.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.04.24.25.42.5.42h3.84c.25 0 .46-.18.5-.42l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.09.47 0 .6-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.58ZM12 15.6A3.6 3.6 0 1 1 12 8.4a3.6 3.6 0 0 1 0 7.2Z"/>
+            </svg>
+          </span>
+        </div>
+        ${
+          history
+            ? `<table class="table"><thead><tr><th>Date</th><th>Km</th><th>Actions</th><th>Co\u00fbt</th><th></th></tr></thead><tbody>${history}</tbody></table>`
+            : `<div class="empty">Aucun entretien enregistr\u00e9.</div>`
+        }
+        <div class="addrow">
+          <button class="ps-add" id="ps-add-maint">+ Ajouter un entretien</button>
+        </div>
+      </ha-card>`;
+    const gearKm = root.querySelector(".gear-km");
+    if (gearKm) gearKm.addEventListener("click", () => this._openEditor());
+    const cellKm = root.querySelector(".cell-km");
+    if (cellKm)
+      cellKm.addEventListener("click", (ev) => {
+        if (ev.target.closest(".gear-km")) return;
+        const entities = this._findEntities();
+        if (!entities.odometer) return;
+        const entityId =
+          entities.odometer.entity_id ||
+          `sensor.${this._slug()}_kilometrage`;
+        const moreInfo = new Event("hass-more-info", {
+          bubbles: true,
+          composed: true,
+        });
+        moreInfo.detail = { entityId: entityId };
+        this.dispatchEvent(moreInfo);
+      });
+    const gearBrand = root.querySelector(".gear-brand");
+    if (gearBrand)
+      gearBrand.addEventListener("click", () => this._openBrandEditor());
+    const gearHistory = root.querySelector(".gear-history");
+    if (gearHistory)
+      gearHistory.addEventListener("click", () => this._openHistoryEditor());
+    const addMaint = root.querySelector("#ps-add-maint");
+    if (addMaint)
+      addMaint.addEventListener("click", () => this._openMaintenanceEditor(null));
+  }
+
+  /** Km courant du v\u00e9hicule (pour pr\u00e9-remplir le formulaire). */
+  _currentKm() {
+    const entities = this._findEntities();
+    if (entities.odometer && entities.odometer.state != null) {
+      const n = Number(entities.odometer.state);
+      if (!isNaN(n)) return n;
+    }
+    return "";
+  }
+
   /** Charge la liste des natures d'entretien (fichier local). */
   async _loadMaintenanceTypes() {
     if (this._maint_types !== undefined) return this._maint_types;
@@ -583,6 +1040,7 @@ class PitstopCard extends HTMLElement {
       .photo { width: 100%; max-height: 260px; object-fit: cover; display: block; margin: 8px 0; border-radius: var(--ha-card-border-radius, 12px); }
       .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; padding: 0 16px 8px; }
       .cell { background: var(--secondary-background-color, #f5f5f5); border-radius: 10px; padding: 10px; }
+      .cell-km { cursor: pointer; }
       .label { font-size: 11px; color: var(--secondary-text-color, #727272); text-transform: uppercase; letter-spacing: 0.5px; }
       .value { font-size: 20px; font-weight: 500; margin-top: 2px; }
       .value.small { font-size: 15px; }

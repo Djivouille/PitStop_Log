@@ -41,7 +41,7 @@ def brands_for_type(vehicle_type: str) -> list[str]:
 # Versionnement sémantique : MAJOR.MINOR.PATCH pour la production,
 # MAJOR.MINOR.PATCH-beta.N pour les versions de test (pre-release).
 DOMAIN = "pitstop_log"
-VERSION = "0.3.0-beta.9"
+VERSION = "0.3.0-beta.10"
 PLATFORMS = ["sensor", "image"]
 
 # Clé et version du stockage persistant (homeassistant.helpers.storage.Store)
