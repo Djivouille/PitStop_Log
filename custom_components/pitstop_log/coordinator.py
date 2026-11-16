@@ -536,6 +536,15 @@ class PitStopDataUpdateCoordinator:
         if km > vehicle.get("odometer", 0):
             vehicle["odometer"] = km
             vehicle["odometer_updated_at"] = dt_util.utcnow().isoformat()
+        # Le relevé de l'entretien entre dans l'historique du kilométrage
+        odo_history = [
+            point
+            for point in (vehicle.get("odometer_history") or [])
+            if point.get("date") != entry_date.isoformat()
+        ]
+        odo_history.append({"date": entry_date.isoformat(), "km": km})
+        odo_history.sort(key=lambda point: point.get("date", ""))
+        vehicle["odometer_history"] = odo_history
 
         # Réinitialisation du plan d'entretien associé, s'il existe
         if plan_id and plan_id in self.data["plans"]:
@@ -582,6 +591,19 @@ class PitStopDataUpdateCoordinator:
         }
         if not self.update_history_entry(vehicle_id, index, entry):
             raise HomeAssistantError("Impossible de mettre \u00e0 jour l'entr\u00e9e")
+        # Le relevé modifié met à jour l'historique du kilométrage
+        vehicle = self.get_vehicle(vehicle_id) or {}
+        if km > (vehicle.get("odometer") or 0):
+            vehicle["odometer"] = km
+            vehicle["odometer_updated_at"] = dt_util.utcnow().isoformat()
+        odo_history = [
+            point
+            for point in (vehicle.get("odometer_history") or [])
+            if point.get("date") != entry_date.isoformat()
+        ]
+        odo_history.append({"date": entry_date.isoformat(), "km": km})
+        odo_history.sort(key=lambda point: point.get("date", ""))
+        vehicle["odometer_history"] = odo_history
         await self.async_save()
         await self.async_refresh()
         return True
