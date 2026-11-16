@@ -150,6 +150,73 @@ class PitstopCard extends HTMLElement {
       </svg>`;
   }
 
+  /** Ouvre la fen\u00eatre de modification de l'immatriculation. */
+  _openRegEditor() {
+    const root = this.shadowRoot;
+    const main = this._findMainSensor();
+    const currentReg =
+      main && main.attributes ? main.attributes.registration || "" : "";
+    const vehicleId =
+      main && main.attributes && main.attributes.vehicle_id
+        ? main.attributes.vehicle_id
+        : this._config.vehicle;
+    root.innerHTML = `
+      <style>${PitstopCard._styles()}</style>
+      <ha-card>
+        <div class="editor">
+          <div class="editor-title">Modification de l'immatriculation</div>
+          <div class="editor-sub">${this._config.vehicle}</div>
+          <div class="field">
+            <label for="ps-reg">Immatriculation (carte grise)</label>
+            <input id="ps-reg" class="ps-input" type="text" value="${currentReg}" />
+          </div>
+          <div class="editor-error" id="ps-error"></div>
+          <div class="editor-actions">
+            <button class="ps-cancel" id="ps-cancel">Annuler</button>
+            <button class="ps-save" id="ps-save">Sauvegarder</button>
+          </div>
+        </div>
+      </ha-card>`;
+    root.querySelector("#ps-cancel").addEventListener("click", () => {
+      this._render();
+    });
+    root.querySelector("#ps-save").addEventListener("click", () =>
+      this._saveRegistration(vehicleId)
+    );
+    root.querySelector("#ps-reg").addEventListener("keydown", (ev) => {
+      if (ev.key === "Enter") this._saveRegistration(vehicleId);
+    });
+  }
+
+  /** Sauvegarde l'immatriculation via le service. */
+  _saveRegistration(vehicleId) {
+    const root = this.shadowRoot;
+    const value = root.querySelector("#ps-reg").value.trim();
+    const errorBox = root.querySelector("#ps-error");
+    errorBox.textContent = "";
+    if (!value) {
+      errorBox.textContent = "Saisissez une immatriculation.";
+      return;
+    }
+    const button = root.querySelector("#ps-save");
+    button.disabled = true;
+    this._hass
+      .callService("pitstop_log", "update_registration", {
+        vehicle_id: vehicleId,
+        registration: value,
+      })
+      .then(
+        () => {
+          this._render();
+        },
+        (err) => {
+          button.disabled = false;
+          errorBox.textContent =
+            (err && err.message) || "Erreur lors de la sauvegarde.";
+        }
+      );
+  }
+
   _render() {
     if (!this._hass || !this._config) return;
     const main = this._findMainSensor();
@@ -248,7 +315,12 @@ class PitstopCard extends HTMLElement {
           </div>
           <div class="cell">
             <div class="label">Immatriculation
-                          </div>
+              <span class="gear gear-reg" title="Mettre \u00e0 jour l'immatriculation">
+                <svg viewBox="0 0 24 24" width="16" height="16">
+                  <path fill="currentColor" d="M19.14 12.94a7.07 7.07 0 0 0 .05-.94 7.07 7.07 0 0 0-.05-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.03 7.03 0 0 0-1.62-.94l-.36-2.54a.5.5 0 0 0-.5-.42h-3.84a.5.5 0 0 0-.5.42l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96a.5.5 0 0 0-.6.22L2.66 8.84a.5.5 0 0 0 .12.64l2.03 1.58c-.03.31-.05.63-.05.94s.02.63.05.94l-2.03 1.58a.5.5 0 0 0-.12.64l1.92 3.32c.13.22.39.31.6.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.04.24.25.42.5.42h3.84c.25 0 .46-.18.5-.42l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.09.47 0 .6-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.58ZM12 15.6A3.6 3.6 0 1 1 12 8.4a3.6 3.6 0 0 1 0 7.2Z"/>
+                </svg>
+              </span>
+            </div>
             <div class="value small">${attrs.registration || "\u2014"}</div>
           </div>
           <div class="cell">
@@ -274,8 +346,10 @@ class PitstopCard extends HTMLElement {
             : ""
         }
       </ha-card>`;
-    const gear = root.querySelector(".gear");
+    const gear = root.querySelector(".gear:not(.gear-reg)");
     if (gear) gear.addEventListener("click", () => this._openEditor());
+    const gearReg = root.querySelector(".gear-reg");
+    if (gearReg) gearReg.addEventListener("click", () => this._openRegEditor());
   }
 
   static _styles() {
