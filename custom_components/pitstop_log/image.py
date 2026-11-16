@@ -53,9 +53,11 @@ async def async_setup_entry(
     vehicle = coordinator.get_vehicle(vehicle_id)
     if vehicle is None:
         return
-    entities: list[ImageEntity] = [PitStopVehiclePhoto(coordinator, entry, vehicle_id)]
+    entities: list[ImageEntity] = [
+        PitStopVehiclePhoto(hass, coordinator, entry, vehicle_id)
+    ]
     if vehicle.get("brand_logo"):
-        entities.append(PitStopBrandLogo(coordinator, entry, vehicle_id))
+        entities.append(PitStopBrandLogo(hass, coordinator, entry, vehicle_id))
     async_add_entities(entities)
 
 
@@ -66,11 +68,13 @@ class PitStopImageEntity(ImageEntity):
 
     def __init__(
         self,
+        hass: HomeAssistant,
         coordinator: PitStopDataUpdateCoordinator,
         entry: ConfigEntry,
         vehicle_id: str,
     ) -> None:
-        """Initialiser l'entité et l'appareil associé."""
+        """Initialiser l'entité (ImageEntity exige hass) et l'appareil associé."""
+        super().__init__(hass)
         self.coordinator = coordinator
         self.vehicle_id = vehicle_id
         vehicle = coordinator.get_vehicle(vehicle_id) or {}
