@@ -358,7 +358,7 @@ class PitstopCard extends HTMLElement {
           ${logo}
           <div class="titles">
             <div class="name">${this._config.title || this._config.vehicle}</div>
-            <div class="brand">${attrs.brand || ""}${attrs.brand ? " \u00b7 " : ""}${attrs.model || ""}</div>
+            <div class="brand">${attrs.brand || ""}${attrs.brand ? " \u00b7 " : ""}${attrs.model || ""}${attrs.model_year ? " (" + attrs.model_year + ")" : ""}</div>
           </div>
           <div class="statusbox">
             <div class="status" style="border-color:${statusColor};color:${statusColor}">${main.state}</div>
