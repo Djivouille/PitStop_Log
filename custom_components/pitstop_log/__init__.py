@@ -47,6 +47,7 @@ from .const import (
     SERVICE_UPDATE_ODOMETER,
     SERVICE_UPDATE_REGISTRATION,
     SERVICE_UPDATE_PURCHASE_DATE,
+    SERVICE_UPDATE_BRAND_MODEL,
 )
 from .coordinator import (
     PitStopDataUpdateCoordinator,
@@ -118,6 +119,14 @@ async def _sync_www_assets(hass: HomeAssistant) -> None:
     source_lovelace = os.path.join(integration_dir, "lovelace")
     target_lovelace = os.path.join(www_dir, "www/pitstop_log/lovelace")
     await hass.async_add_executor_job(_sync_files, source_lovelace, target_lovelace)
+
+    # Liste des marques copiée vers www (lue par la carte pour ses
+    # menus déroulants, identiques à ceux du flux de création)
+    await hass.async_add_executor_job(
+        _sync_single_file,
+        os.path.join(integration_dir, "brands.json"),
+        os.path.join(www_dir, "www/pitstop_log/brands.json"),
+    )
     if not os.path.isdir(source_lovelace):
         _LOGGER.warning(
             "Dossier lovelace/ absent de l'installation ; la carte Lovelace "
@@ -162,6 +171,15 @@ async def async_setup(hass: HomeAssistant, config: dict[str, Any]) -> bool:
             raise ServiceValidationError(f"Véhicule inconnu : {call.data['vehicle_id']}")
         await coordinator.async_update_purchase_date(
             vehicle_id, call.data["date"]
+        )
+
+    async def handle_update_brand_model(call: ServiceCall) -> None:
+        """Service : mettre à jour la marque et le modèle d'un véhicule."""
+        vehicle_id = coordinator.find_vehicle_id(call.data["vehicle_id"])
+        if vehicle_id is None:
+            raise ServiceValidationError(f"Véhicule inconnu : {call.data['vehicle_id']}")
+        await coordinator.async_update_brand_model(
+            vehicle_id, call.data["brand"], call.data["model"]
         )
 
     async def handle_add_maintenance_done(call: ServiceCall) -> None:
@@ -231,6 +249,18 @@ async def async_setup(hass: HomeAssistant, config: dict[str, Any]) -> bool:
         ),
     )
     hass.services.async_register(
+        DOMAIN,
+        SERVICE_UPDATE_BRAND_MODEL,
+        handle_update_brand_model,
+        schema=vol.Schema(
+            {
+                vol.Required("vehicle_id"): str,
+                vol.Required("brand"): str,
+                vol.Required("model"): str,
+            }
+        ),
+    )
+    hass.services.async_register(
         DOMAIN, SERVICE_ADD_MAINTENANCE_DONE, handle_add_maintenance_done,
         schema=ADD_MAINTENANCE_DONE_SCHEMA,
     )
@@ -253,6 +283,19 @@ def _sync_brand_logos(source_dir: str, target_dir: str) -> None:
     idempotente et ne fait rien si le dossier source est absent.
     """
     _sync_files(source_dir, target_dir, suffix=".svg")
+
+
+def _sync_single_file(source: str, target: str) -> None:
+    """Copier un fichier vers www s'il diffère (exécuté hors boucle)."""
+    if not os.path.isfile(source):
+        return
+    if os.path.isfile(target):
+        with open(source, "rb") as src, open(target, "rb") as dst:
+            if src.read() == dst.read():
+                return
+    with open(source, "rb") as src:
+        with open(target, "wb") as dst:
+            dst.write(src.read())
 
 
 def _sync_files(source_dir: str, target_dir: str, suffix: str | None = None) -> None:

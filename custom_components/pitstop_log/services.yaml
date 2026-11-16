@@ -71,6 +71,34 @@ update_purchase_date:
       selector:
         date:
 
+update_brand_model:
+  name: Mettre à jour la marque et le modèle
+  description: >-
+    Met à jour la marque et le modèle d'un véhicule. La marque doit faire
+    partie de la liste brands.json ; le logo est mis à jour automatiquement.
+  fields:
+    vehicle_id:
+      name: Véhicule
+      description: Identifiant ou nom du véhicule.
+      required: true
+      example: "moto_yamaha"
+      selector:
+        text:
+    brand:
+      name: Marque
+      description: Nouvelle marque (issue de la liste brands.json).
+      required: true
+      example: "Yamaha"
+      selector:
+        text:
+    model:
+      name: Modèle
+      description: Nouveau modèle du véhicule.
+      required: true
+      example: "MT-07"
+      selector:
+        text:
+
 add_maintenance_done:
   name: Enregistrer un entretien réalisé
   description: >-

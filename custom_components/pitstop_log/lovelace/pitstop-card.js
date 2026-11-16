@@ -284,6 +284,117 @@ class PitstopCard extends HTMLElement {
       );
   }
 
+  /** Charge la liste des marques (identique au flux de cr\u00e9ation). */
+  async _loadBrands() {
+    if (this._brands !== undefined) return this._brands;
+    try {
+      const resp = await fetch("/local/pitstop_log/brands.json");
+      const data = await resp.json();
+      this._brands = data && data.brands ? data.brands : null;
+    } catch (err) {
+      this._brands = null;
+    }
+    return this._brands;
+  }
+
+  /** Ouvre la fen\u00eatre de modification de la marque et du mod\u00e8le. */
+  async _openBrandEditor() {
+    const brands = await this._loadBrands();
+    const root = this.shadowRoot;
+    const main = this._findMainSensor();
+    const attrs = (main && main.attributes) || {};
+    const vehicleType = attrs.type || "";
+    const currentBrand = attrs.brand || "";
+    const currentModel = attrs.model || "";
+    const vehicleId = attrs.vehicle_id || this._config.vehicle;
+
+    // M\u00eames valeurs que le flux de cr\u00e9ation : cat\u00e9gorie du type + Autre
+    let names = [];
+    if (brands) {
+      if (vehicleType === "other" || !vehicleType) {
+        names = Object.keys(brands);
+      } else {
+        names = Object.keys(brands).filter(
+          (n) =>
+            (brands[n] && brands[n].category === vehicleType) || n === "Autre"
+        );
+      }
+    }
+    if (currentBrand && !names.includes(currentBrand)) {
+      names.unshift(currentBrand);
+    }
+    const options = names
+      .map(
+        (n) =>
+          `<option value="${n}"${n === currentBrand ? " selected" : ""}>${
+            (brands && brands[n] && brands[n].label) || n
+          }</option>`
+      )
+      .join("");
+
+    root.innerHTML = `
+      <style>${PitstopCard._styles()}</style>
+      <ha-card>
+        <div class="editor">
+          <div class="editor-title">Modification de la marque et du mod\u00e8le</div>
+          <div class="editor-sub">${this._config.vehicle}</div>
+          <div class="field">
+            <label for="ps-brand">Marque</label>
+            <select id="ps-brand" class="ps-input">${options}</select>
+          </div>
+          <div class="field">
+            <label for="ps-model">Mod\u00e8le</label>
+            <input id="ps-model" class="ps-input" type="text" value="${currentModel}" />
+          </div>
+          <div class="editor-error" id="ps-error"></div>
+          <div class="editor-actions">
+            <button class="ps-cancel" id="ps-cancel">Annuler</button>
+            <button class="ps-save" id="ps-save">Sauvegarder</button>
+          </div>
+        </div>
+      </ha-card>`;
+    root.querySelector("#ps-cancel").addEventListener("click", () => {
+      this._render();
+    });
+    root.querySelector("#ps-save").addEventListener("click", () =>
+      this._saveBrandModel(vehicleId)
+    );
+    root.querySelector("#ps-model").addEventListener("keydown", (ev) => {
+      if (ev.key === "Enter") this._saveBrandModel(vehicleId);
+    });
+  }
+
+  /** Sauvegarde la marque et le mod\u00e8le via le service. */
+  _saveBrandModel(vehicleId) {
+    const root = this.shadowRoot;
+    const brand = root.querySelector("#ps-brand").value;
+    const model = root.querySelector("#ps-model").value.trim();
+    const errorBox = root.querySelector("#ps-error");
+    errorBox.textContent = "";
+    if (!model) {
+      errorBox.textContent = "Saisissez un mod\u00e8le.";
+      return;
+    }
+    const button = root.querySelector("#ps-save");
+    button.disabled = true;
+    this._hass
+      .callService("pitstop_log", "update_brand_model", {
+        vehicle_id: vehicleId,
+        brand: brand,
+        model: model,
+      })
+      .then(
+        () => {
+          this._render();
+        },
+        (err) => {
+          button.disabled = false;
+          errorBox.textContent =
+            (err && err.message) || "Erreur lors de la sauvegarde.";
+        }
+      );
+  }
+
   _render() {
     if (!this._hass || !this._config) return;
     const main = this._findMainSensor();
@@ -358,7 +469,11 @@ class PitstopCard extends HTMLElement {
           ${logo}
           <div class="titles">
             <div class="name">${this._config.title || this._config.vehicle}</div>
-            <div class="brand">${attrs.brand || ""}${attrs.brand ? " \u00b7 " : ""}${attrs.model || ""}${attrs.model_year ? " (" + attrs.model_year + ")" : ""}</div>
+            <div class="brand">${attrs.brand || ""}${attrs.brand ? " \u00b7 " : ""}${attrs.model || ""}${attrs.model_year ? " (" + attrs.model_year + ")" : ""} <span class="gear gear-brand" title="Mettre \u00e0 jour la marque et le mod\u00e8le">
+                <svg viewBox="0 0 24 24" width="13" height="13">
+                  <path fill="currentColor" d="M19.14 12.94a7.07 7.07 0 0 0 .05-.94 7.07 7.07 0 0 0-.05-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.03 7.03 0 0 0-1.62-.94l-.36-2.54a.5.5 0 0 0-.5-.42h-3.84a.5.5 0 0 0-.5.42l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96a.5.5 0 0 0-.6.22L2.66 8.84a.5.5 0 0 0 .12.64l2.03 1.58c-.03.31-.05.63-.05.94s.02.63.05.94l-2.03 1.58a.5.5 0 0 0-.12.64l1.92 3.32c.13.22.39.31.6.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.04.24.25.42.5.42h3.84c.25 0 .46-.18.5-.42l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.09.47 0 .6-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.58ZM12 15.6A3.6 3.6 0 1 1 12 8.4a3.6 3.6 0 0 1 0 7.2Z"/>
+                </svg>
+              </span></div>
           </div>
           <div class="statusbox">
             <div class="status" style="border-color:${statusColor};color:${statusColor}">${main.state}</div>
@@ -425,6 +540,9 @@ class PitstopCard extends HTMLElement {
     if (gearReg) gearReg.addEventListener("click", () => this._openRegEditor());
     const gearDate = root.querySelector(".gear-date");
     if (gearDate) gearDate.addEventListener("click", () => this._openDateEditor());
+    const gearBrand = root.querySelector(".gear-brand");
+    if (gearBrand)
+      gearBrand.addEventListener("click", () => this._openBrandEditor());
   }
 
   static _styles() {

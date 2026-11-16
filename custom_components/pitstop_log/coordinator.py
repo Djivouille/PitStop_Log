@@ -216,6 +216,27 @@ class PitStopDataUpdateCoordinator:
         await self.async_save()
         await self.async_refresh()
 
+    async def async_update_brand_model(
+        self, vehicle_id: str, brand: str, model: str
+    ) -> None:
+        """Mettre à jour la marque et le modèle d'un véhicule.
+
+        La marque doit exister dans brands.json ; le logo associé est
+        mis à jour automatiquement.
+        """
+        from .const import BRANDS, brand_logo
+
+        vehicle = self.get_vehicle(vehicle_id)
+        if vehicle is None:
+            raise HomeAssistantError(f"Véhicule inconnu : {vehicle_id}")
+        if brand not in BRANDS:
+            raise HomeAssistantError(f"Marque inconnue : {brand}")
+        vehicle["brand"] = brand
+        vehicle["model"] = model
+        vehicle["brand_logo"] = brand_logo(brand)
+        await self.async_save()
+        await self.async_refresh()
+
     def delete_vehicle(self, vehicle_id: str) -> None:
         """Supprimer un véhicule, ses plans et son historique."""
         self.data["vehicles"].pop(vehicle_id, None)
