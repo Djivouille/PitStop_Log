@@ -323,11 +323,6 @@ class PitstopCard extends HTMLElement {
       <style>${PitstopCard._styles()}</style>
       <ha-card>
         <div class="header">
-          <span class="gear" title="Mettre \u00e0 jour le kilom\u00e9trage">
-            <svg viewBox="0 0 24 24" width="22" height="22">
-              <path fill="currentColor" d="M19.14 12.94a7.07 7.07 0 0 0 .05-.94 7.07 7.07 0 0 0-.05-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.03 7.03 0 0 0-1.62-.94l-.36-2.54a.5.5 0 0 0-.5-.42h-3.84a.5.5 0 0 0-.5.42l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96a.5.5 0 0 0-.6.22L2.66 8.84a.5.5 0 0 0 .12.64l2.03 1.58c-.03.31-.05.63-.05.94s.02.63.05.94l-2.03 1.58a.5.5 0 0 0-.12.64l1.92 3.32c.13.22.39.31.6.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.04.24.25.42.5.42h3.84c.25 0 .46-.18.5-.42l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.09.47 0 .6-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.58ZM12 15.6A3.6 3.6 0 1 1 12 8.4a3.6 3.6 0 0 1 0 7.2Z"/>
-            </svg>
-          </span>
           ${logo}
           <div class="titles">
             <div class="brand">${attrs.brand || ""}${attrs.brand ? " \u00b7 " : ""}${attrs.model || ""}</div>
@@ -340,7 +335,13 @@ class PitstopCard extends HTMLElement {
         ${photo}
         <div class="grid">
           <div class="cell">
-            <div class="label">Kilom\u00e9trage</div>
+            <div class="label">Kilom\u00e9trage
+              <span class="gear" title="Mettre \u00e0 jour le kilom\u00e9trage">
+                <svg viewBox="0 0 24 24" width="16" height="16">
+                  <path fill="currentColor" d="M19.14 12.94a7.07 7.07 0 0 0 .05-.94 7.07 7.07 0 0 0-.05-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.03 7.03 0 0 0-1.62-.94l-.36-2.54a.5.5 0 0 0-.5-.42h-3.84a.5.5 0 0 0-.5.42l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96a.5.5 0 0 0-.6.22L2.66 8.84a.5.5 0 0 0 .12.64l2.03 1.58c-.03.31-.05.63-.05.94s.02.63.05.94l-2.03 1.58a.5.5 0 0 0-.12.64l1.92 3.32c.13.22.39.31.6.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.04.24.25.42.5.42h3.84c.25 0 .46-.18.5-.42l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.09.47 0 .6-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.58ZM12 15.6A3.6 3.6 0 1 1 12 8.4a3.6 3.6 0 0 1 0 7.2Z"/>
+                </svg>
+              </span>
+            </div>
             <div class="value">${
               entities.odometer
                 ? Number(entities.odometer.state).toLocaleString() + " km"
@@ -384,7 +385,7 @@ class PitstopCard extends HTMLElement {
       .pad { padding: 16px; }
       .error { color: var(--error-color, #db4437); }
       .header { display: flex; align-items: center; gap: 12px; padding: 16px 16px 8px; }
-      .gear { cursor: pointer; color: var(--secondary-text-color, #727272); flex: none; display: inline-flex; }
+      .gear { cursor: pointer; color: var(--secondary-text-color, #727272); float: right; display: inline-flex; }
       .logo { width: 40px; height: 40px; object-fit: contain; flex: none; }
       .titles { flex: 1; min-width: 0; }
       .brand { font-size: 12px; color: var(--secondary-text-color, #727272); }
