@@ -176,6 +176,8 @@ class PitStopNextMaintenanceSensor(PitStopEntity):
             "brand_logo": vehicle.get("brand_logo"),
             "photo": vehicle.get("photo"),
             "registration": vehicle.get("registration"),
+            "purchase_date": vehicle.get("purchase_date"),
+            "model_year": vehicle.get("model_year"),
             "plans": plans_attr,
             "history": history_attr,
             "history_count": len(history_attr),

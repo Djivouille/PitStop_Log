@@ -69,14 +69,23 @@ class PitstopCard extends HTMLElement {
       .replace(/[\u0300-\u036f]/g, "")
       .replace(/[^a-z0-9]+/g, "_")
       .replace(/^_|_$/g, "");
-    const found = { odometer: null, plans: [], history: null };
+    const found = {
+      odometer:
+        this._hass.states[`sensor.${slug}_kilometrage`] || null,
+      plans: [],
+      history: null,
+    };
     for (const entityId in this._hass.states) {
       const state = this._hass.states[entityId];
-      if (state.attributes && state.attributes.vehicle !== this._config.vehicle) {
+      if (entityId === `sensor.${slug}_kilometrage`) {
+        found.odometer = state;
         continue;
       }
-      if (entityId === `sensor.${slug}_kilometrage`) found.odometer = state;
-      else if (state.attributes && state.attributes.km_remaining !== undefined) {
+      if (
+        state.attributes &&
+        state.attributes.vehicle === this._config.vehicle &&
+        state.attributes.km_remaining !== undefined
+      ) {
         found.plans.push(state);
       }
     }
