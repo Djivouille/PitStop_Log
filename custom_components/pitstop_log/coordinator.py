@@ -96,6 +96,9 @@ class PitStopDataUpdateCoordinator:
                 "plans": stored.get("plans", {}),
                 "history": stored.get("history", []),
             }
+            # Migration : amorcer l'historique du kilométrage des véhicules existants
+            for vehicle_id in self.data["vehicles"]:
+                self._ensure_odometer_history(vehicle_id)
 
     async def async_save(self) -> None:
         """Écrire les données sur le disque (écriture différée)."""
@@ -128,7 +131,52 @@ class PitStopDataUpdateCoordinator:
 
     def set_vehicle(self, vehicle_id: str, vehicle: dict[str, Any]) -> None:
         """Créer ou mettre à jour un véhicule."""
+        previous = self.data["vehicles"].get(vehicle_id)
         self.data["vehicles"][vehicle_id] = vehicle
+        # Historique du kilométrage : amorcé s'il n'existe pas encore
+        # (1re valeur : date de mise en service, km 0)
+        self._ensure_odometer_history(vehicle_id)
+        # Le kilométrage a changé via l'interface : point d'historique
+        if (
+            previous is not None
+            and previous.get("odometer") != vehicle.get("odometer")
+            and vehicle.get("odometer") is not None
+        ):
+            self._append_odometer_point(vehicle_id, vehicle["odometer"])
+
+    def _ensure_odometer_history(self, vehicle_id: str) -> None:
+        """Amorcer l'historique du kilométrage s'il est absent."""
+        vehicle = self.get_vehicle(vehicle_id)
+        if vehicle is None or vehicle.get("odometer_history"):
+            return
+        start_date = vehicle.get("purchase_date") or date.today().isoformat()
+        history = [{"date": start_date, "km": 0}]
+        odometer = vehicle.get("odometer") or 0
+        if odometer > 0:
+            history.append({"date": date.today().isoformat(), "km": odometer})
+        vehicle["odometer_history"] = history
+
+    def _append_odometer_point(self, vehicle_id: str, km: int) -> None:
+        """Ajouter (ou remplacer pour le même jour) un point de kilométrage."""
+        vehicle = self.get_vehicle(vehicle_id)
+        if vehicle is None:
+            return
+        history: list[dict[str, Any]] = vehicle.setdefault("odometer_history", [])
+        today = date.today().isoformat()
+        # Un seul point par jour : le dernier du jour remplace le précédent
+        history = [point for point in history if point.get("date") != today]
+        history.append({"date": today, "km": km})
+        history.sort(key=lambda point: point.get("date", ""))
+        vehicle["odometer_history"] = history
+
+    def get_odometer_history(self, vehicle_id: str) -> list[dict[str, Any]]:
+        """Retourner l'historique du kilométrage (dates croissantes)."""
+        vehicle = self.get_vehicle(vehicle_id)
+        if vehicle is None:
+            return []
+        history = list(vehicle.get("odometer_history") or [])
+        history.sort(key=lambda point: point.get("date", ""))
+        return history
 
     def delete_vehicle(self, vehicle_id: str) -> None:
         """Supprimer un véhicule, ses plans et son historique."""
@@ -158,6 +206,7 @@ class PitStopDataUpdateCoordinator:
             )
         vehicle["odometer"] = km
         vehicle["odometer_updated_at"] = dt_util.utcnow().isoformat()
+        self._append_odometer_point(vehicle_id, km)
         await self.async_save()
         await self.async_refresh()
 

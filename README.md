@@ -145,8 +145,14 @@ custom_components/pitstop_log/
 
 L'intégration embarque une carte Lovelace personnalisée qui affiche toutes les
 informations d'un véhicule : photo, logo de marque, kilométrage, immatriculation,
-statut d'entretien, plans à faire (reste en km et en jours) et derniers entretiens
-réalisés (date, km, actions, coût).
+statut d'entretien, plans à faire (reste en km et en jours), derniers entretiens
+réalisés (date, km, actions, coût), **mise à jour du kilométrage directement
+depuis la carte** (champ de saisie + OK) et **graphique en courbe du kilométrage
+dans le temps** (axe dates / km, survol des points pour le détail).
+
+L'historique du kilométrage démarre à la date de mise en service (date d'achat)
+au km 0 ; chaque mise à jour (service, carte ou interface) ajoute un point
+(remplacé si plusieurs mises à jour le même jour).
 
 **Installation (une seule fois) :**
 

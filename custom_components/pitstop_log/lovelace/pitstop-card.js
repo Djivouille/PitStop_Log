@@ -111,6 +111,61 @@ class PitstopCard extends HTMLElement {
     return found;
   }
 
+  /** Construit un graphique SVG (courbe km / date). */
+  _buildChart(history) {
+    if (!history || history.length === 0) return "";
+    const points = history.slice().sort((a, b) => (a.date < b.date ? -1 : 1));
+    const width = 1000;
+    const height = 220;
+    const pad = 40;
+    const dates = points.map((p) => new Date(p.date).getTime());
+    const minDate = Math.min(...dates);
+    const maxDate = Math.max(...dates);
+    const maxKm = Math.max(...points.map((p) => p.km), 1);
+    const span = Math.max(maxDate - minDate, 1);
+    const x = (d) => pad + ((d - minDate) / span) * (width - 2 * pad);
+    const y = (km) => height - pad - (km / maxKm) * (height - 2 * pad);
+    const poly = points
+      .map((p, i) => `${i === 0 ? "M" : "L"}${x(dates[i]).toFixed(1)},${y(p.km).toFixed(1)}`)
+      .join(" ");
+    const area = `${poly} L${x(dates[dates.length - 1]).toFixed(1)},${height - pad} L${x(dates[0]).toFixed(1)},${height - pad} Z`;
+    const dots = points
+      .map(
+        (p, i) =>
+          `<circle cx="${x(dates[i]).toFixed(1)}" cy="${y(p.km).toFixed(1)}" r="4" fill="var(--primary-color, #03a9f4)"><title>${p.date} \u2014 ${Number(p.km).toLocaleString()} km</title></circle>`
+      )
+      .join("");
+    const fmt = (d) =>
+      new Date(d).toLocaleDateString(undefined, { month: "short", year: "2-digit" });
+    return `
+      <div class="section">Kilom\u00e9trage dans le temps</div>
+      <svg class="chart" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none">
+        <path d="${area}" fill="var(--primary-color, #03a9f4)" opacity="0.12"/>
+        <path d="${poly}" fill="none" stroke="var(--primary-color, #03a9f4)" stroke-width="3"/>
+        ${dots}
+        <text x="${pad}" y="${height - 12}" class="axis">${fmt(minDate)}</text>
+        <text x="${width - pad}" y="${height - 12}" text-anchor="end" class="axis">${fmt(maxDate)}</text>
+        <text x="${width - pad}" y="${pad - 12}" text-anchor="end" class="axis">${maxKm.toLocaleString()} km</text>
+      </svg>`;
+  }
+
+  /** Valide la saisie d'un nouveau kilom\u00e9trage et appelle le service. */
+  _editOdometer() {
+    const input = this.shadowRoot.querySelector(".km-input");
+    const km = parseFloat(input && input.value);
+    if (!km || km < 0 || isNaN(km)) return;
+    const main = this._findMainSensor();
+    const vehicleId = main && main.attributes && main.attributes.vehicle_id;
+    this._hass
+      .callService("pitstop_log", "update_odometer", {
+        vehicle_id: vehicleId || this._config.vehicle,
+        km: km,
+      })
+      .then(() => {
+        this._render();
+      });
+  }
+
   _render() {
     if (!this._hass || !this._config) return;
     const main = this._findMainSensor();
@@ -167,6 +222,8 @@ class PitstopCard extends HTMLElement {
       )
       .join("");
 
+    const chart = this._buildChart(attrs.odometer_history || []);
+
     const logo = attrs.brand_logo
       ? `<img class="logo" src="${attrs.brand_logo}" alt="${attrs.brand || ""}">`
       : "";
@@ -190,12 +247,18 @@ class PitstopCard extends HTMLElement {
         ${photo}
         <div class="grid">
           <div class="cell">
-            <div class="label">Kilom\u00e9trage</div>
+            <div class="label">Kilom\u00e9trage <span class="editkm" title="Mettre \u00e0 jour le kilom\u00e9trage">\u270e</span></div>
             <div class="value">${
               entities.odometer
                 ? Number(entities.odometer.state).toLocaleString() + " km"
                 : "\u2014"
             }</div>
+            <div class="km-edit">
+              <input class="km-input" type="number" min="0" placeholder="${
+                entities.odometer ? Math.round(Number(entities.odometer.state)) : 0
+              }" />
+              <button class="km-go">OK</button>
+            </div>
           </div>
           <div class="cell">
             <div class="label">Immatriculation</div>
@@ -210,6 +273,7 @@ class PitstopCard extends HTMLElement {
             <div class="value">${attrs.history_count != null ? attrs.history_count : "\u2014"}</div>
           </div>
         </div>
+        ${chart}
         ${
           plans
             ? `<div class="section">Entretiens \u00e0 faire</div>
@@ -223,6 +287,13 @@ class PitstopCard extends HTMLElement {
             : ""
         }
       </ha-card>`;
+    const go = root.querySelector(".km-go");
+    if (go) go.addEventListener("click", () => this._editOdometer());
+    const input = root.querySelector(".km-input");
+    if (input)
+      input.addEventListener("keydown", (ev) => {
+        if (ev.key === "Enter") this._editOdometer();
+      });
   }
 
   static _styles() {
@@ -248,6 +319,12 @@ class PitstopCard extends HTMLElement {
       .table td { padding: 6px; border-bottom: 1px solid var(--divider-color, #e0e0e0); vertical-align: top; }
       .table .num { text-align: right; white-space: nowrap; }
       .badge { color: #fff; border-radius: 10px; padding: 2px 8px; font-size: 11px; font-weight: 600; }
+      .editkm { cursor: pointer; }
+      .km-edit { display: flex; gap: 4px; margin-top: 6px; }
+      .km-input { width: 70px; font-size: 13px; padding: 2px 6px; border: 1px solid var(--divider-color, #e0e0e0); border-radius: 6px; background: var(--card-background-color, #fff); color: var(--primary-text-color); }
+      .km-go { font-size: 12px; padding: 3px 8px; border: none; border-radius: 6px; background: var(--primary-color, #03a9f4); color: #fff; cursor: pointer; }
+      .chart { width: calc(100% - 32px); margin: 0 16px 8px; border-radius: 10px; background: var(--secondary-background-color, #f5f5f5); }
+      .axis { font-size: 20px; fill: var(--secondary-text-color, #727272); }
     `;
   }
 }

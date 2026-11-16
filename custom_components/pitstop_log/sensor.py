@@ -181,6 +181,10 @@ class PitStopNextMaintenanceSensor(PitStopEntity):
             "registration": vehicle.get("registration"),
             "purchase_date": vehicle.get("purchase_date"),
             "model_year": vehicle.get("model_year"),
+            "vehicle_id": self.vehicle_id,
+            "odometer_history": self.coordinator.get_odometer_history(
+                self.vehicle_id
+            ),
             "plans": plans_attr,
             "history": history_attr,
             "history_count": len(history_attr),
