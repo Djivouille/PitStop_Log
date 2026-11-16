@@ -5,8 +5,6 @@ carnet d'entretien numérique multi-véhicules (motos, voitures, camping-cars, e
 
 ## Versionnement
 
-## Versionnement
-
 Les versions suivent le **versionnement sémantique** :
 
 - **`MAJOR.MINOR.PATCH`** (ex. `0.1.0`) : versions de **production**, stables — le `0.x` indique que l'intégration n'a pas encore atteint l'ensemble des fonctionnalités prévues pour une `1.0.0` ;
