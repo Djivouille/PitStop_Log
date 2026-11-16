@@ -9,10 +9,10 @@ carnet d'entretien numérique multi-véhicules (motos, voitures, camping-cars, e
 
 Les versions suivent le **versionnement sémantique** :
 
-- **`MAJOR.MINOR.PATCH`** (ex. `1.0.0`) : versions de **production**, stables ;
-- **`MAJOR.MINOR.PATCH-beta.N`** (ex. `1.1.0-beta.1`) : versions de **test** (pre-release), destinées à la validation des nouveautés avant leur publication en production.
+- **`MAJOR.MINOR.PATCH`** (ex. `0.1.0`) : versions de **production**, stables — le `0.x` indique que l'intégration n'a pas encore atteint l'ensemble des fonctionnalités prévues pour une `1.0.0` ;
+- **`MAJOR.MINOR.PATCH-beta.N`** (ex. `0.2.0-beta.1`) : versions de **test** (pre-release), destinées à la validation des nouveautés avant leur publication en production.
 
-**Cycle d'une version** : les nouvelles fonctionnalités sont développées et publiées en `-beta.N` ; après validation, la version stable `MAJOR.MINOR.PATCH` est publiée. Les releases bêta sont marquées « pre-release » sur GitHub : le Marketplace ne les propose qu'aux utilisateurs qui activent **« Afficher les versions bêta »** dans les paramètres du dépôt.
+**Cycle d'une version** : les nouvelles fonctionnalités sont développées et publiées en `-beta.N` ; après validation, la version stable `MAJOR.MINOR.PATCH` est publiée. La `1.0.0` sera publiée lorsque l'intégration atteindra son ensemble de fonctionnalités cible. Les releases bêta sont marquées « pre-release » sur GitHub : le Marketplace ne les propose qu'aux utilisateurs qui activent **« Afficher les versions bêta »** dans les paramètres du dépôt.
 
 Une release GitHub du même nom que la version du `manifest.json` est publiée automatiquement par le workflow du dépôt à chaque changement de version ; les versions contenant `beta` ou `rc` sont automatiquement marquées pre-release.
 
