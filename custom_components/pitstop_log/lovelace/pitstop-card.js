@@ -381,7 +381,7 @@ class PitstopCard extends HTMLElement {
         <div class="grid">
           <div class="cell">
             <div class="label">Kilom\u00e9trage
-              <span class="gear" title="Mettre \u00e0 jour le kilom\u00e9trage">
+              <span class="gear gear-km" title="Mettre \u00e0 jour le kilom\u00e9trage">
                 <svg viewBox="0 0 24 24" width="16" height="16">
                   <path fill="currentColor" d="M19.14 12.94a7.07 7.07 0 0 0 .05-.94 7.07 7.07 0 0 0-.05-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.03 7.03 0 0 0-1.62-.94l-.36-2.54a.5.5 0 0 0-.5-.42h-3.84a.5.5 0 0 0-.5.42l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96a.5.5 0 0 0-.6.22L2.66 8.84a.5.5 0 0 0 .12.64l2.03 1.58c-.03.31-.05.63-.05.94s.02.63.05.94l-2.03 1.58a.5.5 0 0 0-.12.64l1.92 3.32c.13.22.39.31.6.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.04.24.25.42.5.42h3.84c.25 0 .46-.18.5-.42l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.09.47 0 .6-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.58ZM12 15.6A3.6 3.6 0 1 1 12 8.4a3.6 3.6 0 0 1 0 7.2Z"/>
                 </svg>
@@ -422,8 +422,8 @@ class PitstopCard extends HTMLElement {
             : ""
         }
       </ha-card>`;
-    const gear = root.querySelector(".gear");
-    if (gear) gear.addEventListener("click", () => this._openEditor());
+    const gearKm = root.querySelector(".gear-km");
+    if (gearKm) gearKm.addEventListener("click", () => this._openEditor());
     const gearBrand = root.querySelector(".gear-brand");
     if (gearBrand)
       gearBrand.addEventListener("click", () => this._openBrandEditor());
