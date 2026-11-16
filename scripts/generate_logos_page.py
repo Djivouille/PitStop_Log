@@ -61,12 +61,24 @@ def main() -> int:
         if not entries:
             continue
         entries.sort(key=lambda item: item[0].lower())
-        lines += [f"## {title} ({len(entries)})", "", "| Logo | Marque |", "|---|---|"]
-        for name, info in entries:
-            logo = (info.get("logo") or "").strip()
-            filename = logo.rsplit("/", 1)[-1] if logo else "_missing.svg"
-            url = raw_url(filename)
-            lines.append(f'| <img src="{url}" width="48" height="48" alt="{name}"> | {name} |')
+        lines += [f"## {title} ({len(entries)})", ""]
+        # tableau de 4 vignettes par ligne
+        per_row = 4
+        header = "|" + "|".join([" Logo "] * per_row) + "|"
+        sep = "|" + "|".join(["---"] * per_row) + "|"
+        lines += [header, sep]
+        for i in range(0, len(entries), per_row):
+            row = entries[i : i + per_row]
+            cells = []
+            for name, info in row:
+                logo = (info.get("logo") or "").strip()
+                filename = logo.rsplit("/", 1)[-1] if logo else "_missing.svg"
+                url = raw_url(filename)
+                cells.append(
+                    f'<img src="{url}" width="48" height="48" alt="{name}"><br>{name}'
+                )
+            cells += [""] * (per_row - len(row))
+            lines.append("|" + "|".join(cells) + "|")
         lines.append("")
 
     OUT.parent.mkdir(parents=True, exist_ok=True)
