@@ -33,7 +33,7 @@ class PitstopCardEditor extends HTMLElement {
       ) {
         result.push({
           name: state.attributes.vehicle,
-          label: state.attributes.friendly_name || entityId,
+          label: state.attributes.vehicle || state.attributes.friendly_name || entityId,
         });
       }
     }
