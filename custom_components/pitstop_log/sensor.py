@@ -179,6 +179,7 @@ class PitStopNextMaintenanceSensor(PitStopEntity):
         return {
             "vehicle": vehicle.get("name"),
             "brand": vehicle.get("brand"),
+            "model": vehicle.get("model"),
             "brand_logo": vehicle.get("brand_logo"),
             "photo": vehicle.get("photo"),
             "registration": vehicle.get("registration"),
