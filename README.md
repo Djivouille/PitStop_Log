@@ -1,103 +1,129 @@
-# PitStop Log
+# 🏍️ PitStop Log
 
 **PitStop Log** est une intégration personnalisée pour Home Assistant qui sert de
-carnet d'entretien numérique multi-véhicules (motos, voitures, camping-cars, etc.).
+**carnet d'entretien numérique multi-véhicules** 🚗 (motos, voitures, camping-cars…).
 
-## Versionnement
+> 💡 *Philosophie : ajoutez un véhicule à votre garage, et gérez accessoirement ses entretiens.*
 
-Les versions suivent le **versionnement sémantique** :
+---
 
-- **`MAJOR.MINOR.PATCH`** (ex. `0.1.0`) : versions de **production**, stables — le `0.x` indique que l'intégration n'a pas encore atteint l'ensemble des fonctionnalités prévues pour une `1.0.0` ;
-- **`MAJOR.MINOR.PATCH-beta.N`** (ex. `0.2.0-beta.1`) : versions de **test** (pre-release), destinées à la validation des nouveautés avant leur publication en production.
+## ✨ Fonctionnalités
 
-**Cycle d'une version** : les nouvelles fonctionnalités sont développées et publiées en `-beta.N` ; après validation, la version stable `MAJOR.MINOR.PATCH` est publiée. La `1.0.0` sera publiée lorsque l'intégration atteindra son ensemble de fonctionnalités cible. Les releases bêta sont marquées « pre-release » sur GitHub : le Marketplace ne les propose qu'aux utilisateurs qui activent **« Afficher les versions bêta »** dans les paramètres du dépôt.
+- 🚙 **Gestion multi-véhicules** via l'interface de Home Assistant : type,
+  marque (liste déroulante avec logo), modèle, année-modèle, date d'achat,
+  immatriculation, kilométrage et photo du véhicule (téléversée depuis
+  l'interface, stockée localement).
+- 📝 **Saisie des entretiens depuis la carte** : bouton « + Ajouter un entretien »
+  — date, kilométrage, **natures multiples** (cases à cocher : vidange, filtres,
+  pneus…), coût et **facture (photo ou PDF)** stockés localement.
+- 🔄 **Historique complet modifiable** : chaque entretien réalisé peut être
+  modifié ou supprimé depuis la carte ; les relevés kilométriques issus d'un
+  entretien sont identifiés et protégés.
+- 📅 **Entretiens à faire** : échéances par intervalle km et/ou mois, calcul
+  automatique du reste à faire et statut d'alerte — `OK` 🟢, `Bientôt dû` 🟡,
+  `En retard` 🔴. Un entretien réalisé **réinitialise automatiquement** les plans
+  correspondants.
+- 🛠️ **Édition complète via l'interface** (Options Flow) : métadonnées du
+  véhicule, plans d'entretien et historique — sans YAML.
+- 📊 **Kilométrage historisé** : chaque relevé (manuel ou issu d'un entretien)
+  alimente l'historique ; clic sur la cellule → graphique natif Home Assistant.
+- 🌍 **Interface bilingue** 🇫🇷/🇬🇧 — intégration **et** carte Lovelace, extensible par traduction.
 
-Une release GitHub du même nom que la version du `manifest.json` est publiée automatiquement par le workflow du dépôt à chaque changement de version ; les versions contenant `beta` ou `rc` sont automatiquement marquées pre-release.
+---
 
-## Fonctionnalités
+## 📦 Installation
 
-- **Gestion multi-véhicules** via l'interface de Home Assistant (Config Flow) :
-  type, marque (liste déroulante issue de `brands.json`, avec logo associé), modèle,
-  année-modèle, date d'achat, immatriculation (carte grise), kilométrage actuel
-  et photo du véhicule (téléversement depuis l'interface, stockée dans
-  `/config/www/pitstop_log/photos/`, servie via `/local/pitstop_log/photos/...`).
-- **Édition complète via l'interface** (Options Flow) : métadonnées du véhicule,
-  plans d'entretien (ajout/modification/suppression) et historique des entretiens
-  (modification/suppression) — sans passer par les services YAML.
-- **Saisie des entretiens depuis la carte** : bouton « + Ajouter un entretien » (date, kilométrage, nature via liste déroulante issue de `maintenance_types.json`, coût, facture photo ou PDF stockée localement) ; historique complet modifiable et supprimable depuis la carte.
-- **Entretiens à faire** : échéances basées sur un intervalle en kilomètres
-  et/ou en mois, avec calcul automatique du reste à faire (km restants, jours
-  restants) et statut d'alerte : `OK`, `Bientôt dû`, `En retard` (états traduits
-  dans l'interface via `translation_key` + sélecteur de texte).
-- **Entretiens réalisés** : historique daté avec kilométrage, description des
-  actions, coût et photo de facture (stockée dans `/config/www/pitstop_log/invoices/`,
-  accessible via `/local/pitstop_log/invoices/...`).
-- **Persistance** : toutes les données sont sauvegardées via le `Store` de
-  Home Assistant dans `.storage/pitstop_log`.
-- **Interface bilingue** français / anglais.
+### Via le Marketplace de Home Assistant (recommandé)
 
-## **Installation**
+> Nécessite Home Assistant **2026.11** ou plus récent (Marketplace intégré).
 
-### **Via HACS (recommandé)**
+1. **Paramètres** → **Marketplace** → menu **⋮** → **Dépôts personnalisés**.
+2. Ajoutez le dépôt :
+   - URL : `https://github.com/Djivouille/PitStop_Log`
+   - Catégorie : **Integration**
+3. Ouvrez la fiche **PitStop Log** → **Télécharger**.
+4. **Redémarrez Home Assistant**.
+5. **Paramètres** → **Appareils et services** → **Ajouter une intégration** →
+   recherchez **PitStop Log** et suivez l'assistant (voir [⚙️ Configuration](#️-configuration)).
 
-Prérequis : [**HACS**](https://hacs.xyz/installation/prerequisites/) déjà installé.
+> 🧪 Pour recevoir les versions bêta : fiche du dépôt → **⋮** → activez
+> **« Inclure les pre-releases »**.
 
-1. Dans Home Assistant, ouvrez **HACS** dans le menu latéral.
+### Via HACS (alternative)
 
-2. Cliquez sur les **trois points** en haut à droite, puis **Dépôts personnalisés** (*Custom repositories*).
+1. HACS → **⋮** → **Dépôts personnalisés** :
+   - URL : `https://github.com/Djivouille/PitStop_Log` — Catégorie : **Integration**
+2. Recherchez **PitStop Log** → **Télécharger** → redémarrez Home Assistant.
 
-3. Collez l'URL du dépôt et choisissez la catégorie **Integration** :
+---
 
-   * URL : `https://github.com/Djivouille/PitStop_Log`
+## ⚙️ Configuration
 
-   * Catégorie : `Integration`
+1. **Paramètres** → **Appareils et services** → **Ajouter une intégration** → **PitStop Log**.
+2. Suivez l'assistant en deux étapes : *type/marque/modèle*, puis le reste
+   (nom, année, achat, immatriculation, kilométrage, photo).
+3. ➕ Répétez pour chaque véhicule du garage.
+4. Pour gérer un véhicule : sa fiche → **Configurer** :
+   - ✏️ **Modifier le véhicule** : nom, type, marque, modèle, année, achat, immatriculation, km ;
+   - 📅 **Plans d'entretien** : ajout / modification / suppression ;
+   - 🗂️ **Historique des entretiens** : modification / suppression.
 
-4. Cliquez sur **Ajouter**, puis fermez la fenêtre.
+---
 
-5. Recherchez **PitStop Log** dans HACS, ouvrez la fiche et cliquez sur **Télécharger** (*Download*).
+## 🃏 Carte Lovelace « PitStop Log »
 
-6. **Redémarrez Home Assistant** (Paramètres > Système > Redémarrer).
+L'intégration embarque une carte personnalisée qui affiche tout le véhicule :
+logo de marque (avec icône par défaut si manquant), photo, kilométrage,
+statut d'entretien, plans à faire, derniers entretiens — et permet de **tout
+modifier directement depuis la carte** :
 
-7. Ajoutez l'intégration : **Paramètres > Appareils et services > Ajouter une intégration**, recherchez **PitStop Log** et suivez l'assistant (voir [**Configuration**](#configuration)).
+- ⚙️ roue crantée de la cellule Kilométrage → relevés (ajout, ✎ modification, ✖ suppression) ;
+- ⚙️ roue crantée de l'en-tête → marque, modèle, année, photo, immatriculation, date d'achat ;
+- ➕ bouton « Ajouter un entretien » → formulaire complet (natures multiples, facture) ;
+- ⚙️ roue crantée de la section historique → gestion complète des entretiens ;
+- 🖱️ clic sur la cellule Kilométrage → graphique natif Home Assistant.
 
-## Configuration
+**Installation (une seule fois)** :
 
-1. **Paramètres** → **Appareils et services** → **Ajouter une intégration**.
-2. Recherchez **PitStop Log** et suivez l'assistant pour créer un véhicule.
-3. Répétez pour chaque véhicule du parc.
-4. Pour gérer un véhicule : roulez sa carte → **Configurer** (Options Flow). Le menu permet de :
-   - **Modifier le véhicule** : nom, type, marque, modèle, année-modèle, date d'achat, immatriculation, kilométrage ;
-   - **Plans d'entretien** : ajouter, modifier ou supprimer les entretiens périodiques (intervalle km/mois, dernière réalisation) ;
-   - **Historique des entretiens** : modifier ou supprimer chaque entretien réalisé (date, kilométrage, actions, coût, facture) ;
-   - **Terminé** pour fermer.
+1. Paramètres → Tableaux de bord → menu **⋮** → **Ressources** → **Ajouter** :
+   - URL : `/local/pitstop_log/lovelace/pitstop-card.js`
+   - Type : **Module JavaScript**
+2. Rechargez la page (F5).
 
-## Capteurs créés par véhicule
+**Utilisation** : Modifier → ajouter carte → **« PitStop Log »**. L'éditeur
+visuel propose un menu déroulant listant les véhicules (noms des appareils) et
+un titre optionnel — **aucun YAML**. Le fichier JS est copié automatiquement
+dans `/config/www/pitstop_log/lovelace/` au démarrage.
+
+---
+
+## 📊 Capteurs créés par véhicule
 
 | Capteur | Description |
 |---|---|
-| Kilométrage | Kilométrage actuel du véhicule (km). |
-| Prochain entretien | Statut le plus urgent (`OK` / `Bientôt dû` / `En retard`, traduit dans l'interface), avec en attributs le détail des plans et l'historique complet (dates, km, actions, coûts, liens vers les factures). |
-| Un capteur par plan d'entretien | Statut du plan (traduit dans l'interface) avec attributs `km_remaining`, `days_remaining`, `due_km`, `due_date`. |
-| Photo du véhicule (entité image) | Affiche la photo téléversée, visible sur la page de l'appareil et dans les tableaux de bord. |
-| Logo de marque (entité image) | Affiche le logo de la marque du véhicule, visible sur la page de l'appareil et dans les tableaux de bord. |
+| 📏 Kilométrage | Kilométrage actuel (km), avec historique des relevés en attributs. |
+| 🔧 Prochain entretien | Statut le plus urgent (`OK` / `Bientôt dû` / `En retard`), avec plans et historique complet en attributs. |
+| 📅 Un capteur par plan | Statut du plan avec `km_remaining`, `days_remaining`, `due_km`, `due_date`. |
+| 🖼️ Photo du véhicule (image) | Photo téléversée, visible sur la page de l'appareil et les tableaux de bord. |
+| 🏷️ Logo de marque (image) | Logo de la marque, visible sur la page de l'appareil et les tableaux de bord. |
 
-## Services
+---
 
-### `pitstop_log.update_odometer`
+## 🛠️ Services
 
-Met à jour le kilométrage actuel d'un véhicule.
+| Service | Rôle |
+|---|---|
+| `pitstop_log.update_odometer` | Met à jour le kilométrage (relevé daté optionnel). |
+| `pitstop_log.delete_odometer_point` | Supprime un relevé de l'historique. |
+| `pitstop_log.update_registration` | Met à jour l'immatriculation. |
+| `pitstop_log.update_purchase_date` | Met à jour la date d'achat. |
+| `pitstop_log.update_brand_model` | Marque, modèle, année, photo, immatriculation, achat. |
+| `pitstop_log.add_maintenance_done` | Enregistre un entretien (natures multiples, facture, réinitialisation des plans). |
+| `pitstop_log.update_maintenance` | Modifie un entretien réalisé. |
+| `pitstop_log.delete_maintenance` | Supprime un entretien réalisé. |
+| `pitstop_log.add_maintenance_plan` | Ajoute un plan d'entretien périodique. |
 
-```yaml
-service: pitstop_log.update_odometer
-data:
-  vehicle_id: "yamaha_mt07"
-  km: 15432
-```
-
-### `pitstop_log.add_maintenance_done`
-
-Enregistre un entretien réalisé. Si `plan_id` est fourni, le plan d'entretien
-associé est réinitialisé (nouveau point de départ des échéances).
+Exemple — enregistrer un entretien avec facture :
 
 ```yaml
 service: pitstop_log.add_maintenance_done
@@ -105,127 +131,87 @@ data:
   vehicle_id: "yamaha_mt07"
   date: "2025-05-01"
   km: 15432
-  actions: "Vidange, remplacement du filtre à huile"
+  actions: ["Vidange", "Filtre à huile"]
   cost: 89.5
-  invoice_path: "/local/pitstop_log/invoices/vidange_2025.jpg"
-  plan_id: "yamaha_mt07_vidange"
 ```
 
-Vous pouvez aussi fournir directement une image encodée en base64 via
-`invoice_base64` : elle sera sauvegardée automatiquement dans
-`/config/www/pitstop_log/invoices/` et référencée par son URL locale.
+> 💡 Une facture peut être fournie en base64 via `invoice_base64` (photo ou PDF) :
+> elle est sauvegardée dans `/config/www/pitstop_log/invoices/`.
 
-### `pitstop_log.add_maintenance_plan`
+---
 
-Ajoute une règle d'entretien périodique (au moins un des deux intervalles requis).
+## 🏷️ Marques et logos
 
-```yaml
-service: pitstop_log.add_maintenance_plan
-data:
-  vehicle_id: "yamaha_mt07"
-  plan_name: "Vidange moteur"
-  interval_km: 6000
-  interval_months: 12
-  last_km: 15000
-  last_date: "2025-05-01"
-```
+La liste des marques est définie dans `brands.json` (fichier séparé) :
+motos, voitures et camping-cars courants, chacun associé à son logo SVG stocké
+**localement** (aucun CDN externe). Les logos sont copiés automatiquement vers
+`/config/www/pitstop_log/brands/` au démarrage.
 
-## Structure du dépôt
+> 🖼️ **[Galerie des logos de marques](docs/logos.md)** — visualisez toutes les
+> marques et celles en attente de logo (page générée automatiquement depuis `brands.json`).
 
-```
-hacs.json
-README.md
-custom_components/pitstop_log/
-├── manifest.json
-├── __init__.py
-├── const.py
-├── config_flow.py
-├── coordinator.py
-├── sensor.py
-├── services.yaml
-├── strings.json
-└── translations/
-    ├── fr.json
-    └── en.json
-```
-
-## Carte Lovelace « PitStop Log »
-
-L'intégration embarque une carte Lovelace personnalisée qui affiche toutes les
-informations d'un véhicule : photo, logo de marque, kilométrage, immatriculation,
-statut d'entretien, plans à faire (reste en km et en jours), derniers entretiens
-réalisés (date, km, actions, coût), **mise à jour du kilométrage directement
-depuis la carte** (champ de saisie + OK) et **graphique en courbe du kilométrage
-dans le temps** (axe dates / km, survol des points pour le détail).
-
-L'historique du kilométrage démarre à la date de mise en service (date d'achat)
-au km 0 ; chaque mise à jour (service, carte ou interface) ajoute un point
-(remplacé si plusieurs mises à jour le même jour).
-
-**Installation (une seule fois) :**
-
-1. Paramètres → Tableaux de bord → menu **⋮** → **Ressources** → **Ajouter** :
-   - URL : `/local/pitstop_log/lovelace/pitstop-card.js`
-   - Type : **Module JavaScript**
-2. Rechargez la page (F5).
-
-**Utilisation dans un tableau de bord** (Modifier → ajouter carte → « PitStop Log ») :
-l'éditeur visuel propose un **menu déroulant listant les véhicules** de
-l'intégration et un champ « Titre affiché » optionnel — aucun YAML n'est
-nécessaire. Le véhicule est présélectionné automatiquement à l'ajout.
-Le fichier JS est copié automatiquement dans `/config/www/pitstop_log/lovelace/`
-au démarrage de Home Assistant.
-
-## Marques et logos
-
-La liste des marques proposées dans le sélecteur est définie dans
-`custom_components/pitstop_log/brands.json` (fichier à part) : motos, voitures et
-camping-cars les plus courants, chacun associé au chemin de son logo SVG stocké **localement** dans
-`custom_components/pitstop_log/brands/` (39 logos embarqués, issus de Simple
-Icons ; certaines marques retirées du projet n'ont pas de logo). Les logos
-sont copiés automatiquement dans `/config/www/pitstop_log/brands/` au
-démarrage et servis localement via `/local/pitstop_log/brands/...`.
-
-Pour ajouter une marque : déposez son SVG dans `brands/` et éditez
-`brands.json` :
+Pour ajouter une marque : déposez son SVG dans `brands/` et éditez `brands.json` :
 
 ```json
 "Ma Marque": {"logo": "/local/pitstop_log/brands/mamarque.svg", "category": "moto", "label": "Ma Marque"}
 ```
 
-Le logo de la marque et la photo du véhicule sont exposés en attributs du
-capteur « Prochain entretien » (`brand_logo`, `photo`), utilisables dans les
-tableaux de bord Lovelace.
+---
 
-## Stockage des données
+## 💾 Stockage des données
 
-- Données (véhicules, plans, historique) : `.storage/pitstop_log` (JSON, géré
-  par `homeassistant.helpers.storage.Store`).
-- Photos de factures : `/config/www/pitstop_log/invoices/` (créé
-  automatiquement au démarrage), accessibles dans Lovelace via
-  `/local/pitstop_log/invoices/...`.
+- 🗄️ Données (véhicules, plans, historique) : `.storage/pitstop_log` (JSON,
+  géré par le `Store` de Home Assistant).
+- 🧾 Factures : `/config/www/pitstop_log/invoices/`
+- 📷 Photos des véhicules : `/config/www/pitstop_log/photos/`
 
-## Licence
+---
 
-Fourni tel quel, sans garantie. Utilisation libre.
+## 🗂️ Structure du dépôt
 
-## Contribuer (traductions, marques, natures d'entretien)
-
-> 🖼️ **[Galerie des logos de marques](docs/logos.md)** — visualisez toutes les marques et celles en attente de logo (page générée automatiquement depuis `brands.json`).
-
-L'intégration est conçue pour être enrichie par de simples Pull Requests, sans toucher au code :
-
-| Sujet | Fichier à modifier | Comment |
-|---|---|---|
-| Traductions de l'intégration (assistant de config, options, services) | `custom_components/pitstop_log/translations/<langue>.json` | Dupliquez `fr.json`, traduisez les valeurs (gardez les clés). |
-| Traductions de la carte Lovelace | `custom_components/pitstop_log/locales/<langue>.json` | Dupliquez `locales/fr.json` et traduisez les valeurs. La carte charge automatiquement la langue de Home Assistant. |
-| Marques et logos | `custom_components/pitstop_log/brands.json` (+ logo SVG dans `brands/`) | Ajoutez la marque avec sa catégorie (`moto`, `car`, `camper`, `other`) et le chemin du logo. |
-| Natures d'entretien | `custom_components/pitstop_log/maintenance_types.json` | Ajoutez la nature dans la liste `types`. |
-
-Avant d'ouvrir la PR, vérifiez la cohérence des traductions :
-
-```bash
-python3 scripts/check_translations.py
+```
+custom_components/pitstop_log/
+├── manifest.json
+├── __init__.py, const.py, config_flow.py, coordinator.py, sensor.py, image.py
+├── services.yaml, strings.json, icons.json
+├── brands.json          ← marques + logos
+├── maintenance_types.json ← natures d'entretien
+├── brands/              ← logos SVG
+├── locales/             ← traductions de la carte (fr, en)
+├── translations/        ← traductions de l'intégration (fr, en)
+└── lovelace/pitstop-card.js
 ```
 
-Le script contrôle que toutes les langues contiennent les mêmes clés (intégration et carte) et qu'aucune valeur n'est vide.
+---
+
+## 🤝 Contribuer
+
+La plupart des ajouts se font **par simple Pull Request, sans toucher au code** :
+traductions 🌍, marques + logos 🏷️, natures d'entretien 🔧.
+Voir **[CONTRIBUTING.md](CONTRIBUTING.md)** pour la marche à suivre et les
+scripts de vérification.
+
+> ✅ La CI contrôle chaque PR : syntaxe Python/JS, validité JSON, cohérence des
+> traductions, marques/logos, format de version, page des logos à jour.
+> Une PR n'est fusionnée que si tous les jobs sont verts.
+
+---
+
+## 📜 Versionnement
+
+Les versions suivent le **versionnement sémantique** :
+
+- 🏷️ **`MAJOR.MINOR.PATCH`** (ex. `0.1.0`) : versions de **production** ;
+- 🧪 **`MAJOR.MINOR.PATCH-beta.NN`** : versions de **test** (pre-release),
+  numéros de bêta sur 2 chiffres.
+
+**Cycle** : les nouveautés sont publiées en `-beta.NN` ; après validation, la
+version stable est publiée. La `1.0.0` arrivera lorsque l'ensemble des
+fonctionnalités cibles sera atteint. Les releases GitHub sont créées
+automatiquement par le workflow du dépôt à chaque changement de version.
+
+---
+
+## 📄 Licence
+
+Fourni tel quel, sans garantie. Utilisation libre.
