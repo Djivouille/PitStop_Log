@@ -193,7 +193,7 @@ class PitstopCard extends HTMLElement {
           <table class="table editor-table">
             <thead><tr><th>Date</th><th class="num">Kilom\u00e9trage</th></tr></thead>
             <tbody>
-              ${historyRows}
+              ${history}
             </tbody>
           </table>
           <div class="editor-error" id="ps-error"></div>
