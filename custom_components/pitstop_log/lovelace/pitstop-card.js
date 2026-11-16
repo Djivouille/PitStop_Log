@@ -723,9 +723,7 @@ class PitstopCard extends HTMLElement {
       )
       .join("");
 
-    const logo = attrs.brand_logo
-      ? `<img class="logo" src="${attrs.brand_logo}" alt="${attrs.brand || ""}">`
-      : "";
+    const logo = PitstopCard._logoHtml(attrs);
     const photo = attrs.photo
       ? `<img class="photo" src="${attrs.photo}" alt="${this._deviceOrVehicle()}">`
       : "";
@@ -795,6 +793,11 @@ class PitstopCard extends HTMLElement {
           <button class="ps-add" id="ps-add-maint">+ ${psT("add_maintenance")}</button>
         </div>
       </ha-card>`;
+    const logoImg = root.querySelector("img.logo");
+    if (logoImg)
+      logoImg.addEventListener("error", () => {
+        logoImg.outerHTML = PitstopCard._missingLogoSvg();
+      });
     const gearKm = root.querySelector(".gear-km");
     if (gearKm) gearKm.addEventListener("click", () => this._openEditor());
     const cellKm = root.querySelector(".cell-km");
@@ -822,6 +825,22 @@ class PitstopCard extends HTMLElement {
     const addMaint = root.querySelector("#ps-add-maint");
     if (addMaint)
       addMaint.addEventListener("click", () => this._openMaintenanceEditor(null));
+  }
+
+  /** Logo de marque, avec ic\u00f4ne par d\u00e9faut si l'image est manquante. */
+  static _logoHtml(attrs) {
+    if (attrs.brand_logo) {
+      return `<img class="logo" src="${attrs.brand_logo}" alt="${attrs.brand || ""}">`;
+    }
+    return PitstopCard._missingLogoSvg();
+  }
+
+  /** Ic\u00f4ne \u00ab image manquante \u00bb (cadre photo barr\u00e9). */
+  static _missingLogoSvg() {
+    return `<svg class="logo logo-missing" viewBox="0 0 24 24">
+      <path fill="currentColor" d="M21 5v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2m-2 12v-2.6l-3-3L11 16.4l-2-2L5 17v2h14zM8.5 9a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3Z"/>
+      <path d="M3 3l18 18" stroke="currentColor" stroke-width="2"/>
+    </svg>`;
   }
 
   /** Formate les natures d'un entretien (liste ou cha\u00eene). */
@@ -1137,6 +1156,7 @@ class PitstopCard extends HTMLElement {
       .header { display: flex; align-items: center; gap: 12px; padding: 16px 16px 8px; }
       .gear { cursor: pointer; color: var(--secondary-text-color, #727272); float: right; display: inline-flex; }
       .logo { width: 40px; height: 40px; object-fit: contain; flex: none; }
+      .logo-missing { color: var(--secondary-text-color, #727272); opacity: 0.7; }
       .titles { flex: 1; min-width: 0; }
       .brand { font-size: 12px; color: var(--secondary-text-color, #727272); }
       .meta { font-size: 12px; color: var(--secondary-text-color, #727272); margin-top: 2px; }
