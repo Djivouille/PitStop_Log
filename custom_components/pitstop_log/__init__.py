@@ -106,7 +106,7 @@ async def async_setup(hass: HomeAssistant, config: dict[str, Any]) -> bool:
     source_lovelace = os.path.join(os.path.dirname(__file__), "lovelace")
     target_lovelace = os.path.join(hass.config.path(), "www/pitstop_log/lovelace")
     await hass.async_add_executor_job(
-        _sync_brand_logos, source_lovelace, target_lovelace
+        _sync_files, source_lovelace, target_lovelace
     )
 
     async def handle_update_odometer(call: ServiceCall) -> None:
@@ -182,16 +182,28 @@ def _sync_brand_logos(source_dir: str, target_dir: str) -> None:
     Les fichiers déjà présents ne sont pas écrasés ; l'opération est
     idempotente et ne fait rien si le dossier source est absent.
     """
+    _sync_files(source_dir, target_dir, suffix=".svg")
+
+
+def _sync_files(source_dir: str, target_dir: str, suffix: str | None = None) -> None:
+    """Copier les fichiers embarqués d'un dossier vers www (hors boucle).
+
+    Les fichiers déjà présents ne sont pas écrasés ; l'opération est
+    idempotente et ne fait rien si le dossier source est absent.
+    """
     if not os.path.isdir(source_dir):
         return
     os.makedirs(target_dir, exist_ok=True)
     for filename in os.listdir(source_dir):
-        if not filename.endswith(".svg"):
+        if suffix and not filename.endswith(suffix):
+            continue
+        source = os.path.join(source_dir, filename)
+        if not os.path.isfile(source):
             continue
         target = os.path.join(target_dir, filename)
         if os.path.exists(target):
             continue
-        with open(os.path.join(source_dir, filename), "rb") as src:
+        with open(source, "rb") as src:
             with open(target, "wb") as dst:
                 dst.write(src.read())
 
