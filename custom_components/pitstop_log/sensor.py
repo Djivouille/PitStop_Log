@@ -111,6 +111,9 @@ class PitStopOdometerSensor(PitStopEntity):
             "vehicle": vehicle.get("name"),
             "vehicle_id": self.vehicle_id,
             "odometer": True,
+            "odometer_history": self.coordinator.get_odometer_history(
+                self.vehicle_id
+            ),
             "updated_at": vehicle.get("odometer_updated_at"),
         }
 
@@ -182,9 +185,6 @@ class PitStopNextMaintenanceSensor(PitStopEntity):
             "purchase_date": vehicle.get("purchase_date"),
             "model_year": vehicle.get("model_year"),
             "vehicle_id": self.vehicle_id,
-            "odometer_history": self.coordinator.get_odometer_history(
-                self.vehicle_id
-            ),
             "plans": plans_attr,
             "history": history_attr,
             "history_count": len(history_attr),

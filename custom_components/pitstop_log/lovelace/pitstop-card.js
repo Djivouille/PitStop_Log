@@ -163,6 +163,17 @@ class PitstopCard extends HTMLElement {
       main && main.attributes && main.attributes.vehicle_id
         ? main.attributes.vehicle_id
         : this._config.vehicle;
+    const history = (entities.odometer && entities.odometer.attributes
+      ? entities.odometer.attributes.odometer_history || []
+      : []
+    )
+      .slice()
+      .sort((a, b) => (a.date < b.date ? 1 : -1))
+      .map(
+        (p) =>
+          `<tr><td>${p.date}</td><td class="num">${Number(p.km).toLocaleString()} km</td></tr>`
+      )
+      .join("");
     root.innerHTML = `
       <style>${PitstopCard._styles()}</style>
       <ha-card>
@@ -178,6 +189,13 @@ class PitstopCard extends HTMLElement {
             <input id="ps-km" class="ps-input" type="number" min="0" step="1"
                    placeholder="${currentKm}" value="${currentKm}" />
           </div>
+          <div class="section editor-section">Historique des valeurs</div>
+          <table class="table editor-table">
+            <thead><tr><th>Date</th><th class="num">Kilom\u00e9trage</th></tr></thead>
+            <tbody>
+              ${historyRows}
+            </tbody>
+          </table>
           <div class="editor-error" id="ps-error"></div>
           <div class="editor-actions">
             <button class="ps-cancel" id="ps-cancel">Annuler</button>
@@ -290,7 +308,10 @@ class PitstopCard extends HTMLElement {
       )
       .join("");
 
-    const chart = this._buildChart(attrs.odometer_history || []);
+    const odometerHistory = entities.odometer && entities.odometer.attributes
+      ? entities.odometer.attributes.odometer_history || []
+      : [];
+    const chart = this._buildChart(odometerHistory);
     const logo = attrs.brand_logo
       ? `<img class="logo" src="${attrs.brand_logo}" alt="${attrs.brand || ""}">`
       : "";
@@ -395,6 +416,8 @@ class PitstopCard extends HTMLElement {
       .ps-cancel { background: var(--secondary-background-color, #f5f5f5); color: var(--primary-text-color); }
       .ps-save { background: var(--primary-color, #03a9f4); color: #fff; font-weight: 500; }
       .ps-save:disabled { opacity: 0.5; cursor: wait; }
+      .editor-section { padding: 10px 0 4px; }
+      .editor-table { width: 100%; margin: 0 0 8px; }
     `;
   }
 }
