@@ -300,7 +300,11 @@ class PitstopCard extends HTMLElement {
       .sort((a, b) => (a.date < b.date ? 1 : -1))
       .map(
         (p, i) =>
-          `<tr><td>${p.date}</td><td class="num">${Number(p.km).toLocaleString()} km</td><td class="num"><span class="icon-btn edit" data-date="${p.date}" data-km="${p.km}" title="Modifier">\u270e</span><span class="icon-btn del" data-date="${p.date}" title="Supprimer">\u2716</span></td></tr>`
+          `<tr><td>${p.date}</td><td class="num">${Number(p.km).toLocaleString()} km</td><td class="num">${
+            p.source === "maintenance"
+              ? `<span class="src-badge" title="Cr\u00e9\u00e9 par un entretien \u2014 modifiable depuis la rubrique Derniers entretiens">Entretien</span>`
+              : `<span class="icon-btn edit" data-date="${p.date}" data-km="${p.km}" title="Modifier">\u270e</span><span class="icon-btn del" data-date="${p.date}" title="Supprimer">\u2716</span>`
+          }</td></tr>`
       )
       .join("");
     const overlay = document.createElement("div");
@@ -1041,6 +1045,7 @@ class PitstopCard extends HTMLElement {
       .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; padding: 0 16px 8px; }
       .cell { background: var(--secondary-background-color, #f5f5f5); border-radius: 10px; padding: 10px; }
       .cell-km { cursor: pointer; }
+      .src-badge { font-size: 10px; font-weight: 600; color: var(--secondary-text-color, #727272); border: 1px solid var(--divider-color, #e0e0e0); border-radius: 8px; padding: 1px 6px; white-space: nowrap; }
       .label { font-size: 11px; color: var(--secondary-text-color, #727272); text-transform: uppercase; letter-spacing: 0.5px; }
       .value { font-size: 20px; font-weight: 500; margin-top: 2px; }
       .value.small { font-size: 15px; }

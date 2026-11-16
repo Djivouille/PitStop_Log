@@ -542,7 +542,11 @@ class PitStopDataUpdateCoordinator:
             for point in (vehicle.get("odometer_history") or [])
             if point.get("date") != entry_date.isoformat()
         ]
-        odo_history.append({"date": entry_date.isoformat(), "km": km})
+        odo_history.append({
+            "date": entry_date.isoformat(),
+            "km": km,
+            "source": "maintenance",
+        })
         odo_history.sort(key=lambda point: point.get("date", ""))
         vehicle["odometer_history"] = odo_history
 
@@ -601,7 +605,11 @@ class PitStopDataUpdateCoordinator:
             for point in (vehicle.get("odometer_history") or [])
             if point.get("date") != entry_date.isoformat()
         ]
-        odo_history.append({"date": entry_date.isoformat(), "km": km})
+        odo_history.append({
+            "date": entry_date.isoformat(),
+            "km": km,
+            "source": "maintenance",
+        })
         odo_history.sort(key=lambda point: point.get("date", ""))
         vehicle["odometer_history"] = odo_history
         await self.async_save()
@@ -612,8 +620,34 @@ class PitStopDataUpdateCoordinator:
         self, vehicle_id: str, index: int
     ) -> bool:
         """Supprimer une entr\u00e9e d'historique (entretien r\u00e9alis\u00e9)."""
+        target = self.get_history_entry(vehicle_id, index)
         if not self.delete_history_entry(vehicle_id, index):
             raise HomeAssistantError("Entr\u00e9e d'historique introuvable")
+        # Retirer aussi le relev\u00e9 kilom\u00e9trique cr\u00e9\u00e9 par cet entretien
+        if target is not None:
+            vehicle = self.get_vehicle(vehicle_id) or {}
+            odo = list(vehicle.get("odometer_history") or [])
+            entry_date = target.get("date")
+            remaining = [
+                point
+                for point in odo
+                if not (
+                    point.get("date") == entry_date
+                    and point.get("source") == "maintenance"
+                )
+            ]
+            if len(remaining) != len(odo):
+                vehicle["odometer_history"] = remaining
+                if odo and entry_date >= max(
+                    point.get("date", "") for point in odo
+                ):
+                    vehicle["odometer"] = max(
+                        (point.get("km", 0) for point in remaining),
+                        default=0,
+                    )
+                    vehicle["odometer_updated_at"] = (
+                        dt_util.utcnow().isoformat()
+                    )
         await self.async_save()
         await self.async_refresh()
         return True
