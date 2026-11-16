@@ -320,9 +320,13 @@ class PitstopCard extends HTMLElement {
       </svg>`;
   }
 
-  /** Ouvre la page d'\u00e9dition du kilom\u00e9trage. */
+  /** Ouvre la fen\u00eatre d'\u00e9dition du kilom\u00e9trage (overlay). */
   _openEditor() {
+    this._odo_edit_date = null;
+    this._render();
     const root = this.shadowRoot;
+    const card = root.querySelector("ha-card");
+    if (!card) return;
     const main = this._findMainSensor();
     const entities = this._findEntities();
     const today = new Date().toISOString().slice(0, 10);
@@ -333,65 +337,88 @@ class PitstopCard extends HTMLElement {
       main && main.attributes && main.attributes.vehicle_id
         ? main.attributes.vehicle_id
         : this._config.vehicle;
-    const history = (entities.odometer && entities.odometer.attributes
+    const rows = (entities.odometer && entities.odometer.attributes
       ? entities.odometer.attributes.odometer_history || []
-      : []
-    )
+      : [])
       .slice()
       .sort((a, b) => (a.date < b.date ? 1 : -1))
       .map(
-        (p) =>
-          `<tr><td>${p.date}</td><td class="num">${Number(p.km).toLocaleString()} km</td></tr>`
+        (p, i) =>
+          `<tr><td>${p.date}</td><td class="num">${Number(p.km).toLocaleString()} km</td><td class="num"><span class="icon-btn edit" data-date="${p.date}" data-km="${p.km}" title="Modifier">\u270E</span><span class="icon-btn del" data-date="${p.date}" title="Supprimer">\u2716</span></td></tr>`
       )
       .join("");
-    root.innerHTML = `
-      <style>${PitstopCard._styles()}</style>
-      <ha-card>
-        <div class="editor">
-          <div class="editor-title">Mise \u00e0 jour du kilom\u00e9trage</div>
-          <div class="editor-sub">${this._deviceOrVehicle()}</div>
-          <div class="field">
-            <label for="ps-date">Date du relev\u00e9</label>
-            <input id="ps-date" class="ps-input" type="date" value="${today}" />
-          </div>
-          <div class="field">
-            <label for="ps-km">Kilom\u00e9trage (km)</label>
-            <input id="ps-km" class="ps-input" type="number" min="0" step="1" placeholder="${currentKm}" value="${currentKm}" />
-          </div>
-          <div class="section editor-section">Historique des valeurs</div>
-          <table class="table editor-table">
-            <thead><tr><th>Date</th><th class="num">Kilom\u00e9trage</th></tr></thead>
-            <tbody>
-              ${history}
-            </tbody>
-          </table>
-          <div class="editor-error" id="ps-error"></div>
-          <div class="editor-actions">
-            <button class="ps-cancel" id="ps-cancel">Annuler</button>
-            <button class="ps-save" id="ps-save">Sauvegarder</button>
-          </div>
+    const overlay = document.createElement("div");
+    overlay.className = "ps-overlay";
+    overlay.innerHTML = `
+      <div class="ps-modal">
+        <div class="editor-title">Mise \u00e0 jour du kilom\u00e9trage</div>
+        <div class="editor-sub">${this._deviceOrVehicle()}</div>
+        <div class="field">
+          <label for="ps-date">Date du relev\u00e9</label>
+          <input id="ps-date" class="ps-input" type="date" value="${today}" />
         </div>
-      </ha-card>`;
-    root.querySelector("#ps-cancel").addEventListener("click", () => {
-      this._render();
+        <div class="field">
+          <label for="ps-km">Kilom\u00e9trage (km)</label>
+          <input id="ps-km" class="ps-input" type="number" min="0" step="1" placeholder="${currentKm}" value="${currentKm}" />
+        </div>
+        <div class="section editor-section">Historique des valeurs</div>
+        <table class="table editor-table">
+          <thead><tr><th>Date</th><th class="num">Kilom\u00e9trage</th><th></th></tr></thead>
+          <tbody id="ps-odo-rows">
+            ${rows}
+          </tbody>
+        </table>
+        <div class="editor-error" id="ps-error"></div>
+        <div class="editor-actions">
+          <button class="ps-cancel" id="ps-cancel">Annuler</button>
+          <button class="ps-save" id="ps-save">Sauvegarder</button>
+        </div>
+      </div>`;
+    card.appendChild(overlay);
+    overlay.addEventListener("click", (ev) => {
+      if (ev.target === overlay) overlay.remove();
     });
-    root.querySelector("#ps-save").addEventListener("click", () =>
-      this._saveOdometer(vehicleId)
+    overlay.querySelector("#ps-cancel").addEventListener("click", () => {
+      overlay.remove();
+    });
+    overlay.querySelector("#ps-save").addEventListener("click", () =>
+      this._saveOdometer(vehicleId, overlay)
     );
-    root.querySelector("#ps-km").addEventListener("keydown", (ev) => {
-      if (ev.key === "Enter") this._saveOdometer(vehicleId);
+    overlay.querySelector("#ps-km").addEventListener("keydown", (ev) => {
+      if (ev.key === "Enter") this._saveOdometer(vehicleId, overlay);
     });
-    root.querySelector("#ps-date").addEventListener("keydown", (ev) => {
-      if (ev.key === "Enter") this._saveOdometer(vehicleId);
+    overlay.querySelector("#ps-date").addEventListener("keydown", (ev) => {
+      if (ev.key === "Enter") this._saveOdometer(vehicleId, overlay);
     });
+    overlay.querySelectorAll(".icon-btn.edit").forEach((btn) =>
+      btn.addEventListener("click", () => {
+        this._odo_edit_date = btn.dataset.date;
+        overlay.querySelector("#ps-date").value = btn.dataset.date;
+        overlay.querySelector("#ps-km").value = btn.dataset.km;
+      })
+    );
+    overlay.querySelectorAll(".icon-btn.del").forEach((btn) =>
+      btn.addEventListener("click", () => {
+        if (!window.confirm("Supprimer le relev\u00e9 du " + btn.dataset.date + " ?"))
+          return;
+        this._hass
+          .callService("pitstop_log", "delete_odometer_point", {
+            vehicle_id: vehicleId,
+            date: btn.dataset.date,
+          })
+          .then(
+            () => this._openEditor(),
+            () => this._openEditor()
+          );
+      })
+    );
   }
 
   /** Valide la saisie d'un nouveau kilom\u00e9trage et appelle le service. */
-  _saveOdometer(vehicleId) {
-    const root = this.shadowRoot;
-    const dateValue = root.querySelector("#ps-date").value;
-    const kmValue = parseFloat(root.querySelector("#ps-km").value);
-    const errorBox = root.querySelector("#ps-error");
+  _saveOdometer(vehicleId, overlay) {
+    const dateValue = overlay.querySelector("#ps-date").value;
+    const kmValue = parseFloat(overlay.querySelector("#ps-km").value);
+    const errorBox = overlay.querySelector("#ps-error");
     errorBox.textContent = "";
     if (!dateValue) {
       errorBox.textContent = "Choisissez une date.";
@@ -401,24 +428,44 @@ class PitstopCard extends HTMLElement {
       errorBox.textContent = "Kilom\u00e9trage invalide.";
       return;
     }
-    const button = root.querySelector("#ps-save");
+    const button = overlay.querySelector("#ps-save");
     button.disabled = true;
+    const done = () => {
+      overlay.remove();
+      this._render();
+    };
+    const fail = (err) => {
+      button.disabled = false;
+      errorBox.textContent =
+        (err && err.message) || "Erreur lors de la sauvegarde.";
+    };
+    // \u00c9dition d'un relev\u00e9 dont on change la date : on supprime l'ancien
+    const editDate = this._odo_edit_date;
+    this._odo_edit_date = null;
+    if (editDate && editDate !== dateValue) {
+      this._hass
+        .callService("pitstop_log", "delete_odometer_point", {
+          vehicle_id: vehicleId,
+          date: editDate,
+        })
+        .then(() =>
+          this._hass
+            .callService("pitstop_log", "update_odometer", {
+              vehicle_id: vehicleId,
+              km: kmValue,
+              date: dateValue,
+            })
+            .then(done, fail)
+        , fail);
+      return;
+    }
     this._hass
       .callService("pitstop_log", "update_odometer", {
         vehicle_id: vehicleId,
         km: kmValue,
         date: dateValue,
       })
-      .then(
-        () => {
-          this._render();
-        },
-        (err) => {
-          button.disabled = false;
-          errorBox.textContent =
-            (err && err.message) || "Erreur lors de la sauvegarde.";
-        }
-      );
+      .then(done, fail);
   }
 
   /** Charge la liste des marques (identique au flux de cr\u00e9ation). */
@@ -760,7 +807,7 @@ class PitstopCard extends HTMLElement {
           <td class="num">${h.cost != null ? Number(h.cost).toLocaleString() + " \u20ac" : ""}</td>
           <td class="num">
             ${h.invoice_url ? `<a class="inv" href="${h.invoice_url}" target="_blank" title="Facture">\ud83d\udcc4</a>` : ""}
-            <span class="icon-btn edit" data-index="${i}" title="Modifier">\u270E</span>
+            <span class="icon-btn edit" data-index="${i}" title="Modifier">\u270e</span>
             <span class="icon-btn del" data-index="${i}" title="Supprimer">\u2716</span>
           </td>
         </tr>`

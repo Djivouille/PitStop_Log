@@ -367,6 +367,37 @@ class PitStopDataUpdateCoordinator:
         await self.async_save()
         await self.async_refresh()
 
+    async def async_delete_odometer_point(
+        self, vehicle_id: str, entry_date: str
+    ) -> None:
+        """Supprimer un point de l'historique du kilométrage."""
+        vehicle = self.get_vehicle(vehicle_id)
+        if vehicle is None:
+            raise HomeAssistantError(f"Véhicule inconnu : {vehicle_id}")
+        history: list[dict[str, Any]] = list(
+            vehicle.get("odometer_history") or []
+        )
+        remaining = [
+            point for point in history if point.get("date") != entry_date
+        ]
+        if len(remaining) == len(history):
+            raise HomeAssistantError(
+                f"Aucun relevé à la date {entry_date}"
+            )
+        vehicle["odometer_history"] = remaining
+        # Si le point supprimé était le plus récent, le kilométrage actuel
+        # redevient le maximum des relevés restants
+        if history and entry_date >= max(
+            point.get("date", "") for point in history
+        ):
+            max_km = max(
+                (point.get("km", 0) for point in remaining), default=0
+            )
+            vehicle["odometer"] = max_km
+            vehicle["odometer_updated_at"] = dt_util.utcnow().isoformat()
+        await self.async_save()
+        await self.async_refresh()
+
     # ------------------------------------------------------------------
     # Plans d'entretien (entretiens à faire)
     # ------------------------------------------------------------------

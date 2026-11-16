@@ -49,6 +49,7 @@ from .const import (
     CONF_INDEX,
     MAINTENANCE_TYPES_FILE,
     SERVICE_UPDATE_ODOMETER,
+    SERVICE_DELETE_ODOMETER_POINT,
     SERVICE_UPDATE_REGISTRATION,
     SERVICE_UPDATE_PURCHASE_DATE,
     SERVICE_UPDATE_BRAND_MODEL,
@@ -165,6 +166,15 @@ async def async_setup(hass: HomeAssistant, config: dict[str, Any]) -> bool:
             vehicle_id, call.data["km"], call.data.get("date")
         )
 
+    async def handle_delete_odometer_point(call: ServiceCall) -> None:
+        """Service : supprimer un relevé de l'historique du kilométrage."""
+        vehicle_id = coordinator.find_vehicle_id(call.data["vehicle_id"])
+        if vehicle_id is None:
+            raise ServiceValidationError(f"Véhicule inconnu : {call.data['vehicle_id']}")
+        await coordinator.async_delete_odometer_point(
+            vehicle_id, call.data["date"]
+        )
+
     async def handle_update_registration(call: ServiceCall) -> None:
         """Service : mettre à jour l'immatriculation d'un véhicule."""
         vehicle_id = coordinator.find_vehicle_id(call.data["vehicle_id"])
@@ -242,6 +252,15 @@ async def async_setup(hass: HomeAssistant, config: dict[str, Any]) -> bool:
     hass.services.async_register(
         DOMAIN, SERVICE_UPDATE_ODOMETER, handle_update_odometer,
         schema=UPDATE_ODOMETER_SCHEMA,
+    )
+    hass.services.async_register(
+        DOMAIN, SERVICE_DELETE_ODOMETER_POINT, handle_delete_odometer_point,
+        schema=vol.Schema(
+            {
+                vol.Required("vehicle_id"): str,
+                vol.Required("date"): str,
+            }
+        ),
     )
     hass.services.async_register(
         DOMAIN,

@@ -359,3 +359,25 @@ delete_maintenance:
           min: 0
           max: 10000
           step: 1
+
+delete_odometer_point:
+  name: Supprimer un relevé de kilométrage
+  description: >-
+    Supprime le point d'historique du kilométrage correspondant à la date
+    donnée. Si c'était le relevé le plus récent, le kilométrage actuel
+    redevient le maximum des relevés restants.
+  fields:
+    vehicle_id:
+      name: Véhicule
+      description: Identifiant ou nom du véhicule.
+      required: true
+      example: "moto_yamaha"
+      selector:
+        text:
+    date:
+      name: Date
+      description: Date du relevé à supprimer (AAAA-MM-JJ).
+      required: true
+      example: "2026-11-16"
+      selector:
+        date:
