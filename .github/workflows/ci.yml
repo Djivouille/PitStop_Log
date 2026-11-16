@@ -1,0 +1,84 @@
+name: CI
+
+# Contrôles de qualité pour chaque PR et chaque push sur main.
+# Une PR ne doit être acceptée que si tous les jobs passent.
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  python:
+    name: Python (syntaxe)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Compilation de tous les modules
+        run: python -m compileall -q custom_components/pitstop_log
+
+  json:
+    name: JSON valides
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validation de chaque fichier JSON
+        run: |
+          set -e
+          find custom_components/pitstop_log -name "*.json" -not -path "*/brands/*" | while read -r f; do
+            python -m json.tool "$f" > /dev/null || { echo "JSON invalide : $f"; exit 1; }
+            echo "OK  $f"
+          done
+
+  lovelace:
+    name: Carte Lovelace (syntaxe + ASCII)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: node --check
+        run: node --check custom_components/pitstop_log/lovelace/pitstop-card.js
+      - name: Fichier ASCII pur
+        run: |
+          python3 - <<'PY'
+          path = "custom_components/pitstop_log/lovelace/pitstop-card.js"
+          content = open(path, "rb").read()
+          try:
+              content.decode("ascii")
+          except UnicodeDecodeError as err:
+              raise SystemExit(
+                  f"{path} doit rester ASCII pur "
+                  "(caractères non ASCII à échapper en \\uXXXX)\n{err}"
+              )
+          print("ASCII pur : OK")
+          PY
+
+  translations:
+    name: Traductions cohérentes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: scripts/check_translations.py
+        run: python scripts/check_translations.py
+
+  data:
+    name: Données (marques, natures, version)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: brands.json, maintenance_types.json, manifest.json
+        run: python scripts/check_data.py
