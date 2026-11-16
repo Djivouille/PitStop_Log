@@ -1,7 +1,8 @@
 name: Release
 
 # Publie automatiquement une release GitHub quand la version du manifest
-# change. HACS se base sur les releases pour afficher la version installable.
+# change. HACS/Marketplace se base sur les releases pour afficher la version
+# installable et proposer les mises à jour.
 on:
   push:
     branches:
@@ -38,9 +39,49 @@ jobs:
             echo "La release $VERSION existe déjà, rien à faire."
             exit 0
           fi
+          # Les versions beta/rc sont marquées pre-release : le Marketplace
+          # ne les propose qu'aux utilisateurs ayant activé les versions bêta.
+          PRERELEASE_ARGS=""
+          if echo "$VERSION" | grep -Eq 'beta|rc'; then
+            PRERELEASE_ARGS="--prerelease"
+            echo "Version $VERSION détectée comme bêta -> pre-release."
+          fi
+
+          cat > /tmp/release-notes.md <<'NOTES'
+          ## PitStop Log
+
+          Carnet d'entretien numérique multi-véhicules pour Home Assistant :
+          motos, voitures, camping-cars. Gestion des entretiens périodiques
+          (km/mois), historique des interventions avec factures, kilométrage
+          avec historique et graphique, carte Lovelace dédiée.
+
+          ## Versionnement
+
+          - **`MAJOR.MINOR.PATCH`** (ex. `1.0.0`) : version de **production**, stable ;
+          - **`MAJOR.MINOR.PATCH-beta.N`** (ex. `1.1.0-beta.1`) : version de **test**
+            (pre-release) destinée à valider les nouveautés avant publication.
+
+          Les nouveautés sont d'abord publiées en `-beta.N`. Après validation,
+          la version stable `MAJOR.MINOR.PATCH` est publiée. Les releases bêta
+          ne sont proposées par le Marketplace qu'aux utilisateurs ayant activé
+          **« Afficher les versions bêta »** dans les paramètres du dépôt.
+
+          ## Installation
+
+          1. Marketplace → PitStop Log → Télécharger (activez « Afficher les
+             versions bêta » pour les versions de test) ;
+          2. Redémarrez Home Assistant ;
+          3. Ajoutez l'intégration : Paramètres → Appareils et services →
+             Ajouter une intégration → PitStop Log.
+
+          La carte Lovelace « PitStop Card » nécessite l'ajout d'une ressource
+          (voir le README du dépôt pour le guide complet).
+          NOTES
+
           git tag "$VERSION" 2>/dev/null || true
           git push origin "refs/tags/$VERSION"
           gh release create "$VERSION" \
             --title "$VERSION" \
-            --notes "Publication PitStop Log $VERSION. Consultez le README pour les changements."
+            --notes-file /tmp/release-notes.md \
+            $PRERELEASE_ARGS
           echo "Release $VERSION publiée."

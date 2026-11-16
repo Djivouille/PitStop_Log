@@ -5,7 +5,16 @@ carnet d'entretien numérique multi-véhicules (motos, voitures, camping-cars, e
 
 ## Versionnement
 
-Les versions suivent le format **`AAAA.MM.JJ`** (date de publication), par exemple `2026.11.13`. HA et HACS exigeant une version parsable dans `manifest.json`, les séparateurs `-` et `_` sont remplacés par des points et le format est limité à 3 segments (calendrier) ; si plusieurs versions sont publiées le même jour, la date du jour suivant est utilisée. Une release GitHub du même nom est publiée automatiquement par le workflow du dépôt à chaque changement de version.
+## Versionnement
+
+Les versions suivent le **versionnement sémantique** :
+
+- **`MAJOR.MINOR.PATCH`** (ex. `1.0.0`) : versions de **production**, stables ;
+- **`MAJOR.MINOR.PATCH-beta.N`** (ex. `1.1.0-beta.1`) : versions de **test** (pre-release), destinées à la validation des nouveautés avant leur publication en production.
+
+**Cycle d'une version** : les nouvelles fonctionnalités sont développées et publiées en `-beta.N` ; après validation, la version stable `MAJOR.MINOR.PATCH` est publiée. Les releases bêta sont marquées « pre-release » sur GitHub : le Marketplace ne les propose qu'aux utilisateurs qui activent **« Afficher les versions bêta »** dans les paramètres du dépôt.
+
+Une release GitHub du même nom que la version du `manifest.json` est publiée automatiquement par le workflow du dépôt à chaque changement de version ; les versions contenant `beta` ou `rc` sont automatiquement marquées pre-release.
 
 ## Fonctionnalités
 
