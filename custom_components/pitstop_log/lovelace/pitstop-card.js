@@ -150,6 +150,107 @@ class PitstopCard extends HTMLElement {
       </svg>`;
   }
 
+  /** Ouvre la page d'\u00e9dition du kilom\u00e9trage. */
+  _openEditor() {
+    const root = this.shadowRoot;
+    const main = this._findMainSensor();
+    const entities = this._findEntities();
+    const today = new Date().toISOString().slice(0, 10);
+    const currentKm = entities.odometer
+      ? Math.round(Number(entities.odometer.state))
+      : "";
+    const vehicleId =
+      main && main.attributes && main.attributes.vehicle_id
+        ? main.attributes.vehicle_id
+        : this._config.vehicle;
+    const history = (entities.odometer && entities.odometer.attributes
+      ? entities.odometer.attributes.odometer_history || []
+      : []
+    )
+      .slice()
+      .sort((a, b) => (a.date < b.date ? 1 : -1))
+      .map(
+        (p) =>
+          `<tr><td>${p.date}</td><td class="num">${Number(p.km).toLocaleString()} km</td></tr>`
+      )
+      .join("");
+    root.innerHTML = `
+      <style>${PitstopCard._styles()}</style>
+      <ha-card>
+        <div class="editor">
+          <div class="editor-title">Mise \u00e0 jour du kilom\u00e9trage</div>
+          <div class="editor-sub">${this._config.vehicle}</div>
+          <div class="field">
+            <label for="ps-date">Date du relev\u00e9</label>
+            <input id="ps-date" class="ps-input" type="date" value="${today}" />
+          </div>
+          <div class="field">
+            <label for="ps-km">Kilom\u00e9trage (km)</label>
+            <input id="ps-km" class="ps-input" type="number" min="0" step="1" placeholder="${currentKm}" value="${currentKm}" />
+          </div>
+          <div class="section editor-section">Historique des valeurs</div>
+          <table class="table editor-table">
+            <thead><tr><th>Date</th><th class="num">Kilom\u00e9trage</th></tr></thead>
+            <tbody>
+              ${history}
+            </tbody>
+          </table>
+          <div class="editor-error" id="ps-error"></div>
+          <div class="editor-actions">
+            <button class="ps-cancel" id="ps-cancel">Annuler</button>
+            <button class="ps-save" id="ps-save">Sauvegarder</button>
+          </div>
+        </div>
+      </ha-card>`;
+    root.querySelector("#ps-cancel").addEventListener("click", () => {
+      this._render();
+    });
+    root.querySelector("#ps-save").addEventListener("click", () =>
+      this._saveOdometer(vehicleId)
+    );
+    root.querySelector("#ps-km").addEventListener("keydown", (ev) => {
+      if (ev.key === "Enter") this._saveOdometer(vehicleId);
+    });
+    root.querySelector("#ps-date").addEventListener("keydown", (ev) => {
+      if (ev.key === "Enter") this._saveOdometer(vehicleId);
+    });
+  }
+
+  /** Valide la saisie d'un nouveau kilom\u00e9trage et appelle le service. */
+  _saveOdometer(vehicleId) {
+    const root = this.shadowRoot;
+    const dateValue = root.querySelector("#ps-date").value;
+    const kmValue = parseFloat(root.querySelector("#ps-km").value);
+    const errorBox = root.querySelector("#ps-error");
+    errorBox.textContent = "";
+    if (!dateValue) {
+      errorBox.textContent = "Choisissez une date.";
+      return;
+    }
+    if (isNaN(kmValue) || kmValue < 0) {
+      errorBox.textContent = "Kilom\u00e9trage invalide.";
+      return;
+    }
+    const button = root.querySelector("#ps-save");
+    button.disabled = true;
+    this._hass
+      .callService("pitstop_log", "update_odometer", {
+        vehicle_id: vehicleId,
+        km: kmValue,
+        date: dateValue,
+      })
+      .then(
+        () => {
+          this._render();
+        },
+        (err) => {
+          button.disabled = false;
+          errorBox.textContent =
+            (err && err.message) || "Erreur lors de la sauvegarde.";
+        }
+      );
+  }
+
   /** Charge la liste des marques (identique au flux de cr\u00e9ation). */
   async _loadBrands() {
     if (this._brands !== undefined) return this._brands;
