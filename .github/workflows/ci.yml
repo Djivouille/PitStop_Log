@@ -82,3 +82,23 @@ jobs:
           python-version: "3.12"
       - name: brands.json, maintenance_types.json, manifest.json
         run: python scripts/check_data.py
+
+  logos-page:
+    name: Page des logos à jour
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Régénérer docs/logos.md
+        run: python scripts/generate_logos_page.py
+      - name: Échouer si la page n'est pas à jour
+        run: |
+          git diff --exit-code docs/logos.md || {
+            echo ""
+            echo "docs/logos.md n'est pas à jour avec brands.json."
+            echo "Lancez : python3 scripts/generate_logos_page.py"
+            echo "et committez le résultat dans cette PR."
+            exit 1
+          }

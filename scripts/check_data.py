@@ -60,7 +60,7 @@ for name, info in brands.items():
         errors.append(f"brands.json : {name} logo introuvable : brands/{filename}")
 
 for svg in sorted(brand_dir.glob("*.svg")):
-    if svg.name not in referenced:
+    if svg.name not in referenced and svg.name != "_missing.svg":
         errors.append(f"logo orphelin (absent de brands.json) : brands/{svg.name}")
 
 # ---- 2. maintenance_types.json ----

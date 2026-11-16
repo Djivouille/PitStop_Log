@@ -213,6 +213,8 @@ Fourni tel quel, sans garantie. Utilisation libre.
 
 ## Contribuer (traductions, marques, natures d'entretien)
 
+> 🖼️ **[Galerie des logos de marques](docs/logos.md)** — visualisez toutes les marques et celles en attente de logo (page générée automatiquement depuis `brands.json`).
+
 L'intégration est conçue pour être enrichie par de simples Pull Requests, sans toucher au code :
 
 | Sujet | Fichier à modifier | Comment |
