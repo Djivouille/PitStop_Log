@@ -213,8 +213,8 @@ def _sync_brand_logos(source_dir: str, target_dir: str) -> None:
 def _sync_files(source_dir: str, target_dir: str, suffix: str | None = None) -> None:
     """Copier les fichiers embarqués d'un dossier vers www (hors boucle).
 
-    Les fichiers déjà présents ne sont pas écrasés ; l'opération est
-    idempotente et ne fait rien si le dossier source est absent.
+    Un fichier n'est réécrit que si son contenu diffère ; l'opération
+    est idempotente et ne fait rien si le dossier source est absent.
     """
     if not os.path.isdir(source_dir):
         return
@@ -226,8 +226,10 @@ def _sync_files(source_dir: str, target_dir: str, suffix: str | None = None) -> 
         if not os.path.isfile(source):
             continue
         target = os.path.join(target_dir, filename)
-        if os.path.exists(target):
-            continue
+        if os.path.isfile(target):
+            with open(source, "rb") as src, open(target, "rb") as dst:
+                if src.read() == dst.read():
+                    continue
         with open(source, "rb") as src:
             with open(target, "wb") as dst:
                 dst.write(src.read())
