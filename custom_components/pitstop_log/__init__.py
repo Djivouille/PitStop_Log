@@ -399,6 +399,9 @@ def _sync_single_file(source: str, target: str) -> None:
     """Copier un fichier vers www s'il diffère (exécuté hors boucle)."""
     if not os.path.isfile(source):
         return
+    target_dir = os.path.dirname(target)
+    if target_dir:
+        os.makedirs(target_dir, exist_ok=True)
     if os.path.isfile(target):
         with open(source, "rb") as src, open(target, "rb") as dst:
             if src.read() == dst.read():
