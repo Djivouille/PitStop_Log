@@ -150,175 +150,6 @@ class PitstopCard extends HTMLElement {
       </svg>`;
   }
 
-  /** Ouvre la page d'\u00e9dition du kilom\u00e9trage. */
-  _openEditor() {
-    const root = this.shadowRoot;
-    const main = this._findMainSensor();
-    const entities = this._findEntities();
-    const today = new Date().toISOString().slice(0, 10);
-    const currentKm = entities.odometer
-      ? Math.round(Number(entities.odometer.state))
-      : "";
-    const vehicleId =
-      main && main.attributes && main.attributes.vehicle_id
-        ? main.attributes.vehicle_id
-        : this._config.vehicle;
-    const history = (entities.odometer && entities.odometer.attributes
-      ? entities.odometer.attributes.odometer_history || []
-      : []
-    )
-      .slice()
-      .sort((a, b) => (a.date < b.date ? 1 : -1))
-      .map(
-        (p) =>
-          `<tr><td>${p.date}</td><td class="num">${Number(p.km).toLocaleString()} km</td></tr>`
-      )
-      .join("");
-    root.innerHTML = `
-      <style>${PitstopCard._styles()}</style>
-      <ha-card>
-        <div class="editor">
-          <div class="editor-title">Mise \u00e0 jour du kilom\u00e9trage</div>
-          <div class="editor-sub">${this._config.vehicle}</div>
-          <div class="field">
-            <label for="ps-date">Date du relev\u00e9</label>
-            <input id="ps-date" class="ps-input" type="date" value="${today}" />
-          </div>
-          <div class="field">
-            <label for="ps-km">Kilom\u00e9trage (km)</label>
-            <input id="ps-km" class="ps-input" type="number" min="0" step="1"
-                   placeholder="${currentKm}" value="${currentKm}" />
-          </div>
-          <div class="section editor-section">Historique des valeurs</div>
-          <table class="table editor-table">
-            <thead><tr><th>Date</th><th class="num">Kilom\u00e9trage</th></tr></thead>
-            <tbody>
-              ${history}
-            </tbody>
-          </table>
-          <div class="editor-error" id="ps-error"></div>
-          <div class="editor-actions">
-            <button class="ps-cancel" id="ps-cancel">Annuler</button>
-            <button class="ps-save" id="ps-save">Sauvegarder</button>
-          </div>
-        </div>
-      </ha-card>`;
-    root.querySelector("#ps-cancel").addEventListener("click", () => {
-      this._render();
-    });
-    root.querySelector("#ps-save").addEventListener("click", () =>
-      this._saveOdometer(vehicleId)
-    );
-    root.querySelector("#ps-km").addEventListener("keydown", (ev) => {
-      if (ev.key === "Enter") this._saveOdometer(vehicleId);
-    });
-    root.querySelector("#ps-date").addEventListener("keydown", (ev) => {
-      if (ev.key === "Enter") this._saveOdometer(vehicleId);
-    });
-  }
-
-  /** Sauvegarde le relev\u00e9 via le service pitstop_log.update_odometer. */
-  _saveOdometer(vehicleId) {
-    const root = this.shadowRoot;
-    const dateValue = root.querySelector("#ps-date").value;
-    const kmValue = parseFloat(root.querySelector("#ps-km").value);
-    const errorBox = root.querySelector("#ps-error");
-    errorBox.textContent = "";
-    if (!dateValue) {
-      errorBox.textContent = "Choisissez une date.";
-      return;
-    }
-    if (isNaN(kmValue) || kmValue < 0) {
-      errorBox.textContent = "Kilom\u00e9trage invalide.";
-      return;
-    }
-    const button = root.querySelector("#ps-save");
-    button.disabled = true;
-    this._hass
-      .callService("pitstop_log", "update_odometer", {
-        vehicle_id: vehicleId,
-        km: kmValue,
-        date: dateValue,
-      })
-      .then(
-        () => {
-          this._render();
-        },
-        (err) => {
-          button.disabled = false;
-          errorBox.textContent =
-            (err && err.message) || "Erreur lors de la sauvegarde.";
-        }
-      );
-  }
-
-  /** Ouvre la page d'\u00e9dition de l'immatriculation. */
-  _openRegEditor() {
-    const root = this.shadowRoot;
-    const main = this._findMainSensor();
-    const currentReg =
-      main && main.attributes ? main.attributes.registration || "" : "";
-    const vehicleId =
-      main && main.attributes && main.attributes.vehicle_id
-        ? main.attributes.vehicle_id
-        : this._config.vehicle;
-    root.innerHTML = `
-      <style>${PitstopCard._styles()}</style>
-      <ha-card>
-        <div class="editor">
-          <div class="editor-title">Mise \u00e0 jour de l'immatriculation</div>
-          <div class="editor-sub">${this._config.vehicle}</div>
-          <div class="field">
-            <label for="ps-reg">Immatriculation (carte grise)</label>
-            <input id="ps-reg" class="ps-input" type="text" value="${currentReg}" />
-          </div>
-          <div class="editor-error" id="ps-error"></div>
-          <div class="editor-actions">
-            <button class="ps-cancel" id="ps-cancel">Annuler</button>
-            <button class="ps-save" id="ps-save">Sauvegarder</button>
-          </div>
-        </div>
-      </ha-card>`;
-    root.querySelector("#ps-cancel").addEventListener("click", () => {
-      this._render();
-    });
-    root.querySelector("#ps-save").addEventListener("click", () =>
-      this._saveRegistration(vehicleId)
-    );
-    root.querySelector("#ps-reg").addEventListener("keydown", (ev) => {
-      if (ev.key === "Enter") this._saveRegistration(vehicleId);
-    });
-  }
-
-  /** Sauvegarde l'immatriculation via le service. */
-  _saveRegistration(vehicleId) {
-    const root = this.shadowRoot;
-    const value = root.querySelector("#ps-reg").value.trim();
-    const errorBox = root.querySelector("#ps-error");
-    errorBox.textContent = "";
-    if (!value) {
-      errorBox.textContent = "Saisissez une immatriculation.";
-      return;
-    }
-    const button = root.querySelector("#ps-save");
-    button.disabled = true;
-    this._hass
-      .callService("pitstop_log", "update_registration", {
-        vehicle_id: vehicleId,
-        registration: value,
-      })
-      .then(
-        () => {
-          this._render();
-        },
-        (err) => {
-          button.disabled = false;
-          errorBox.textContent =
-            (err && err.message) || "Erreur lors de la sauvegarde.";
-        }
-      );
-  }
-
   _render() {
     if (!this._hass || !this._config) return;
     const main = this._findMainSensor();
@@ -417,12 +248,7 @@ class PitstopCard extends HTMLElement {
           </div>
           <div class="cell">
             <div class="label">Immatriculation
-              <span class="gear gear-reg" title="Mettre \u00e0 jour l'immatriculation">
-                <svg viewBox="0 0 24 24" width="16" height="16">
-                  <path fill="currentColor" d="M19.14 12.94a7.07 7.07 0 0 0 .05-.94 7.07 7.07 0 0 0-.05-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.03 7.03 0 0 0-1.62-.94l-.36-2.54a.5.5 0 0 0-.5-.42h-3.84a.5.5 0 0 0-.5.42l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96a.5.5 0 0 0-.6.22L2.66 8.84a.5.5 0 0 0 .12.64l2.03 1.58c-.03.31-.05.63-.05.94s.02.63.05.94l-2.03 1.58a.5.5 0 0 0-.12.64l1.92 3.32c.13.22.39.31.6.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.04.24.25.42.5.42h3.84c.25 0 .46-.18.5-.42l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.09.47 0 .6-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.58ZM12 15.6A3.6 3.6 0 1 1 12 8.4a3.6 3.6 0 0 1 0 7.2Z"/>
-                </svg>
-              </span>
-            </div>
+                          </div>
             <div class="value small">${attrs.registration || "\u2014"}</div>
           </div>
           <div class="cell">
@@ -448,10 +274,8 @@ class PitstopCard extends HTMLElement {
             : ""
         }
       </ha-card>`;
-    const gear = root.querySelector(".gear:not(.gear-reg)");
+    const gear = root.querySelector(".gear");
     if (gear) gear.addEventListener("click", () => this._openEditor());
-    const gearReg = root.querySelector(".gear-reg");
-    if (gearReg) gearReg.addEventListener("click", () => this._openRegEditor());
   }
 
   static _styles() {
