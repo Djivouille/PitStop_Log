@@ -344,7 +344,7 @@ class PitstopCard extends HTMLElement {
       .sort((a, b) => (a.date < b.date ? 1 : -1))
       .map(
         (p, i) =>
-          `<tr><td>${p.date}</td><td class="num">${Number(p.km).toLocaleString()} km</td><td class="num"><span class="icon-btn edit" data-date="${p.date}" data-km="${p.km}" title="Modifier">\u270E</span><span class="icon-btn del" data-date="${p.date}" title="Supprimer">\u2716</span></td></tr>`
+          `<tr><td>${p.date}</td><td class="num">${Number(p.km).toLocaleString()} km</td><td class="num"><span class="icon-btn edit" data-date="${p.date}" data-km="${p.km}" title="Modifier">\u270e</span><span class="icon-btn del" data-date="${p.date}" title="Supprimer">\u2716</span></td></tr>`
       )
       .join("");
     const overlay = document.createElement("div");
@@ -689,6 +689,11 @@ class PitstopCard extends HTMLElement {
                   <path fill="currentColor" d="M19.14 12.94a7.07 7.07 0 0 0 .05-.94 7.07 7.07 0 0 0-.05-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.03 7.03 0 0 0-1.62-.94l-.36-2.54a.5.5 0 0 0-.5-.42h-3.84a.5.5 0 0 0-.5.42l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96a.5.5 0 0 0-.6.22L2.66 8.84a.5.5 0 0 0 .12.64l2.03 1.58c-.03.31-.05.63-.05.94s.02.63.05.94l-2.03 1.58a.5.5 0 0 0-.12.64l1.92 3.32c.13.22.39.31.6.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.04.24.25.42.5.42h3.84c.25 0 .46-.18.5-.42l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.09.47 0 .6-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.58ZM12 15.6A3.6 3.6 0 1 1 12 8.4a3.6 3.6 0 0 1 0 7.2Z"/>
                 </svg>
               </span></div>
+            <div class="meta">${
+              (attrs.purchase_date || "\u2014") +
+              " - " +
+              (attrs.registration || "\u2014")
+            }</div>
           </div>
           <div class="statusbox">
             <div class="status" style="border-color:${statusColor};color:${statusColor}">${main.state}</div>
@@ -709,16 +714,6 @@ class PitstopCard extends HTMLElement {
                 ? Number(entities.odometer.state).toLocaleString() + " km"
                 : "\u2014"
             }</div>
-          </div>
-          <div class="cell">
-            <div class="label">Immatriculation
-                          </div>
-            <div class="value small">${attrs.registration || "\u2014"}</div>
-          </div>
-          <div class="cell">
-            <div class="label">Date d'achat
-                          </div>
-            <div class="value small">${attrs.purchase_date || "\u2014"}</div>
           </div>
           <div class="cell">
             <div class="label">Entretiens r\u00e9alis\u00e9s</div>
@@ -1072,6 +1067,7 @@ class PitstopCard extends HTMLElement {
       .logo { width: 40px; height: 40px; object-fit: contain; flex: none; }
       .titles { flex: 1; min-width: 0; }
       .brand { font-size: 12px; color: var(--secondary-text-color, #727272); }
+      .meta { font-size: 12px; color: var(--secondary-text-color, #727272); margin-top: 2px; }
       .name { font-size: 20px; font-weight: 500; }
       .status { font-size: 13px; font-weight: 600; border: 1.5px solid; border-radius: 16px; padding: 4px 12px; white-space: nowrap; }
       .photo { width: 100%; max-height: 260px; object-fit: cover; display: block; margin: 8px 0; border-radius: var(--ha-card-border-radius, 12px); }
