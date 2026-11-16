@@ -423,11 +423,15 @@ def _detect_invoice_ext(image_b64: str) -> str:
 
 
 def _save_invoice_image(filepath: str, image_b64: str) -> None:
-    """Décoder et écrire une image de facture sur le disque (hors boucle)."""
+    """Décoder et écrire une facture (image ou PDF) sur le disque."""
+    payload_b64 = image_b64
+    # Retire l'éventuel préfixe data URL (data:image/xxx;base64, ou pdf)
+    if payload_b64.startswith("data:"):
+        payload_b64 = payload_b64.split(",", 1)[1] if "," in payload_b64 else payload_b64
     try:
-        payload = base64.b64decode(image_b64)
+        payload = base64.b64decode(payload_b64)
     except Exception as err:
-        raise HomeAssistantError("Image de facture base64 invalide") from err
+        raise HomeAssistantError("Fichier de facture base64 invalide") from err
     with open(filepath, "wb") as file:
         file.write(payload)
 
