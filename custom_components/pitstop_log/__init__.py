@@ -141,7 +141,7 @@ async def _sync_www_assets(hass: HomeAssistant) -> None:
     if not os.path.isdir(source_lovelace):
         _LOGGER.warning(
             "Dossier lovelace/ absent de l'installation ; la carte Lovelace "
-            "PitStop Card ne sera pas disponible. Réinstallez l'intégration."
+            "La carte Lovelace PitStop Log ne sera pas disponible. Réinstallez l'intégration."
         )
     elif not os.path.isfile(os.path.join(target_lovelace, "pitstop-card.js")):
         _LOGGER.error(

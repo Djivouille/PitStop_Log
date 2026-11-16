@@ -1,5 +1,5 @@
 /**
- * \u00c9diteur visuel de la carte PitStop : s\u00e9lection du v\u00e9hicule
+ * \u00c9diteur visuel de la carte PitStop Log : s\u00e9lection du v\u00e9hicule
  * dans un menu d\u00e9roulant listant les v\u00e9hicules PitStop Log.
  */
 class PitstopCardEditor extends HTMLElement {
@@ -124,7 +124,7 @@ class PitstopCardEditor extends HTMLElement {
 }
 
 /**
- * PitStop Card \u2014 carte Lovelace pour l'int\u00e9gration PitStop Log.
+ * PitStop Log \u2014 carte Lovelace de l'int\u00e9gration PitStop Log.
  *
  * Affiche toutes les informations d'un v\u00e9hicule : photo, logo de marque,
  * kilom\u00e9trage, statut d'entretien, plans \u00e0 faire, historique et graphique
@@ -1099,6 +1099,6 @@ customElements.define("pitstop-card", PitstopCard);
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "pitstop-card",
-  name: "PitStop Card",
-  description: "Affiche toutes les informations d'un v\u00e9hicule PitStop Log.",
+  name: "PitStop Log",
+  description: "Carte PitStop Log : toutes les informations d'un v\u00e9hicule du garage.",
 });

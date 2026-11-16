@@ -151,7 +151,7 @@ custom_components/pitstop_log/
     └── en.json
 ```
 
-## Carte Lovelace « PitStop Card »
+## Carte Lovelace « PitStop Log »
 
 L'intégration embarque une carte Lovelace personnalisée qui affiche toutes les
 informations d'un véhicule : photo, logo de marque, kilométrage, immatriculation,
@@ -171,7 +171,7 @@ au km 0 ; chaque mise à jour (service, carte ou interface) ajoute un point
    - Type : **Module JavaScript**
 2. Rechargez la page (F5).
 
-**Utilisation dans un tableau de bord** (Modifier → ajouter carte → « PitStop Card ») :
+**Utilisation dans un tableau de bord** (Modifier → ajouter carte → « PitStop Log ») :
 l'éditeur visuel propose un **menu déroulant listant les véhicules** de
 l'intégration et un champ « Titre affiché » optionnel — aucun YAML n'est
 nécessaire. Le véhicule est présélectionné automatiquement à l'ajout.
