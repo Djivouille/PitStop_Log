@@ -31,6 +31,26 @@ update_odometer:
       selector:
         date:
 
+update_registration:
+  name: Mettre à jour l'immatriculation
+  description: >-
+    Met à jour l'immatriculation (carte grise) d'un véhicule.
+  fields:
+    vehicle_id:
+      name: Véhicule
+      description: Identifiant ou nom du véhicule.
+      required: true
+      example: "moto_yamaha"
+      selector:
+        text:
+    registration:
+      name: Immatriculation
+      description: Nouvelle immatriculation (carte grise).
+      required: true
+      example: "AB-123-CD"
+      selector:
+        text:
+
 add_maintenance_done:
   name: Enregistrer un entretien réalisé
   description: >-

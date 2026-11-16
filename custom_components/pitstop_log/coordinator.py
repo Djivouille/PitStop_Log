@@ -178,6 +178,17 @@ class PitStopDataUpdateCoordinator:
         history.sort(key=lambda point: point.get("date", ""))
         return history
 
+    async def async_update_registration(
+        self, vehicle_id: str, registration: str
+    ) -> None:
+        """Mettre à jour l'immatriculation d'un véhicule."""
+        vehicle = self.get_vehicle(vehicle_id)
+        if vehicle is None:
+            raise HomeAssistantError(f"Véhicule inconnu : {vehicle_id}")
+        vehicle["registration"] = registration
+        await self.async_save()
+        await self.async_refresh()
+
     def delete_vehicle(self, vehicle_id: str) -> None:
         """Supprimer un véhicule, ses plans et son historique."""
         self.data["vehicles"].pop(vehicle_id, None)
