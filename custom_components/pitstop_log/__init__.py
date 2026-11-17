@@ -47,7 +47,6 @@ from .const import (
     SERVICE_UPDATE_MAINTENANCE,
     SERVICE_DELETE_MAINTENANCE,
     CONF_INDEX,
-    CONF_UNIT,
     MAINTENANCE_TYPES_FILE,
     SERVICE_UPDATE_ODOMETER,
     SERVICE_DELETE_ODOMETER_POINT,
@@ -66,7 +65,6 @@ UPDATE_ODOMETER_SCHEMA = vol.Schema(
         vol.Required("vehicle_id"): str,
         vol.Required("km"): int,
         vol.Optional("date"): str,
-        vol.Optional("unit"): str,
     }
 )
 
@@ -80,7 +78,6 @@ ADD_MAINTENANCE_DONE_SCHEMA = vol.Schema(
         vol.Optional("invoice_path"): str,
         vol.Optional("invoice_base64"): str,
         vol.Optional("plan_id"): str,
-        vol.Optional("unit"): str,
     }
 )
 
@@ -92,7 +89,6 @@ ADD_MAINTENANCE_PLAN_SCHEMA = vol.Schema(
         vol.Optional("interval_months"): int,
         vol.Optional("last_km"): int,
         vol.Optional("last_date"): str,
-        vol.Optional("unit"): str,
     }
 )
 
@@ -179,9 +175,7 @@ async def async_setup(hass: HomeAssistant, config: dict[str, Any]) -> bool:
         if vehicle_id is None:
             raise ServiceValidationError(f"Véhicule inconnu : {call.data['vehicle_id']}")
         await coordinator.async_update_odometer(
-            vehicle_id,
-            _km_to_canonical(call.data["km"], call.data.get(CONF_UNIT)),
-            call.data.get("date"),
+            vehicle_id, call.data["km"], call.data.get("date")
         )
 
     async def handle_delete_odometer_point(call: ServiceCall) -> None:
@@ -246,7 +240,7 @@ async def async_setup(hass: HomeAssistant, config: dict[str, Any]) -> bool:
         await coordinator.async_add_maintenance_done(
             vehicle_id=vehicle_id,
             date=call.data[CONF_DATE],
-            km=_km_to_canonical(call.data[CONF_KM], call.data.get(CONF_UNIT)),
+            km=call.data[CONF_KM],
             actions=call.data[CONF_ACTIONS],
             cost=call.data.get(CONF_COST),
             invoice_url=invoice_url,
@@ -258,21 +252,12 @@ async def async_setup(hass: HomeAssistant, config: dict[str, Any]) -> bool:
         vehicle_id = coordinator.find_vehicle_id(call.data["vehicle_id"])
         if vehicle_id is None:
             raise ServiceValidationError(f"Véhicule inconnu : {call.data['vehicle_id']}")
-        plan_unit = call.data.get(CONF_UNIT)
         await coordinator.async_add_maintenance_plan(
             vehicle_id=vehicle_id,
             name=call.data[CONF_PLAN_NAME],
-            interval_km=(
-                _km_to_canonical(call.data[CONF_INTERVAL_KM], plan_unit)
-                if call.data.get(CONF_INTERVAL_KM) is not None
-                else None
-            ),
+            interval_km=call.data.get(CONF_INTERVAL_KM),
             interval_months=call.data.get(CONF_INTERVAL_MONTHS),
-            last_km=(
-                _km_to_canonical(call.data[CONF_LAST_KM], plan_unit)
-                if call.data.get(CONF_LAST_KM) is not None
-                else None
-            ),
+            last_km=call.data.get(CONF_LAST_KM),
             last_date=call.data.get(CONF_LAST_DATE),
         )
 
@@ -347,7 +332,7 @@ async def async_setup(hass: HomeAssistant, config: dict[str, Any]) -> bool:
             vehicle_id=vehicle_id,
             index=call.data[CONF_INDEX],
             date=call.data[CONF_DATE],
-            km=_km_to_canonical(call.data[CONF_KM], call.data.get(CONF_UNIT)),
+            km=call.data[CONF_KM],
             actions=call.data[CONF_ACTIONS],
             cost=call.data.get(CONF_COST),
             invoice_url=invoice_url,
@@ -381,7 +366,6 @@ async def async_setup(hass: HomeAssistant, config: dict[str, Any]) -> bool:
                 vol.Required("actions"): vol.Any(str, [str]),
                 vol.Optional("cost"): vol.Coerce(float),
                 vol.Optional("invoice_base64"): str,
-                vol.Optional("unit"): str,
             }
         ),
     )
@@ -450,17 +434,6 @@ def _sync_files(source_dir: str, target_dir: str, suffix: str | None = None) -> 
         with open(source, "rb") as src:
             with open(target, "wb") as dst:
                 dst.write(src.read())
-
-
-def _km_to_canonical(value: float, unit: str | None) -> int:
-    """Convertir une distance vers le kilomètre (format canonique).
-
-    Les données de PitStop Log sont toujours stockées en km ; le champ
-    optionnel `unit` des services permet de fournir des miles.
-    """
-    if unit and unit.lower() in ("mi", "mile", "miles"):
-        return round(value * 1.609344)
-    return round(value)
 
 
 def _detect_invoice_ext(image_b64: str) -> str:

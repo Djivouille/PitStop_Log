@@ -43,7 +43,7 @@
   "badge_maintenance_hint": "Créé par un entretien — modifiable depuis la rubrique Derniers entretiens",
   "km_update_title": "Mise à jour du kilométrage",
   "reading_date": "Date du relevé",
-  "km_field": "Kilométrage",
+  "km_field": "Kilométrage (km)",
   "km_history_title": "Historique des valeurs",
   "err_date": "Choisissez une date.",
   "err_km": "Kilométrage invalide.",
