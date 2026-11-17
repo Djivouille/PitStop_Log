@@ -15,18 +15,20 @@
 
 ## 📑 Table of contents
 
-- [✨ Features](#-features)
-- [📦 Installation](#-installation)
-- [⚙️ Configuration](#️-configuration)
-- [🃏 Lovelace card](#-lovelace-card)
-- [📊 Sensors](#-sensors)
-- [🛠️ Services](#️-services)
-- [🏷️ Brands and logos](#️-brands-and-logos)
-- [💾 Data storage](#-data-storage)
-- [🗂️ Repository structure](#️-repository-structure)
-- [🤝 Contributing](#-contributing)
-- [📜 Versioning](#-versioning)
-- [📄 License](#-license)
+- [✨ Features](#features)
+- [📦 Installation](#installation)
+- [⚙️ Configuration](#configuration)
+- [🃏 Lovelace card](#lovelace-card)
+- [📊 Sensors](#sensors)
+- [🛠️ Services](#services)
+- [🏷️ Brands and logos](#brands-and-logos)
+- [💾 Data storage](#data-storage)
+- [🗂️ Repository structure](#repository-structure)
+- [🤝 Contributing](#contributing)
+- [📜 Versioning](#versioning)
+- [📄 License](#license)
+
+<a id="features"></a>
 
 ## ✨ Features
 
@@ -50,6 +52,8 @@
   feeds the history; click the cell → native Home Assistant chart.
 - 🌍 **Bilingual UI** 🇫🇷/🇬🇧 — integration **and** Lovelace card, extensible by translation.
 
+<a id="installation"></a>
+
 ## 📦 Installation
 
 > Requires Home Assistant **2026.11** or newer (built-in Marketplace).
@@ -61,10 +65,12 @@
 3. Open the **PitStop Log** page → **Download**.
 4. **Restart Home Assistant**.
 5. **Settings** → **Devices & services** → **Add integration** →
-   search for **PitStop Log** and follow the wizard (see [⚙️ Configuration](#️-configuration)).
+   search for **PitStop Log** and follow the wizard (see [⚙️ Configuration](#configuration)).
 
 > 🧪 To receive beta versions: repository page → **⋮** → enable
 > **“Include pre-releases”**.
+
+<a id="configuration"></a>
 
 ## ⚙️ Configuration
 
@@ -76,6 +82,8 @@
    - ✏️ **Edit vehicle**: name, type, brand, model, year, purchase, registration, odometer;
    - 📅 **Maintenance plans**: add / edit / delete;
    - 🗂️ **Maintenance history**: edit / delete.
+
+<a id="lovelace-card"></a>
 
 ## 🃏 Lovelace card
 
@@ -102,6 +110,8 @@ dropdown listing your vehicles (device names) and an optional title —
 **no YAML**. The JS file is copied automatically to
 `/config/www/pitstop_log/lovelace/` at startup.
 
+<a id="sensors"></a>
+
 ## 📊 Sensors
 
 | Sensor | Description |
@@ -111,6 +121,8 @@ dropdown listing your vehicles (device names) and an optional title —
 | 📅 One per plan | Plan status with `km_remaining`, `days_remaining`, `due_km`, `due_date`. |
 | 🖼️ Vehicle photo (image) | Uploaded photo, visible on the device page and dashboards. |
 | 🏷️ Brand logo (image) | Brand logo, visible on the device page and dashboards. |
+
+<a id="services"></a>
 
 ## 🛠️ Services
 
@@ -141,6 +153,8 @@ data:
 > 💡 An invoice can be provided as base64 via `invoice_base64` (photo or
 > PDF): it is saved to `/config/www/pitstop_log/invoices/`.
 
+<a id="brands-and-logos"></a>
+
 ## 🏷️ Brands and logos
 
 The brand list is defined in `brands.json` (separate file): common
@@ -157,12 +171,16 @@ To add a brand: drop its SVG in `brands/` and edit `brands.json`:
 "My Brand": {"logo": "/local/pitstop_log/brands/mybrand.svg", "category": "moto", "label": "My Brand"}
 ```
 
+<a id="data-storage"></a>
+
 ## 💾 Data storage
 
 - 🗄️ Data (vehicles, plans, history): `.storage/pitstop_log` (JSON,
   managed by Home Assistant's `Store`).
 - 🧾 Invoices: `/config/www/pitstop_log/invoices/`
 - 📷 Vehicle photos: `/config/www/pitstop_log/photos/`
+
+<a id="repository-structure"></a>
 
 ## 🗂️ Repository structure
 
@@ -179,6 +197,8 @@ custom_components/pitstop_log/
 └── lovelace/pitstop-card.js
 ```
 
+<a id="contributing"></a>
+
 ## 🤝 Contributing
 
 Most additions are made **by simple Pull Request, without touching code**:
@@ -189,6 +209,8 @@ verification scripts.
 > ✅ CI checks every PR: Python/JS syntax, JSON validity, translation
 > consistency, brands/logos, version format, logos page up to date.
 > A PR is only merged when all jobs are green.
+
+<a id="versioning"></a>
 
 ## 📜 Versioning
 
@@ -202,6 +224,8 @@ Versions follow **semantic versioning**:
 stable version is published. `1.0.0` will come when the target feature set
 is reached. GitHub releases are created automatically by the repository
 workflow on every version change.
+
+<a id="license"></a>
 
 ## 📄 License
 

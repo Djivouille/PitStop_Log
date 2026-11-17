@@ -15,18 +15,20 @@
 
 ## 📑 Sommaire
 
-- [✨ Fonctionnalités](#-fonctionnalités)
-- [📦 Installation](#-installation-1)
-- [⚙️ Configuration](#️-configuration-1)
-- [🃏 Carte Lovelace](#-carte-lovelace)
-- [📊 Capteurs](#-capteurs)
-- [🛠️ Services](#️-services-1)
-- [🏷️ Marques et logos](#️-marques-et-logos)
-- [💾 Stockage des données](#-stockage-des-données)
-- [🗂️ Structure du dépôt](#️-structure-du-dépôt)
-- [🤝 Contribuer](#-contribuer)
-- [📜 Versionnement](#-versionnement)
-- [📄 Licence](#-licence)
+- [✨ Fonctionnalités](#fonctionnalites)
+- [📦 Installation](#installation)
+- [⚙️ Configuration](#configuration)
+- [🃏 Carte Lovelace](#carte-lovelace)
+- [📊 Capteurs](#capteurs)
+- [🛠️ Services](#services)
+- [🏷️ Marques et logos](#marques-et-logos)
+- [💾 Stockage des données](#stockage-des-donnees)
+- [🗂️ Structure du dépôt](#structure-du-depot)
+- [🤝 Contribuer](#contribuer)
+- [📜 Versionnement](#versionnement)
+- [📄 Licence](#licence)
+
+<a id="fonctionnalites"></a>
 
 ## ✨ Fonctionnalités
 
@@ -50,6 +52,8 @@
   alimente l'historique ; clic sur la cellule → graphique natif Home Assistant.
 - 🌍 **Interface bilingue** 🇫🇷/🇬🇧 — intégration **et** carte Lovelace, extensible par traduction.
 
+<a id="installation"></a>
+
 ## 📦 Installation
 
 > Nécessite Home Assistant **2026.11** ou plus récent (Marketplace intégré).
@@ -61,10 +65,12 @@
 3. Ouvrez la fiche **PitStop Log** → **Télécharger**.
 4. **Redémarrez Home Assistant**.
 5. **Paramètres** → **Appareils et services** → **Ajouter une intégration** →
-   recherchez **PitStop Log** et suivez l'assistant (voir [⚙️ Configuration](#️-configuration-1)).
+   recherchez **PitStop Log** et suivez l'assistant (voir [⚙️ Configuration](#configuration)).
 
 > 🧪 Pour recevoir les versions bêta : fiche du dépôt → **⋮** → activez
 > **« Inclure les pre-releases »**.
+
+<a id="configuration"></a>
 
 ## ⚙️ Configuration
 
@@ -76,6 +82,8 @@
    - ✏️ **Modifier le véhicule** : nom, type, marque, modèle, année, achat, immatriculation, km ;
    - 📅 **Plans d'entretien** : ajout / modification / suppression ;
    - 🗂️ **Historique des entretiens** : modification / suppression.
+
+<a id="carte-lovelace"></a>
 
 ## 🃏 Carte Lovelace
 
@@ -102,6 +110,8 @@ visuel propose un menu déroulant listant les véhicules (noms des appareils) et
 un titre optionnel — **aucun YAML**. Le fichier JS est copié automatiquement
 dans `/config/www/pitstop_log/lovelace/` au démarrage.
 
+<a id="capteurs"></a>
+
 ## 📊 Capteurs
 
 | Capteur | Description |
@@ -111,6 +121,8 @@ dans `/config/www/pitstop_log/lovelace/` au démarrage.
 | 📅 Un capteur par plan | Statut du plan avec `km_remaining`, `days_remaining`, `due_km`, `due_date`. |
 | 🖼️ Photo du véhicule (image) | Photo téléversée, visible sur la page de l'appareil et les tableaux de bord. |
 | 🏷️ Logo de marque (image) | Logo de la marque, visible sur la page de l'appareil et les tableaux de bord. |
+
+<a id="services"></a>
 
 ## 🛠️ Services
 
@@ -141,6 +153,8 @@ data:
 > 💡 Une facture peut être fournie en base64 via `invoice_base64` (photo ou PDF) :
 > elle est sauvegardée dans `/config/www/pitstop_log/invoices/`.
 
+<a id="marques-et-logos"></a>
+
 ## 🏷️ Marques et logos
 
 La liste des marques est définie dans `brands.json` (fichier séparé) :
@@ -157,12 +171,16 @@ Pour ajouter une marque : déposez son SVG dans `brands/` et éditez `brands.jso
 "Ma Marque": {"logo": "/local/pitstop_log/brands/mamarque.svg", "category": "moto", "label": "Ma Marque"}
 ```
 
+<a id="stockage-des-donnees"></a>
+
 ## 💾 Stockage des données
 
 - 🗄️ Données (véhicules, plans, historique) : `.storage/pitstop_log` (JSON,
   géré par le `Store` de Home Assistant).
 - 🧾 Factures : `/config/www/pitstop_log/invoices/`
 - 📷 Photos des véhicules : `/config/www/pitstop_log/photos/`
+
+<a id="structure-du-depot"></a>
 
 ## 🗂️ Structure du dépôt
 
@@ -179,6 +197,8 @@ custom_components/pitstop_log/
 └── lovelace/pitstop-card.js
 ```
 
+<a id="contribuer"></a>
+
 ## 🤝 Contribuer
 
 La plupart des ajouts se font **par simple Pull Request, sans toucher au code** :
@@ -189,6 +209,8 @@ scripts de vérification.
 > ✅ La CI contrôle chaque PR : syntaxe Python/JS, validité JSON, cohérence des
 > traductions, marques/logos, format de version, page des logos à jour.
 > Une PR n'est fusionnée que si tous les jobs sont verts.
+
+<a id="versionnement"></a>
 
 ## 📜 Versionnement
 
@@ -202,6 +224,8 @@ Les versions suivent le **versionnement sémantique** :
 version stable est publiée. La `1.0.0` arrivera lorsque l'ensemble des
 fonctionnalités cibles sera atteint. Les releases GitHub sont créées
 automatiquement par le workflow du dépôt à chaque changement de version.
+
+<a id="licence"></a>
 
 ## 📄 Licence
 
