@@ -43,7 +43,7 @@
   "badge_maintenance_hint": "Created by a maintenance entry — edit it from the Recent maintenance section",
   "km_update_title": "Update odometer",
   "reading_date": "Reading date",
-  "km_field": "Odometer (km)",
+  "km_field": "Odometer",
   "km_history_title": "Reading history",
   "err_date": "Choose a date.",
   "err_km": "Invalid odometer.",

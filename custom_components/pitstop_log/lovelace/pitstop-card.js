@@ -385,7 +385,7 @@ class PitstopCard extends HTMLElement {
     const entities = this._findEntities();
     const today = new Date().toISOString().slice(0, 10);
     const currentKm = entities.odometer
-      ? Math.round(Number(entities.odometer.state))
+      ? this._kmToDisplay(Number(entities.odometer.state))
       : "";
     const vehicleId =
       main && main.attributes && main.attributes.vehicle_id
@@ -398,7 +398,7 @@ class PitstopCard extends HTMLElement {
       .sort((a, b) => (a.date < b.date ? 1 : -1))
       .map(
         (p, i) =>
-          `<tr><td>${p.date}</td><td class="num">${Number(p.km).toLocaleString()} km</td><td class="num">${
+          `<tr><td>${p.date}</td><td class="num">${this._fmtKm(p.km)}</td><td class="num">${
             p.source === "maintenance"
               ? `<span class="src-badge" title="${psT("badge_maintenance_hint")}">${psT("badge_maintenance")}</span>`
               : `<span class="icon-btn edit" data-date="${p.date}" data-km="${p.km}" title="${psT("edit")}">\u270e</span><span class="icon-btn del" data-date="${p.date}" title="${psT("delete")}">\u2716</span>`
@@ -416,7 +416,7 @@ class PitstopCard extends HTMLElement {
           <input id="ps-date" class="ps-input" type="date" value="${today}" />
         </div>
         <div class="field">
-          <label for="ps-km">${psT("km_field")}</label>
+          <label for="ps-km">${psT("km_field")} (${this._lengthUnit()})</label>
           <input id="ps-km" class="ps-input" type="number" min="0" step="1" placeholder="${currentKm}" value="${currentKm}" />
         </div>
         <div class="section editor-section">${psT("km_history_title")}</div>
@@ -452,7 +452,7 @@ class PitstopCard extends HTMLElement {
       btn.addEventListener("click", () => {
         this._odo_edit_date = btn.dataset.date;
         overlay.querySelector("#ps-date").value = btn.dataset.date;
-        overlay.querySelector("#ps-km").value = btn.dataset.km;
+        overlay.querySelector("#ps-km").value = this._kmToDisplay(Number(btn.dataset.km));
       })
     );
     overlay.querySelectorAll(".icon-btn.del").forEach((btn) =>
@@ -475,7 +475,7 @@ class PitstopCard extends HTMLElement {
   /** Valide la saisie d'un nouveau kilom\u00e9trage et appelle le service. */
   _saveOdometer(vehicleId, overlay) {
     const dateValue = overlay.querySelector("#ps-date").value;
-    const kmValue = parseFloat(overlay.querySelector("#ps-km").value);
+    const kmValue = this._displayToKm(parseFloat(overlay.querySelector("#ps-km").value));
     const errorBox = overlay.querySelector("#ps-error");
     errorBox.textContent = "";
     if (!dateValue) {
@@ -703,7 +703,7 @@ class PitstopCard extends HTMLElement {
         <tr>
           <td>${p.attributes.friendly_name || p.entity_id}</td>
           <td><span class="badge" style="background:${statusColors[p.state] || "var(--primary-color)"}">${p.state}</span></td>
-          <td class="num">${p.attributes.km_remaining != null ? p.attributes.km_remaining.toLocaleString() + " km" : "\u2014"}</td>
+          <td class="num">${p.attributes.km_remaining != null ? this._fmtKm(p.attributes.km_remaining) : "\u2014"}</td>
           <td class="num">${p.attributes.days_remaining != null ? p.attributes.days_remaining + " j" : "\u2014"}</td>
         </tr>`
       )
@@ -715,7 +715,7 @@ class PitstopCard extends HTMLElement {
         (h) => `
         <tr>
           <td>${h.date || ""}</td>
-          <td class="num">${h.km != null ? Number(h.km).toLocaleString() + " km" : ""}</td>
+          <td class="num">${h.km != null ? this._fmtKm(h.km) : ""}</td>
           <td>${this._fmtActions(h.actions)}</td>
           <td class="num">${h.cost != null ? Number(h.cost).toLocaleString() + " \u20ac" : ""}</td>
           <td class="num">${h.invoice_url ? `<a class="inv" href="${h.invoice_url}" target="_blank" title="Facture">\ud83d\udcc4</a>` : ""}</td>
@@ -762,7 +762,7 @@ class PitstopCard extends HTMLElement {
             </div>
             <div class="value">${
               entities.odometer
-                ? Number(entities.odometer.state).toLocaleString() + " km"
+                ? this._fmtKm(Number(entities.odometer.state))
                 : "\u2014"
             }</div>
           </div>
@@ -849,6 +849,37 @@ class PitstopCard extends HTMLElement {
     return actions || "";
   }
 
+  /** Unit\u00e9 de longueur pr\u00e9f\u00e9r\u00e9e de l'utilisateur ("km" ou "mi"). */
+  _lengthUnit() {
+    const units =
+      this._hass &&
+      this._hass.config &&
+      this._hass.config.unit_system;
+    return (units && units.length) || "km";
+  }
+
+  _isMetric() {
+    return this._lengthUnit() !== "mi";
+  }
+
+  /** Convertit des km stock\u00e9s vers l'unit\u00e9 d'affichage. */
+  _kmToDisplay(km) {
+    if (this._isMetric()) return km;
+    return Math.round(km / 1.609344);
+  }
+
+  /** Convertit une saisie utilisateur (unit\u00e9 d'affichage) vers des km. */
+  _displayToKm(value) {
+    if (this._isMetric()) return value;
+    return Math.round(value * 1.609344);
+  }
+
+  /** Formate une distance stock\u00e9e en km pour l'affichage. */
+  _fmtKm(km) {
+    if (km == null) return "\u2014";
+    return this._kmToDisplay(Number(km)).toLocaleString() + " " + this._lengthUnit();
+  }
+
   /** Km courant du v\u00e9hicule (pour pr\u00e9-remplir le formulaire). */
   _currentKm() {
     const entities = this._findEntities();
@@ -890,7 +921,7 @@ class PitstopCard extends HTMLElement {
         (h, i) => `
         <tr>
           <td>${h.date || ""}</td>
-          <td class="num">${h.km != null ? Number(h.km).toLocaleString() + " km" : ""}</td>
+          <td class="num">${h.km != null ? this._fmtKm(h.km) : ""}</td>
           <td>${this._fmtActions(h.actions)}</td>
           <td class="num">${h.cost != null ? Number(h.cost).toLocaleString() + " \u20ac" : ""}</td>
           <td class="num">
@@ -954,7 +985,7 @@ class PitstopCard extends HTMLElement {
     const entries = attrs.history || [];
     const entry = index != null ? entries[index] || {} : {};
     const plans = attrs.plans || [];
-    const currentKm = this._currentKm();
+    const currentKm = this._currentKm() !== "" ? this._kmToDisplay(this._currentKm()) : "";
     const today = new Date().toISOString().slice(0, 10);
     const natureList = Array.isArray(entry.actions)
       ? entry.actions
@@ -984,8 +1015,8 @@ class PitstopCard extends HTMLElement {
           <input id="ps-m-date" class="ps-input" type="date" value="${entry.date || today}" />
         </div>
         <div class="field">
-          <label for="ps-m-km">${psT("km")}</label>
-          <input id="ps-m-km" class="ps-input" type="number" min="0" value="${entry.km != null ? entry.km : currentKm}" />
+          <label for="ps-m-km">${psT("km")} (${this._lengthUnit()})</label>
+          <input id="ps-m-km" class="ps-input" type="number" min="0" value="${entry.km != null ? this._kmToDisplay(entry.km) : currentKm}" />
         </div>
         <div class="field">
           <label>${psT("natures")}</label>
@@ -1051,7 +1082,7 @@ class PitstopCard extends HTMLElement {
     const button = overlay.querySelector("#ps-m-save");
     errorBox.textContent = "";
     const date = overlay.querySelector("#ps-m-date").value;
-    const km = parseInt(overlay.querySelector("#ps-m-km").value, 10);
+    const km = this._displayToKm(parseInt(overlay.querySelector("#ps-m-km").value, 10));
     if (!date || isNaN(km) || km < 0) {
       errorBox.textContent = psT("err_date_km");
       return;
