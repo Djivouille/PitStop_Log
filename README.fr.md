@@ -1,6 +1,6 @@
 # 🏍️ PitStop Log
 
-[![English](https://flagcdn.com/w80/gb.png)](README.md) [![Français](https://flagcdn.com/w80/fr.png)](#français)
+<a href="README.md"><img src="https://flagcdn.com/w40/gb.png" width="32" alt="English"></a> <a href="#français"><img src="https://flagcdn.com/w40/fr.png" width="32" alt="Français"></a>
 
 ---
 
