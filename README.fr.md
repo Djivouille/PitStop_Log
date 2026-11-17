@@ -2,6 +2,12 @@
 
 <a href="README.md"><img src="https://flagcdn.com/w40/gb.png" width="32" alt="English"></a> <a href="#français"><img src="https://flagcdn.com/w40/fr.png" width="32" alt="Français"></a>
 
+[![GitHub release](https://img.shields.io/github/v/release/Djivouille/PitStop_Log)](https://github.com/Djivouille/PitStop_Log/releases)
+[![Pre-release](https://img.shields.io/github/v/release/Djivouille/PitStop_Log/include_prereleases?label=pre-release&color=orange)](https://github.com/Djivouille/PitStop_Log/releases)
+[![Licence](https://img.shields.io/badge/licence-libre%20d'utilisation-green)](#licence)
+[![Home Assistant](https://img.shields.io/badge/Home%20Assistant-2026.11%2B-41bdf5?logo=homeassistant&logoColor=white)](https://www.home-assistant.io/)
+[![Étoiles](https://img.shields.io/github/stars/Djivouille/PitStop_Log?style=social)](https://github.com/Djivouille/PitStop_Log/stargazers)
+
 ---
 
 <a id="français"></a>
