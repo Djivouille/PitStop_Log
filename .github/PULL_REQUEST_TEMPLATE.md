@@ -13,5 +13,6 @@
 - [ ] (si traduction) toutes les langues ont les mêmes clés
 - [ ] (si marque) le logo SVG est bien ajouté dans `custom_components/pitstop_log/brands/` et référencé dans `brands.json`
 - [ ] (si marque) j'ai régénéré la page des logos : `python3 scripts/generate_logos_page.py`
+- [ ] (si gabarit de plans) j'ai régénéré la page des gabarits : `python3 scripts/generate_templates_page.py`
 - [ ] (si nature d'entretien) ajoutée dans `maintenance_types.json` sans doublon
 - [ ] Je n'ai pas modifié `custom_components/pitstop_log/lovelace/pitstop-card.js` (sauf accord préalable — fichier à échappement ASCII)

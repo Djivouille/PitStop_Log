@@ -90,7 +90,8 @@
    - 📅 **Maintenance plans**: add / edit / delete;
    - 🧰 **Plan templates**: one-click typical plans for the vehicle type
      (motorcycle, car, campervan), without duplicating existing plans
-     (template content viewable at `/local/pitstop_log/plan_templates.json`);
+     (template content viewable at `/local/pitstop_log/plan_templates.json`,
+     gallery: [plan templates](docs/plan_templates.md));
    - 🗂️ **Maintenance logbook**: edit / delete.
 
 <a id="lovelace-card"></a>

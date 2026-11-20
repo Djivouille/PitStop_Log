@@ -90,7 +90,8 @@
    - 📅 **Plans d'entretien** : ajout / modification / suppression ;
    - 🧰 **Gabarits de plans** : applique en un clic les plans types du type de
      véhicule (moto, voiture, camping-car), sans doublonner les plans existants
-     (contenu des gabarits consultable : `/local/pitstop_log/plan_templates.json`) ;
+     (contenu des gabarits consultable : `/local/pitstop_log/plan_templates.json`,
+     galerie : [gabarits de plans](docs/plan_templates.md)) ;
    - 🗂️ **Carnet d'entretien** : modification / suppression.
 
 <a id="carte-lovelace"></a>

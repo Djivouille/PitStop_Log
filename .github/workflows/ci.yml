@@ -102,3 +102,23 @@ jobs:
             echo "et committez le résultat dans cette PR."
             exit 1
           }
+
+  templates-page:
+    name: Page des gabarits à jour
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Régénérer docs/plan_templates.md
+        run: python scripts/generate_templates_page.py
+      - name: Échouer si la page n'est pas à jour
+        run: |
+          git diff --exit-code docs/plan_templates.md || {
+            echo ""
+            echo "docs/plan_templates.md n'est pas à jour avec plan_templates.json."
+            echo "Lancez : python3 scripts/generate_templates_page.py"
+            echo "et committez le résultat dans cette PR."
+            exit 1
+          }
