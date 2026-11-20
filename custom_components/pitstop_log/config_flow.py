@@ -166,11 +166,16 @@ def template_form_fields(vehicle_type: str) -> list[tuple[str, dict[str, Any], b
 
 
 def apply_template_schema(vehicle_type: str) -> vol.Schema:
-    """Schéma de l'étape gabarit : un bloc de champs éditables par plan."""
+    """Schéma de l'étape gabarit : un bloc de champs éditables par plan.
+
+    Le nom reste en Optional (avec défaut) : un plan non coché peut avoir un
+    nom vide sans bloquer le formulaire ; la validation métier (nom requis si
+    le plan est inclus) est faite dans template_plans_from_input().
+    """
     schema: dict[Any, Any] = {}
     for prefix, tpl, enabled in template_form_fields(vehicle_type):
         schema[vol.Optional(f"{prefix}_enabled", default=enabled)] = bool
-        schema[vol.Required(f"{prefix}_name", default=tpl.get("name", ""))] = str
+        schema[vol.Optional(f"{prefix}_name", default=tpl.get("name", ""))] = str
         if tpl.get("interval_km"):
             schema[vol.Optional(f"{prefix}_interval_km", default=tpl["interval_km"])] = int
         else:
