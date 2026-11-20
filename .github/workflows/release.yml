@@ -54,7 +54,7 @@ jobs:
           {
             echo "$TITLE"
             echo ""
-            eval "$LOG_CMD" | grep -v "^chore" || echo "- (aucun commit listé)"
+            eval "$LOG_CMD" | grep -vE "^- (chore|ci)(\(|:)" || echo "- (aucun commit listé)"
           } > /tmp/release-notes.md
           echo "Notes générées (tag précédent : ${PREV:-aucun})."
 
