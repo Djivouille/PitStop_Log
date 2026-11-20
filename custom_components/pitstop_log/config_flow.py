@@ -192,11 +192,11 @@ def template_description(vehicle_type: str, lang: str = "fr") -> str:
     """Tableau du gabarit + emplacements personnalisés (description de l'étape)."""
     template = plan_template_for_type(vehicle_type)
     if lang == "en":
-        header = "| Plan | Interval (km) | Interval (months) |"
-        custom_label = "Custom plan"
+        header = "| Nature | Interval (km) | Interval (months) |"
+        custom_label = "Custom nature"
     else:
-        header = "| Plan | Intervalle (km) | Intervalle (mois) |"
-        custom_label = "Plan personnalisé"
+        header = "| Nature | Intervalle (km) | Intervalle (mois) |"
+        custom_label = "Nature personnalisée"
     rows = [
         f"| {plan_display_name(tpl.get('name', ''), lang)} | "
         f"{tpl.get('interval_km') or '—'} | {tpl.get('interval_months') or '—'} |"

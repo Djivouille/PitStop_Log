@@ -28,7 +28,7 @@
 - [📊 Sensors](#sensors)
 - [🛠️ Services](#services)
 - [🏷️ Brands and logos](#brands-and-logos)
-- [🧰 Plan templates](#plan-templates)
+- [🧰 Nature templates](#plan-templates)
 - [🤝 Contributing](#contributing)
 - [💾 Data storage](#data-storage)
 - [🗂️ Repository structure](#repository-structure)
@@ -52,9 +52,9 @@
 - 📅 **Upcoming maintenance**: due by km and/or months interval, automatic
   remaining calculation and alert status — `OK` 🟢, `Due soon` 🟡,
   `Overdue` 🔴. Recording a maintenance **automatically resets** the
-  matching plans.
+  matching natures.
 - 🛠️ **Full editing from the UI** (Options Flow): vehicle metadata,
-  maintenance plans and maintenance logbook — no YAML.
+  maintenance natures and maintenance logbook — no YAML.
 - 📊 **Odometer history**: every reading (manual or from a maintenance)
   feeds the history; click the cell → native Home Assistant chart.
 - 🌍 **Bilingual UI** 🇫🇷/🇬🇧 — integration **and** Lovelace card, extensible by translation.
@@ -84,15 +84,15 @@
 1. **Settings** → **Devices & services** → **Add integration** → **PitStop Log**.
 2. Follow the wizard: *type/brand/model*, then the rest
    (name, year, purchase, registration, odometer, photo) then the
-   **maintenance plan definition** (shown and customizable on screen).
+   **maintenance nature definition** (shown and customizable on screen).
 3. ➕ Repeat for each vehicle in your garage.
 4. To manage a vehicle: its page → **Configure**:
    - ✏️ **Edit vehicle**: name, type, brand, model, year, purchase, registration, odometer;
-   - 📅 **Maintenance plans**: add / edit / delete;
-   - 🧰 **Plan templates**: one-click typical plans for the vehicle type
-     (motorcycle, car, campervan), without duplicating existing plans
+   - 📅 **Maintenance natures**: add / edit / delete;
+   - 🧰 **Nature templates**: one-click typical natures for the vehicle type
+     (motorcycle, car, campervan), without duplicating existing natures
      (template content viewable at `/local/pitstop_log/plan_templates.json`,
-     gallery: [plan templates](docs/plan_templates.md));
+     gallery: [nature templates](docs/plan_templates.md));
    - 🗂️ **Maintenance logbook**: edit / delete.
 
 <a id="lovelace-card"></a>
@@ -101,7 +101,7 @@
 
 The integration ships a custom card showing the whole vehicle: brand
 logo (with a default icon when missing), photo, odometer, maintenance
-status, upcoming plans, recent logbook entries — and lets you **edit
+status, upcoming natures, recent logbook entries — and lets you **edit
 everything directly from the card**:
 
 - ⚙️ gear icon on the Odometer cell → readings (add, ✎ edit, ✖ delete);
@@ -122,7 +122,7 @@ dropdown listing your vehicles (device names) and an optional title —
 **no YAML**. The JS file is copied automatically to
 `/config/www/pitstop_log/lovelace/` at startup.
 
-Displayed natures/plans are translated via `plan_names` (`locales/<lang>.json`):
+Displayed natures are translated via `plan_names` (`locales/<lang>.json`):
 the stored name stays the stable ID, only the display changes.
 
 <a id="sensors"></a>
@@ -132,8 +132,8 @@ the stored name stays the stable ID, only the display changes.
 | Sensor | Description |
 |---|---|
 | 📏 Odometer | Current odometer (km), with reading history in attributes. |
-| 🔧 Next maintenance | Most urgent status (`OK` / `Due soon` / `Overdue`), with plans, the vehicle type's template (`plan_template`) and the full logbook in attributes. |
-| 📅 One per plan | Plan status with `km_remaining`, `days_remaining`, `due_km`, `due_date`. |
+| 🔧 Next maintenance | Most urgent status (`OK` / `Due soon` / `Overdue`), with natures, the vehicle type's template (`plan_template`) and the full logbook in attributes. |
+| 📅 One per nature | Nature status with `km_remaining`, `days_remaining`, `due_km`, `due_date`. |
 | 🖼️ Vehicle photo (image) | Uploaded photo, visible on the device page and dashboards. |
 | 🏷️ Brand logo (image) | Brand logo, visible on the device page and dashboards. |
 
@@ -148,10 +148,10 @@ the stored name stays the stable ID, only the display changes.
 | `pitstop_log.update_registration` | Update the registration. |
 | `pitstop_log.update_purchase_date` | Update the purchase date. |
 | `pitstop_log.update_brand_model` | Brand, model, year, photo, registration, purchase. |
-| `pitstop_log.add_maintenance_done` | Add a logbook entry (multiple natures, invoice, plan reset). |
+| `pitstop_log.add_maintenance_done` | Add a logbook entry (multiple natures, invoice, nature reset). |
 | `pitstop_log.update_maintenance` | Edit a logbook entry. |
 | `pitstop_log.delete_maintenance` | Delete a logbook entry. |
-| `pitstop_log.add_maintenance_plan` | Add a periodic maintenance plan. |
+| `pitstop_log.add_maintenance_plan` | Add a periodic maintenance nature. |
 
 Example — add a logbook entry with an invoice:
 
@@ -188,19 +188,19 @@ To add a brand: drop its SVG in `brands/` and edit `brands.json`:
 
 <a id="plan-templates"></a>
 
-## 🧰 Plan templates
+## 🧰 Nature templates
 
-Maintenance plan templates per vehicle type (motorcycle, car, campervan,
+Maintenance nature templates per vehicle type (motorcycle, car, campervan,
 other) are defined in `plan_templates.json` (separate file). They are
 applied with one click when creating a vehicle or from **Configure**,
-never overwriting existing plans, which remain editable afterwards.
+never overwriting existing natures, which remain editable afterwards.
 The runtime copy is served at `/local/pitstop_log/plan_templates.json`.
 
-> 🧰 **[Plan templates gallery](docs/plan_templates.md)** — browse all templates
+> 🧰 **[Nature templates gallery](docs/plan_templates.md)** — browse all templates
 > by vehicle type: displayed names (FR/EN), stored name, slug and intervals
 > (page generated automatically from `plan_templates.json`).
 
-To add or edit a template: edit `plan_templates.json` (plan names must stay
+To add or edit a template: edit `plan_templates.json` (nature names must stay
 in `maintenance_types.json`), then regenerate the gallery:
 
 ```bash
@@ -224,7 +224,7 @@ verification scripts.
 
 ## 💾 Data storage
 
-- 🗄️ Data (vehicles, plans, logbook): `.storage/pitstop_log` (JSON,
+- 🗄️ Data (vehicles, natures, logbook): `.storage/pitstop_log` (JSON,
   managed by Home Assistant's `Store`).
 - 🧾 Invoices: `/config/www/pitstop_log/invoices/`
 - 📷 Vehicle photos: `/config/www/pitstop_log/photos/`
@@ -240,7 +240,7 @@ custom_components/pitstop_log/
 ├── services.yaml, strings.json, icons.json
 ├── brands.json             ← brands + logos
 ├── maintenance_types.json  ← maintenance natures
-├── plan_templates.json     ← plan templates per vehicle type
+├── plan_templates.json     ← nature templates per vehicle type
 │                            (display names translated via `plan_names` in translations/)
 ├── brands/                 ← SVG logos
 ├── locales/                ← card translations (fr, en)

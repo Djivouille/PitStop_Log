@@ -202,9 +202,9 @@ add_maintenance_done:
         text:
           multiline: true
     plan_id:
-      name: Plan d'entretien
+      name: Nature d'entretien
       description: >-
-        Identifiant du plan d'entretien à réinitialiser
+        Identifiant de la nature d'entretien à réinitialiser
         (entretien périodique). Optionnel.
       required: false
       example: "moto_yamaha_vidange"
@@ -212,7 +212,7 @@ add_maintenance_done:
         text:
 
 add_maintenance_plan:
-  name: Ajouter un plan d'entretien
+  name: Ajouter une nature d'entretien
   description: >-
     Ajoute une règle d'entretien périodique (en km et/ou en mois).
   fields:
@@ -224,7 +224,7 @@ add_maintenance_plan:
       selector:
         text:
     plan_name:
-      name: Nom du plan
+      name: Nom de la nature
       description: Nom de l'entretien périodique.
       required: true
       example: "Vidange moteur"

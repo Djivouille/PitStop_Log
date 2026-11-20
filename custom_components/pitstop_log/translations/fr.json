@@ -36,8 +36,8 @@
         }
       },
       "apply_template": {
-        "title": "Définition des plans d'entretien",
-        "description": "Voici une proposition de plans d'entretien pour ce type de véhicule :\n\n{plans}\n\nPersonnalisez le plan d'entretien ci-dessous et ajoutez au besoin des entretiens personnalisés (ils restent modifiables et supprimables ensuite).",
+        "title": "Définition des natures d'entretien",
+        "description": "Voici une proposition de natures d'entretien pour ce type de véhicule :\n\n{plans}\n\nPersonnalisez la nature d'entretien ci-dessous et ajoutez au besoin des entretiens personnalisés (ils restent modifiables et supprimables ensuite).",
         "data": {
           "tpl_vidange_enabled": "Vidange",
           "tpl_vidange_name": "Vidange — nom",
@@ -91,18 +91,18 @@
           "tpl_autre_name": "Autre — nom",
           "tpl_autre_interval_km": "Autre — intervalle (km)",
           "tpl_autre_interval_months": "Autre — intervalle (mois)",
-          "tpl_custom_0_enabled": "Plan personnalisé 1",
-          "tpl_custom_0_name": "Plan personnalisé 1 — nom",
-          "tpl_custom_0_interval_km": "Plan personnalisé 1 — intervalle (km)",
-          "tpl_custom_0_interval_months": "Plan personnalisé 1 — intervalle (mois)",
-          "tpl_custom_1_enabled": "Plan personnalisé 2",
-          "tpl_custom_1_name": "Plan personnalisé 2 — nom",
-          "tpl_custom_1_interval_km": "Plan personnalisé 2 — intervalle (km)",
-          "tpl_custom_1_interval_months": "Plan personnalisé 2 — intervalle (mois)",
-          "tpl_custom_2_enabled": "Plan personnalisé 3",
-          "tpl_custom_2_name": "Plan personnalisé 3 — nom",
-          "tpl_custom_2_interval_km": "Plan personnalisé 3 — intervalle (km)",
-          "tpl_custom_2_interval_months": "Plan personnalisé 3 — intervalle (mois)"
+          "tpl_custom_0_enabled": "Nature personnalisée 1",
+          "tpl_custom_0_name": "Nature personnalisée 1 — nom",
+          "tpl_custom_0_interval_km": "Nature personnalisée 1 — intervalle (km)",
+          "tpl_custom_0_interval_months": "Nature personnalisée 1 — intervalle (mois)",
+          "tpl_custom_1_enabled": "Nature personnalisée 2",
+          "tpl_custom_1_name": "Nature personnalisée 2 — nom",
+          "tpl_custom_1_interval_km": "Nature personnalisée 2 — intervalle (km)",
+          "tpl_custom_1_interval_months": "Nature personnalisée 2 — intervalle (mois)",
+          "tpl_custom_2_enabled": "Nature personnalisée 3",
+          "tpl_custom_2_name": "Nature personnalisée 3 — nom",
+          "tpl_custom_2_interval_km": "Nature personnalisée 3 — intervalle (km)",
+          "tpl_custom_2_interval_months": "Nature personnalisée 3 — intervalle (mois)"
         }
       }
     },
@@ -110,7 +110,7 @@
       "name_already_used": "Un véhicule porte déjà ce nom.",
       "invalid_date": "Date invalide, format attendu : AAAA-MM-JJ.",
       "interval_required": "Un intervalle en km ou en mois doit être défini.",
-      "name_required": "Le nom du plan ne peut pas être vide."
+      "name_required": "Le nom de la nature ne peut pas être vide."
     },
     "abort": {
       "already_configured": "Ce véhicule est déjà configuré."
@@ -122,9 +122,9 @@
         "title": "PitStop Log",
         "menu_options": {
           "vehicle": "Modifier le véhicule",
-          "plans": "Plans d'entretien",
+          "plans": "Natures d'entretien",
           "history": "Carnet d'entretien",
-          "templates": "Gabarits de plans",
+          "templates": "Gabarits de natures",
           "done": "Terminé"
         }
       },
@@ -136,17 +136,17 @@
         }
       },
       "plans": {
-        "title": "Plans d'entretien",
-        "description": "Sélectionnez un plan à modifier ou ajoutez-en un.",
+        "title": "Natures d'entretien",
+        "description": "Sélectionnez une nature à modifier ou ajoutez-en une.",
         "data": {
-          "choice": "Plan d'entretien"
+          "choice": "Nature d'entretien"
         }
       },
       "add_plan": {
-        "title": "Ajouter un plan d'entretien",
+        "title": "Ajouter une nature d'entretien",
         "description": "Définissez un intervalle en kilomètres et/ou en mois.",
         "data": {
-          "plan_name": "Nom du plan",
+          "plan_name": "Nom de la nature",
           "interval_km": "Intervalle (km)",
           "interval_months": "Intervalle (mois)",
           "last_km": "Dernier kilométrage effectué",
@@ -154,15 +154,15 @@
         }
       },
       "plan": {
-        "title": "Modifier le plan d'entretien",
-        "description": "Cochez « Supprimer » pour supprimer ce plan.",
+        "title": "Modifier la nature d'entretien",
+        "description": "Cochez « Supprimer » pour supprimer cette nature.",
         "data": {
-          "plan_name": "Nom du plan",
+          "plan_name": "Nom de la nature",
           "interval_km": "Intervalle (km)",
           "interval_months": "Intervalle (mois)",
           "last_km": "Dernier kilométrage effectué",
           "last_date": "Date de la dernière réalisation (AAAA-MM-JJ)",
-          "delete": "Supprimer ce plan"
+          "delete": "Supprimer cette nature"
         }
       },
       "history": {
@@ -185,12 +185,12 @@
         }
       },
       "templates": {
-        "title": "Gabarits de plans",
-        "description": "Applique le gabarit du type du véhicule. Les plans dont le nom existe déjà ne sont pas dupliqués.",
+        "title": "Gabarits de natures",
+        "description": "Applique le gabarit du type du véhicule. Les natures dont le nom existe déjà ne sont pas dupliquées.",
         "data": {
           "apply_template": {
             "name": "Appliquer le gabarit",
-            "description": "Ajoute les plans types manquants (vidange, freins, pneus…)."
+            "description": "Ajoute les natures types manquantes (vidange, freins, pneus…)."
           }
         }
       },
@@ -371,13 +371,13 @@
           "description": "Contenu de la photo de facture encodé en base64. Sauvegardé automatiquement dans /config/www/pitstop_log/invoices/. Optionnel."
         },
         "plan_id": {
-          "name": "Plan d'entretien",
-          "description": "Identifiant du plan d'entretien à réinitialiser (entretien périodique). Optionnel."
+          "name": "Nature d'entretien",
+          "description": "Identifiant de la nature d'entretien à réinitialiser (entretien périodique). Optionnel."
         }
       }
     },
     "add_maintenance_plan": {
-      "name": "Ajouter un plan d'entretien",
+      "name": "Ajouter une nature d'entretien",
       "description": "Ajoute une règle d'entretien périodique (en km et/ou en mois).",
       "fields": {
         "vehicle_id": {
@@ -385,7 +385,7 @@
           "description": "Identifiant ou nom du véhicule."
         },
         "plan_name": {
-          "name": "Nom du plan",
+          "name": "Nom de la nature",
           "description": "Nom de l'entretien périodique."
         },
         "interval_km": {

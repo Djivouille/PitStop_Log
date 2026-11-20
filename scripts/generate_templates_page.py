@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Génère la page de visualisation des gabarits de plans d'entretien.
+"""Génère la page de visualisation des gabarits de natures d'entretien.
 
 Usage : python3 scripts/generate_templates_page.py
 
 Lit custom_components/pitstop_log/plan_templates.json et écrit
 docs/plan_templates.md (un tableau par type de véhicule). Les noms
 affichés (FR/EN) viennent de la section « plan_names » des traductions ;
-le « nom stocké » est l'identifiant stable du plan, utilisé pour la
+le « nom stocké » est l'identifiant stable de la nature, utilisé pour la
 réinitialisation automatique depuis le carnet d'entretien.
 
 La CI (job « templates-page ») régénère la page et échoue si elle n'est
@@ -54,7 +54,7 @@ def main() -> int:
         names[lang] = data.get("plan_names", {})
 
     lines = [
-        "# Gabarits de plans d'entretien par type de véhicule",
+        "# Gabarits de natures d'entretien par type de véhicule",
         "",
         "Page générée automatiquement depuis",
         "[`plan_templates.json`](../custom_components/pitstop_log/plan_templates.json)",
@@ -62,12 +62,12 @@ def main() -> int:
         "ne pas éditer ce fichier à la main : relancer le script après toute",
         "modification des gabarits (la CI vérifie que la page est à jour).",
         "",
-        "- **Nom stocké** : identifiant stable du plan (valeur `name` du JSON). Il doit",
+        "- **Nom stocké** : identifiant stable de la nature (valeur `name` du JSON). Il doit",
         "  rester dans `maintenance_types.json` : c'est lui qui permet la",
-        "  réinitialisation automatique d'un plan depuis le carnet d'entretien.",
+        "  réinitialisation automatique d'une nature depuis le carnet d'entretien.",
         "- **Slug** : clé de `plan_names` dans les traductions (noms affichés FR/EN)",
         "  et préfixe des champs du formulaire (`tpl_<slug>_…`).",
-        "- En plus des plans du gabarit, l'interface propose **3 plans personnalisés**",
+        "- En plus des natures du gabarit, l'interface propose **3 natures personnalisées**",
         "  (`tpl_custom_1` à `tpl_custom_3`), non stockés dans ce fichier.",
         "- Copie servie à l'exécution : `/local/pitstop_log/plan_templates.json`.",
         "",
@@ -79,7 +79,7 @@ def main() -> int:
             continue
         plans = tpl.get("plans", [])
         plural = "s" if len(plans) != 1 else ""
-        lines += [f"## {title} ({len(plans)} plan{plural})", ""]
+        lines += [f"## {title} ({len(plans)} nature{plural})", ""]
         lines += [
             "| Entretien (FR) | Maintenance (EN) | Nom stocké | Slug | Intervalle (km) | Intervalle (mois) |",
             "|---|---|---|---|---|---|",

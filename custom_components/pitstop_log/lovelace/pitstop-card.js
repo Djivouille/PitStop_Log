@@ -130,7 +130,7 @@ class PitstopCardEditor extends HTMLElement {
  * PitStop Log \u2014 carte Lovelace de l'int\u00e9gration PitStop Log.
  *
  * Affiche toutes les informations d'un v\u00e9hicule : photo, logo de marque,
- * kilom\u00e9trage, statut d'entretien, plans \u00e0 faire, historique et graphique
+ * kilom\u00e9trage, statut d'entretien, natures \u00e0 faire, historique et graphique
  * du kilom\u00e9trage. L'ic\u00f4ne roue crant\u00e9e ouvre une page d'\u00e9dition du
  * kilom\u00e9trage (date + km, bouton Sauvegarder).
  *
@@ -161,7 +161,7 @@ const PS_DEFAULT_STRINGS = {
   "th_actions": "Actions",
   "th_cost": "Co\u00fbt",
   "th_nature": "Nature",
-  "th_plan": "Plan",
+  "th_plan": "Nature",
   "th_status": "Statut",
   "th_remaining": "Reste",
   "th_due": "\u00c9ch\u00e9ance",
@@ -179,7 +179,7 @@ const PS_DEFAULT_STRINGS = {
   "invoice_optional": "Facture (photo ou PDF, optionnel)",
   "invoice_attached": "Une facture est d\u00e9j\u00e0 associ\u00e9e :",
   "see": "voir",
-  "plans_reset": "Plans r\u00e9initialis\u00e9s : ",
+  "plans_reset": "Natures r\u00e9initialis\u00e9es : ",
   "err_date_km": "Renseignez la date et le kilom\u00e9trage.",
   "err_nature": "Cochez au moins une nature d'entretien.",
   "err_save": "Erreur lors de la sauvegarde.",
@@ -255,7 +255,7 @@ function psSlug(name) {
     .replace(/^_+|_+$/g, "");
 }
 
-/** Nom affich\u00e9 d'une nature/plan : mapping plan_names, repli sur le brut. */
+/** Nom affich\u00e9 d'une nature : mapping plan_names, repli sur le brut. */
 function psName(name) {
   const names =
     (PS_STRINGS && PS_STRINGS.plan_names) || PS_DEFAULT_STRINGS.plan_names || {};
@@ -367,7 +367,7 @@ class PitstopCard extends HTMLElement {
     return null;
   }
 
-  /** Trouve l'odom\u00e8tre et les capteurs de plans du v\u00e9hicule. */
+  /** Trouve l'odom\u00e8tre et les capteurs de natures du v\u00e9hicule. */
   _findEntities() {
     const slug = this._slug();
     const found = { odometer: null, plans: [] };

@@ -28,7 +28,7 @@
 - [📊 Capteurs](#capteurs)
 - [🛠️ Services](#services)
 - [🏷️ Marques et logos](#marques-et-logos)
-- [🧰 Gabarits de plans](#gabarits-de-plans)
+- [🧰 Gabarits de natures](#gabarits-de-plans)
 - [🤝 Contribuer](#contribuer)
 - [💾 Stockage des données](#stockage-des-donnees)
 - [🗂️ Structure du dépôt](#structure-du-depot)
@@ -51,10 +51,10 @@
   entretien sont identifiés et protégés.
 - 📅 **Entretiens à faire** : échéances par intervalle km et/ou mois, calcul
   automatique du reste à faire et statut d'alerte — `OK` 🟢, `Bientôt dû` 🟡,
-  `En retard` 🔴. Un entretien réalisé **réinitialise automatiquement** les plans
+  `En retard` 🔴. Un entretien réalisé **réinitialise automatiquement** les natures
   correspondants.
 - 🛠️ **Édition complète via l'interface** (Options Flow) : métadonnées du
-  véhicule, plans d'entretien et carnet d'entretien — sans YAML.
+  véhicule, natures d'entretien et carnet d'entretien — sans YAML.
 - 📊 **Kilométrage historisé** : chaque relevé (manuel ou issu d'un entretien)
   alimente l'historique ; clic sur la cellule → graphique natif Home Assistant.
 - 🌍 **Interface bilingue** 🇫🇷/🇬🇧 — intégration **et** carte Lovelace, extensible par traduction.
@@ -84,15 +84,15 @@
 1. **Paramètres** → **Appareils et services** → **Ajouter une intégration** → **PitStop Log**.
 2. Suivez l'assistant : *type/marque/modèle*, puis le reste
    (nom, année, achat, immatriculation, kilométrage, photo) puis la
-   **définition des plans d'entretien** (contenu affiché et personnalisable à l'écran).
+   **définition des natures d'entretien** (contenu affiché et personnalisable à l'écran).
 3. ➕ Répétez pour chaque véhicule du garage.
 4. Pour gérer un véhicule : sa fiche → **Configurer** :
    - ✏️ **Modifier le véhicule** : nom, type, marque, modèle, année, achat, immatriculation, km ;
-   - 📅 **Plans d'entretien** : ajout / modification / suppression ;
-   - 🧰 **Gabarits de plans** : applique en un clic les plans types du type de
-     véhicule (moto, voiture, camping-car), sans doublonner les plans existants
+   - 📅 **Natures d'entretien** : ajout / modification / suppression ;
+   - 🧰 **Gabarits de natures** : applique en un clic les natures types du type de
+     véhicule (moto, voiture, camping-car), sans doublonner les natures existantes
      (contenu des gabarits consultable : `/local/pitstop_log/plan_templates.json`,
-     galerie : [gabarits de plans](docs/plan_templates.md)) ;
+     galerie : [gabarits de natures](docs/plan_templates.md)) ;
    - 🗂️ **Carnet d'entretien** : modification / suppression.
 
 <a id="carte-lovelace"></a>
@@ -101,7 +101,7 @@
 
 L'intégration embarque une carte personnalisée qui affiche tout le véhicule :
 logo de marque (avec icône par défaut si manquant), photo, kilométrage,
-statut d'entretien, plans à faire, dernières entrées du carnet — et permet de **tout
+statut d'entretien, natures à faire, dernières entrées du carnet — et permet de **tout
 modifier directement depuis la carte** :
 
 - ⚙️ roue crantée de la cellule Kilométrage → relevés (ajout, ✎ modification, ✖ suppression) ;
@@ -122,7 +122,7 @@ visuel propose un menu déroulant listant les véhicules (noms des appareils) et
 un titre optionnel — **aucun YAML**. Le fichier JS est copié automatiquement
 dans `/config/www/pitstop_log/lovelace/` au démarrage.
 
-Les natures et plans affichés sont traduits via `plan_names` (`locales/<langue>.json`) :
+Les natures affichées sont traduites via `plan_names` (`locales/<langue>.json`) :
 le nom stocké reste l'identifiant stable, seul l'affichage change.
 
 <a id="capteurs"></a>
@@ -132,8 +132,8 @@ le nom stocké reste l'identifiant stable, seul l'affichage change.
 | Capteur | Description |
 |---|---|
 | 📏 Kilométrage | Kilométrage actuel (km), avec historique des relevés en attributs. |
-| 🔧 Prochain entretien | Statut le plus urgent (`OK` / `Bientôt dû` / `En retard`), avec plans, gabarit du type (`plan_template`) et carnet d'entretien complet en attributs. |
-| 📅 Un capteur par plan | Statut du plan avec `km_remaining`, `days_remaining`, `due_km`, `due_date`. |
+| 🔧 Prochain entretien | Statut le plus urgent (`OK` / `Bientôt dû` / `En retard`), avec natures, gabarit du type (`plan_template`) et carnet d'entretien complet en attributs. |
+| 📅 Un capteur par nature | Statut de la nature avec `km_remaining`, `days_remaining`, `due_km`, `due_date`. |
 | 🖼️ Photo du véhicule (image) | Photo téléversée, visible sur la page de l'appareil et les tableaux de bord. |
 | 🏷️ Logo de marque (image) | Logo de la marque, visible sur la page de l'appareil et les tableaux de bord. |
 
@@ -148,10 +148,10 @@ le nom stocké reste l'identifiant stable, seul l'affichage change.
 | `pitstop_log.update_registration` | Met à jour l'immatriculation. |
 | `pitstop_log.update_purchase_date` | Met à jour la date d'achat. |
 | `pitstop_log.update_brand_model` | Marque, modèle, année, photo, immatriculation, achat. |
-| `pitstop_log.add_maintenance_done` | Ajoute une entrée au carnet d'entretien (natures multiples, facture, réinitialisation des plans). |
+| `pitstop_log.add_maintenance_done` | Ajoute une entrée au carnet d'entretien (natures multiples, facture, réinitialisation des natures). |
 | `pitstop_log.update_maintenance` | Modifie une entrée du carnet d'entretien. |
 | `pitstop_log.delete_maintenance` | Supprime une entrée du carnet d'entretien. |
-| `pitstop_log.add_maintenance_plan` | Ajoute un plan d'entretien périodique. |
+| `pitstop_log.add_maintenance_plan` | Ajoute une nature d'entretien périodique. |
 
 Exemple — ajouter une entrée au carnet d'entretien avec facture :
 
@@ -188,21 +188,21 @@ Pour ajouter une marque : déposez son SVG dans `brands/` et éditez `brands.jso
 
 <a id="gabarits-de-plans"></a>
 
-## 🧰 Gabarits de plans
+## 🧰 Gabarits de natures
 
-Les gabarits de plans d'entretien par type de véhicule (moto, voiture,
+Les gabarits de natures d'entretien par type de véhicule (moto, voiture,
 camping-car, autre) sont définis dans `plan_templates.json` (fichier séparé).
 Ils s'appliquent en un clic à la création d'un véhicule ou depuis
-**Configurer**, sans jamais écraser les plans existants, qui restent
+**Configurer**, sans jamais écraser les natures existantes, qui restent
 modifiables ensuite. La copie servie à l'exécution est consultable :
 `/local/pitstop_log/plan_templates.json`.
 
-> 🧰 **[Galerie des gabarits de plans](docs/plan_templates.md)** — visualisez tous
+> 🧰 **[Galerie des gabarits de natures](docs/plan_templates.md)** — visualisez tous
 > les gabarits par type de véhicule : noms affichés (FR/EN), nom stocké, slug
 > et intervalles (page générée automatiquement depuis `plan_templates.json`).
 
 Pour ajouter ou modifier un gabarit : éditez `plan_templates.json` (les noms de
-plans doivent rester dans `maintenance_types.json`), puis régénérez la galerie :
+natures doivent rester dans `maintenance_types.json`), puis régénérez la galerie :
 
 ```bash
 python3 scripts/generate_templates_page.py
@@ -225,7 +225,7 @@ scripts de vérification.
 
 ## 💾 Stockage des données
 
-- 🗄️ Données (véhicules, plans, carnet d'entretien) : `.storage/pitstop_log` (JSON,
+- 🗄️ Données (véhicules, natures, carnet d'entretien) : `.storage/pitstop_log` (JSON,
   géré par le `Store` de Home Assistant).
 - 🧾 Factures : `/config/www/pitstop_log/invoices/`
 - 📷 Photos des véhicules : `/config/www/pitstop_log/photos/`
@@ -241,7 +241,7 @@ custom_components/pitstop_log/
 ├── services.yaml, strings.json, icons.json
 ├── brands.json             ← marques + logos
 ├── maintenance_types.json ← natures d'entretien
-├── plan_templates.json    ← gabarits de plans par type de véhicule
+├── plan_templates.json    ← gabarits de natures par type de véhicule
 │                            (noms affichés traduits via `plan_names` dans translations/)
 ├── brands/                 ← logos SVG
 ├── locales/                ← traductions de la carte (fr, en)

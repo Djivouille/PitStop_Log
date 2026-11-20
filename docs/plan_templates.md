@@ -1,4 +1,4 @@
-# Gabarits de plans d'entretien par type de véhicule
+# Gabarits de natures d'entretien par type de véhicule
 
 Page générée automatiquement depuis
 [`plan_templates.json`](../custom_components/pitstop_log/plan_templates.json)
@@ -6,16 +6,16 @@ par [`scripts/generate_templates_page.py`](../scripts/generate_templates_page.py
 ne pas éditer ce fichier à la main : relancer le script après toute
 modification des gabarits (la CI vérifie que la page est à jour).
 
-- **Nom stocké** : identifiant stable du plan (valeur `name` du JSON). Il doit
+- **Nom stocké** : identifiant stable de la nature (valeur `name` du JSON). Il doit
   rester dans `maintenance_types.json` : c'est lui qui permet la
-  réinitialisation automatique d'un plan depuis le carnet d'entretien.
+  réinitialisation automatique d'une nature depuis le carnet d'entretien.
 - **Slug** : clé de `plan_names` dans les traductions (noms affichés FR/EN)
   et préfixe des champs du formulaire (`tpl_<slug>_…`).
-- En plus des plans du gabarit, l'interface propose **3 plans personnalisés**
+- En plus des natures du gabarit, l'interface propose **3 natures personnalisées**
   (`tpl_custom_1` à `tpl_custom_3`), non stockés dans ce fichier.
 - Copie servie à l'exécution : `/local/pitstop_log/plan_templates.json`.
 
-## Moto (7 plans)
+## Moto (7 natures)
 
 | Entretien (FR) | Maintenance (EN) | Nom stocké | Slug | Intervalle (km) | Intervalle (mois) |
 |---|---|---|---|---|---|
@@ -27,7 +27,7 @@ modification des gabarits (la CI vérifie que la page est à jour).
 | Batterie | Battery | `Batterie` | `batterie` | — | 12 |
 | Révision | General service | `Révision` | `revision` | 12 000 | 12 |
 
-## Voiture (7 plans)
+## Voiture (7 natures)
 
 | Entretien (FR) | Maintenance (EN) | Nom stocké | Slug | Intervalle (km) | Intervalle (mois) |
 |---|---|---|---|---|---|
@@ -39,7 +39,7 @@ modification des gabarits (la CI vérifie que la page est à jour).
 | Batterie | Battery | `Batterie` | `batterie` | — | 24 |
 | Contrôle technique | Technical inspection (MOT) | `Contrôle technique` | `controle_technique` | — | 24 |
 
-## Camping-car (6 plans)
+## Camping-car (6 natures)
 
 | Entretien (FR) | Maintenance (EN) | Nom stocké | Slug | Intervalle (km) | Intervalle (mois) |
 |---|---|---|---|---|---|
@@ -50,7 +50,7 @@ modification des gabarits (la CI vérifie que la page est à jour).
 | Pneus | Tires | `Pneus` | `pneus` | 30 000 | — |
 | Contrôle technique | Technical inspection (MOT) | `Contrôle technique` | `controle_technique` | — | 24 |
 
-## Autre (1 plan)
+## Autre (1 nature)
 
 | Entretien (FR) | Maintenance (EN) | Nom stocké | Slug | Intervalle (km) | Intervalle (mois) |
 |---|---|---|---|---|---|

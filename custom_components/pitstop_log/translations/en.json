@@ -36,8 +36,8 @@
         }
       },
       "apply_template": {
-        "title": "Maintenance plan definition",
-        "description": "Here is a suggested maintenance plan for this vehicle type:\n\n{plans}\n\nCustomize the maintenance plan below and add custom maintenance entries if needed (they remain editable and deletable afterwards).",
+        "title": "Maintenance nature definition",
+        "description": "Here is a suggested maintenance nature for this vehicle type:\n\n{plans}\n\nCustomize the maintenance nature below and add custom maintenance entries if needed (they remain editable and deletable afterwards).",
         "data": {
           "tpl_vidange_enabled": "Oil change",
           "tpl_vidange_name": "Oil change — name",
@@ -91,18 +91,18 @@
           "tpl_autre_name": "Other — name",
           "tpl_autre_interval_km": "Other — interval (km)",
           "tpl_autre_interval_months": "Other — interval (months)",
-          "tpl_custom_0_enabled": "Custom plan 1",
-          "tpl_custom_0_name": "Custom plan 1 — name",
-          "tpl_custom_0_interval_km": "Custom plan 1 — interval (km)",
-          "tpl_custom_0_interval_months": "Custom plan 1 — interval (months)",
-          "tpl_custom_1_enabled": "Custom plan 2",
-          "tpl_custom_1_name": "Custom plan 2 — name",
-          "tpl_custom_1_interval_km": "Custom plan 2 — interval (km)",
-          "tpl_custom_1_interval_months": "Custom plan 2 — interval (months)",
-          "tpl_custom_2_enabled": "Custom plan 3",
-          "tpl_custom_2_name": "Custom plan 3 — name",
-          "tpl_custom_2_interval_km": "Custom plan 3 — interval (km)",
-          "tpl_custom_2_interval_months": "Custom plan 3 — interval (months)"
+          "tpl_custom_0_enabled": "Custom nature 1",
+          "tpl_custom_0_name": "Custom nature 1 — name",
+          "tpl_custom_0_interval_km": "Custom nature 1 — interval (km)",
+          "tpl_custom_0_interval_months": "Custom nature 1 — interval (months)",
+          "tpl_custom_1_enabled": "Custom nature 2",
+          "tpl_custom_1_name": "Custom nature 2 — name",
+          "tpl_custom_1_interval_km": "Custom nature 2 — interval (km)",
+          "tpl_custom_1_interval_months": "Custom nature 2 — interval (months)",
+          "tpl_custom_2_enabled": "Custom nature 3",
+          "tpl_custom_2_name": "Custom nature 3 — name",
+          "tpl_custom_2_interval_km": "Custom nature 3 — interval (km)",
+          "tpl_custom_2_interval_months": "Custom nature 3 — interval (months)"
         }
       }
     },
@@ -110,7 +110,7 @@
       "name_already_used": "A vehicle with this name already exists.",
       "invalid_date": "Invalid date, expected format: YYYY-MM-DD.",
       "interval_required": "An interval in km or months must be set.",
-      "name_required": "The plan name cannot be empty."
+      "name_required": "The nature name cannot be empty."
     },
     "abort": {
       "already_configured": "This vehicle is already configured."
@@ -122,9 +122,9 @@
         "title": "PitStop Log",
         "menu_options": {
           "vehicle": "Edit vehicle",
-          "plans": "Maintenance plans",
+          "plans": "Maintenance natures",
           "history": "Maintenance logbook",
-          "templates": "Plan templates",
+          "templates": "Nature templates",
           "done": "Done"
         }
       },
@@ -136,17 +136,17 @@
         }
       },
       "plans": {
-        "title": "Maintenance plans",
-        "description": "Select a plan to edit or add a new one.",
+        "title": "Maintenance natures",
+        "description": "Select a nature to edit or add a new one.",
         "data": {
-          "choice": "Maintenance plan"
+          "choice": "Maintenance nature"
         }
       },
       "add_plan": {
-        "title": "Add a maintenance plan",
+        "title": "Add a maintenance nature",
         "description": "Define an interval in kilometers and/or months.",
         "data": {
-          "plan_name": "Plan name",
+          "plan_name": "Nature name",
           "interval_km": "Interval (km)",
           "interval_months": "Interval (months)",
           "last_km": "Last mileage done",
@@ -154,15 +154,15 @@
         }
       },
       "plan": {
-        "title": "Edit maintenance plan",
-        "description": "Check \"Delete\" to remove this plan.",
+        "title": "Edit maintenance nature",
+        "description": "Check \"Delete\" to remove this nature.",
         "data": {
-          "plan_name": "Plan name",
+          "plan_name": "Nature name",
           "interval_km": "Interval (km)",
           "interval_months": "Interval (months)",
           "last_km": "Last mileage done",
           "last_date": "Date of last completion (YYYY-MM-DD)",
-          "delete": "Delete this plan"
+          "delete": "Delete this nature"
         }
       },
       "history": {
@@ -185,12 +185,12 @@
         }
       },
       "templates": {
-        "title": "Plan templates",
-        "description": "Applies the template matching the vehicle type. Plans whose name already exists are not duplicated.",
+        "title": "Nature templates",
+        "description": "Applies the template matching the vehicle type. Natures whose name already exists are not duplicated.",
         "data": {
           "apply_template": {
             "name": "Apply the template",
-            "description": "Adds the missing typical plans (oil change, brakes, tires…)."
+            "description": "Adds the missing typical natures (oil change, brakes, tires…)."
           }
         }
       },
@@ -340,7 +340,7 @@
     },
     "add_maintenance_done": {
       "name": "Add a logbook entry",
-      "description": "Adds a completed maintenance to the vehicle's maintenance logbook. If plan_id is provided, the associated maintenance plan is reset.",
+      "description": "Adds a completed maintenance to the vehicle's maintenance logbook. If plan_id is provided, the associated maintenance nature is reset.",
       "fields": {
         "vehicle_id": {
           "name": "Vehicle",
@@ -371,13 +371,13 @@
           "description": "Invoice photo or PDF encoded in base64 (optional)."
         },
         "plan_id": {
-          "name": "Maintenance plan",
-          "description": "Plan to reset (optional, name matching is automatic)."
+          "name": "Maintenance nature",
+          "description": "Nature to reset (optional, name matching is automatic)."
         }
       }
     },
     "add_maintenance_plan": {
-      "name": "Add a maintenance plan",
+      "name": "Add a maintenance nature",
       "description": "Adds a periodic maintenance rule (at least one interval required).",
       "fields": {
         "vehicle_id": {
@@ -385,8 +385,8 @@
           "description": "Vehicle id or name."
         },
         "plan_name": {
-          "name": "Plan name",
-          "description": "Name of the maintenance plan."
+          "name": "Nature name",
+          "description": "Name of the maintenance nature."
         },
         "interval_km": {
           "name": "Interval (km)",
