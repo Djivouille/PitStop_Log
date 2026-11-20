@@ -82,8 +82,8 @@
 
 1. **Paramètres** → **Appareils et services** → **Ajouter une intégration** → **PitStop Log**.
 2. Suivez l'assistant : *type/marque/modèle*, puis le reste
-   (nom, année, achat, immatriculation, kilométrage, photo) puis le
-   **gabarit de plans d'entretien** (contenu affiché et personnalisable à l'écran).
+   (nom, année, achat, immatriculation, kilométrage, photo) puis la
+   **définition des plans d'entretien** (contenu affiché et personnalisable à l'écran).
 3. ➕ Répétez pour chaque véhicule du garage.
 4. Pour gérer un véhicule : sa fiche → **Configurer** :
    - ✏️ **Modifier le véhicule** : nom, type, marque, modèle, année, achat, immatriculation, km ;
