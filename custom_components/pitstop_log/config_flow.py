@@ -39,6 +39,7 @@ from .const import (
     CONF_PHOTO,
     CONF_PLAN_NAME,
     CONF_PURCHASE_DATE,
+    CONF_TEMPLATE_PLANS,
     CONF_REGISTRATION,
     CONF_VEHICLE_NAME,
     CONF_VEHICLE_TYPE,
@@ -47,6 +48,7 @@ from .const import (
     VEHICLE_TYPE_LABELS,
     brand_logo,
     brands_for_type,
+    plan_template_for_type,
 )
 from .coordinator import (
     async_get_or_create_coordinator,
@@ -108,19 +110,71 @@ VEHICLE_TYPE_SCHEMA = vol.Schema(
 
 
 
-# Schéma de l'étape d'application du gabarit de plans (création du véhicule)
-APPLY_TEMPLATE_SCHEMA = vol.Schema(
-    {
-        vol.Required(CONF_APPLY_TEMPLATE, default=True): bool,
-    }
-)
-
 # Schéma de l'étape d'application du gabarit (flux d'options, défaut : non)
 APPLY_TEMPLATE_OPTIONS_SCHEMA = vol.Schema(
     {
         vol.Optional(CONF_APPLY_TEMPLATE, default=False): bool,
     }
 )
+
+
+def apply_template_schema(vehicle_type: str) -> vol.Schema:
+    """Schéma de l'étape gabarit : un bloc de champs éditables par plan."""
+    template = plan_template_for_type(vehicle_type)
+    schema: dict[Any, Any] = {}
+    for index, tpl in enumerate(template.get("plans", [])):
+        prefix = f"tpl_{index}"
+        schema[vol.Optional(f"{prefix}_enabled", default=True)] = bool
+        schema[vol.Required(f"{prefix}_name", default=tpl.get("name", ""))] = str
+        if tpl.get("interval_km"):
+            schema[vol.Optional(f"{prefix}_interval_km", default=tpl["interval_km"])] = int
+        else:
+            schema[vol.Optional(f"{prefix}_interval_km")] = int
+        if tpl.get("interval_months"):
+            schema[vol.Optional(f"{prefix}_interval_months", default=tpl["interval_months"])] = int
+        else:
+            schema[vol.Optional(f"{prefix}_interval_months")] = int
+    return vol.Schema(schema)
+
+
+def template_description(vehicle_type: str) -> str:
+    """Lister le contenu du gabarit (affiché dans la description de l'étape)."""
+    template = plan_template_for_type(vehicle_type)
+    return "\n".join(
+        f"- **{tpl.get('name')}** — {tpl.get('interval_km') or '—'} km / "
+        f"{tpl.get('interval_months') or '—'} mois"
+        for tpl in template.get("plans", [])
+    )
+
+
+def template_plans_from_input(
+    user_input: dict[str, Any], vehicle_type: str
+) -> tuple[list[dict[str, Any]], dict[str, str]]:
+    """Extraire les plans personnalisés saisis ; retourne (plans, erreurs)."""
+    template = plan_template_for_type(vehicle_type)
+    plans: list[dict[str, Any]] = []
+    errors: dict[str, str] = {}
+    for index, tpl in enumerate(template.get("plans", [])):
+        prefix = f"tpl_{index}"
+        if not user_input.get(f"{prefix}_enabled", True):
+            continue
+        name = (user_input.get(f"{prefix}_name") or "").strip() or tpl.get("name", "")
+        interval_km = user_input.get(f"{prefix}_interval_km")
+        interval_months = user_input.get(f"{prefix}_interval_months")
+        if not name:
+            errors[f"{prefix}_name"] = "name_required"
+        if not interval_km and not interval_months:
+            errors[f"{prefix}_interval_km"] = "interval_required"
+        if f"{prefix}_name" in errors or f"{prefix}_interval_km" in errors:
+            continue
+        plans.append(
+            {
+                "name": name,
+                "interval_km": interval_km or None,
+                "interval_months": interval_months or None,
+            }
+        )
+    return plans, errors
 
 # Schéma d'ajout d'un plan d'entretien depuis l'interface
 PLAN_SCHEMA = vol.Schema(
@@ -244,23 +298,31 @@ class PitStopLogConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     async def async_step_apply_template(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
-        """Étape 3 : appliquer ou non le gabarit de plans du type de véhicule."""
+        """Étape 3 : afficher et personnaliser le gabarit de plans du type choisi."""
+        errors: dict[str, str] = {}
         if user_input is not None and self._pending_vehicle is not None:
-            vehicle_id, details, photo_url = self._pending_vehicle
-            return self.async_create_entry(
-                title=details[CONF_VEHICLE_NAME],
-                data={
-                    "vehicle_id": vehicle_id,
-                    CONF_VEHICLE_TYPE: self._vehicle_type,
-                    CONF_BRAND: self._vehicle_brand,
-                    CONF_MODEL: self._vehicle_model,
-                    **details,
-                    CONF_PHOTO: photo_url,
-                    CONF_APPLY_TEMPLATE: user_input.get(CONF_APPLY_TEMPLATE, False),
-                },
-            )
+            plans, errors = template_plans_from_input(user_input, self._vehicle_type)
+            if not errors:
+                vehicle_id, details, photo_url = self._pending_vehicle
+                return self.async_create_entry(
+                    title=details[CONF_VEHICLE_NAME],
+                    data={
+                        "vehicle_id": vehicle_id,
+                        CONF_VEHICLE_TYPE: self._vehicle_type,
+                        CONF_BRAND: self._vehicle_brand,
+                        CONF_MODEL: self._vehicle_model,
+                        **details,
+                        CONF_PHOTO: photo_url,
+                        CONF_TEMPLATE_PLANS: plans,
+                    },
+                )
         return self.async_show_form(
-            step_id="apply_template", data_schema=APPLY_TEMPLATE_SCHEMA
+            step_id="apply_template",
+            data_schema=apply_template_schema(self._vehicle_type),
+            description_placeholders={
+                "plans": template_description(self._vehicle_type)
+            },
+            errors=errors,
         )
 
     @staticmethod

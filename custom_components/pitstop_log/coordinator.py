@@ -441,19 +441,25 @@ class PitStopDataUpdateCoordinator:
     async def async_apply_plan_template(
         self, vehicle_id: str, vehicle_type: str
     ) -> list[str]:
-        """Appliquer le gabarit de plans d'un type de v\u00e9hicule.
+        """Appliquer le gabarit de plans d'un type de v\u00e9hicule."""
+        template = plan_template_for_type(vehicle_type)
+        return await self.async_apply_plans(vehicle_id, template.get("plans", []))
+
+    async def async_apply_plans(
+        self, vehicle_id: str, plans: list[dict[str, Any]]
+    ) -> list[str]:
+        """Appliquer une liste de plans (gabarit \u00e9ventuellement personnalis\u00e9).
 
         Les plans dont le nom existe d\u00e9j\u00e0 pour ce v\u00e9hicule ne sont
         pas dupliqu\u00e9s. Retourne la liste des identifiants de plans cr\u00e9\u00e9s.
         """
         if self.get_vehicle(vehicle_id) is None:
             raise HomeAssistantError(f"V\u00e9hicule inconnu : {vehicle_id}")
-        template = plan_template_for_type(vehicle_type)
         existing_names = {
             plan.get("name") for _, plan in self.get_plans(vehicle_id)
         }
         created: list[str] = []
-        for tpl in template.get("plans", []):
+        for tpl in plans:
             name = (tpl.get("name") or "").strip()
             interval_km = tpl.get("interval_km")
             interval_months = tpl.get("interval_months")

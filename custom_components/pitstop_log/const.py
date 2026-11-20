@@ -105,6 +105,7 @@ VEHICLE_TYPE_LABELS = {
 
 # Clés des plans d'entretien (entretiens à faire)
 CONF_APPLY_TEMPLATE = "apply_template"
+CONF_TEMPLATE_PLANS = "template_plans"
 CONF_PLAN_NAME = "plan_name"
 CONF_INTERVAL_KM = "interval_km"
 CONF_INTERVAL_MONTHS = "interval_months"

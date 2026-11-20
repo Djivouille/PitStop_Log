@@ -37,18 +37,44 @@
       },
       "apply_template": {
         "title": "Maintenance plan template",
-        "description": "Apply the plan template for the selected vehicle type? Created plans remain editable and can be deleted later.",
+        "description": "Template proposed for this vehicle type:\n\n{plans}\n\nCustomize the plans below (they remain editable and deletable afterwards).",
         "data": {
-          "apply_template": {
-            "name": "Apply the plan template",
-            "description": "Pre-fills the typical plans (oil change, brakes, tires…) for this vehicle."
-          }
+          "tpl_0_enabled": "Include plan 1?",
+          "tpl_0_name": "Plan 1 — name",
+          "tpl_0_interval_km": "Plan 1 — interval (km)",
+          "tpl_0_interval_months": "Plan 1 — interval (months)",
+          "tpl_1_enabled": "Include plan 2?",
+          "tpl_1_name": "Plan 2 — name",
+          "tpl_1_interval_km": "Plan 2 — interval (km)",
+          "tpl_1_interval_months": "Plan 2 — interval (months)",
+          "tpl_2_enabled": "Include plan 3?",
+          "tpl_2_name": "Plan 3 — name",
+          "tpl_2_interval_km": "Plan 3 — interval (km)",
+          "tpl_2_interval_months": "Plan 3 — interval (months)",
+          "tpl_3_enabled": "Include plan 4?",
+          "tpl_3_name": "Plan 4 — name",
+          "tpl_3_interval_km": "Plan 4 — interval (km)",
+          "tpl_3_interval_months": "Plan 4 — interval (months)",
+          "tpl_4_enabled": "Include plan 5?",
+          "tpl_4_name": "Plan 5 — name",
+          "tpl_4_interval_km": "Plan 5 — interval (km)",
+          "tpl_4_interval_months": "Plan 5 — interval (months)",
+          "tpl_5_enabled": "Include plan 6?",
+          "tpl_5_name": "Plan 6 — name",
+          "tpl_5_interval_km": "Plan 6 — interval (km)",
+          "tpl_5_interval_months": "Plan 6 — interval (months)",
+          "tpl_6_enabled": "Include plan 7?",
+          "tpl_6_name": "Plan 7 — name",
+          "tpl_6_interval_km": "Plan 7 — interval (km)",
+          "tpl_6_interval_months": "Plan 7 — interval (months)"
         }
       }
     },
     "error": {
       "name_already_used": "A vehicle with this name already exists.",
-      "invalid_date": "Invalid date, expected format: YYYY-MM-DD."
+      "invalid_date": "Invalid date, expected format: YYYY-MM-DD.",
+      "interval_required": "An interval in km or months must be set.",
+      "name_required": "The plan name cannot be empty."
     },
     "abort": {
       "already_configured": "This vehicle is already configured."

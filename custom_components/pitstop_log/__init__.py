@@ -17,7 +17,6 @@ from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
 from .const import (
     BRANDS_DIR,
     CONF_ACTIONS,
-    CONF_APPLY_TEMPLATE,
     CONF_BRAND,
     CONF_COST,
     CONF_DATE,
@@ -26,6 +25,7 @@ from .const import (
     CONF_ODOMETER,
     CONF_PURCHASE_DATE,
     CONF_REGISTRATION,
+    CONF_TEMPLATE_PLANS,
     CONF_INVOICE_BASE64,
     CONF_INVOICE_PATH,
     CONF_INTERVAL_KM,
@@ -504,11 +504,10 @@ async def async_setup_entry(
             },
         )
         await coordinator.async_save()
-        # Gabarit de plans demandé à la création : appliquer le modèle du type
-        if entry.data.get(CONF_APPLY_TEMPLATE):
-            await coordinator.async_apply_plan_template(
-                vehicle_id, entry.data.get(CONF_VEHICLE_TYPE, "car")
-            )
+        # Gabarit de plans personnalisé à la création : appliquer les plans saisis
+        template_plans = entry.data.get(CONF_TEMPLATE_PLANS) or []
+        if template_plans:
+            await coordinator.async_apply_plans(vehicle_id, template_plans)
     # Ressources www : couvre aussi le cas d'un composant non encore initialisé
     await _sync_www_assets(hass)
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)

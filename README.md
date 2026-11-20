@@ -82,8 +82,8 @@
 
 1. **Settings** → **Devices & services** → **Add integration** → **PitStop Log**.
 2. Follow the wizard: *type/brand/model*, then the rest
-   (name, year, purchase, registration, odometer, photo) and the
-   **maintenance plan template** choice.
+   (name, year, purchase, registration, odometer, photo) then the
+   **maintenance plan template** (shown and customizable on screen).
 3. ➕ Repeat for each vehicle in your garage.
 4. To manage a vehicle: its page → **Configure**:
    - ✏️ **Edit vehicle**: name, type, brand, model, year, purchase, registration, odometer;
