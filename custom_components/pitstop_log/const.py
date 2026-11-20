@@ -168,6 +168,8 @@ SERVICE_ADD_MAINTENANCE_DONE = "add_maintenance_done"
 SERVICE_ADD_MAINTENANCE_PLAN = "add_maintenance_plan"
 SERVICE_UPDATE_MAINTENANCE = "update_maintenance"
 SERVICE_DELETE_MAINTENANCE = "delete_maintenance"
+SERVICE_UPDATE_MAINTENANCE_PLAN = "update_maintenance_plan"
+SERVICE_DELETE_MAINTENANCE_PLAN = "delete_maintenance_plan"
 
 # Attributs communs
 ATTR_VEHICLE_ID = "vehicle_id"

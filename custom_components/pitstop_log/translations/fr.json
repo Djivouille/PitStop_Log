@@ -406,6 +406,46 @@
         }
       }
     },
+    "update_maintenance_plan": {
+      "name": "Modifier une nature d'entretien",
+      "description": "Modifie une nature d'entretien périodique d'un véhicule (nom et/ou intervalles en km / mois). Passer 0 efface un intervalle.",
+      "fields": {
+        "vehicle_id": {
+          "name": "Véhicule",
+          "description": "Identifiant ou nom du véhicule."
+        },
+        "plan_id": {
+          "name": "Identifiant de la nature",
+          "description": "Identifiant de la nature à modifier (attribut plan_id du capteur de la nature)."
+        },
+        "plan_name": {
+          "name": "Nom de la nature",
+          "description": "Nouveau nom (vide = conserve l'actuel)."
+        },
+        "interval_km": {
+          "name": "Intervalle (km)",
+          "description": "Fréquence en kilomètres (0 = efface l'intervalle). Optionnel."
+        },
+        "interval_months": {
+          "name": "Intervalle (mois)",
+          "description": "Fréquence en mois (0 = efface l'intervalle). Optionnel."
+        }
+      }
+    },
+    "delete_maintenance_plan": {
+      "name": "Supprimer une nature d'entretien",
+      "description": "Supprime une nature d'entretien périodique d'un véhicule. Les entrées du carnet d'entretien sont conservées.",
+      "fields": {
+        "vehicle_id": {
+          "name": "Véhicule",
+          "description": "Identifiant ou nom du véhicule."
+        },
+        "plan_id": {
+          "name": "Identifiant de la nature",
+          "description": "Identifiant de la nature à supprimer (attribut plan_id du capteur de la nature)."
+        }
+      }
+    },
     "update_maintenance": {
       "name": "Modifier une entrée du carnet d'entretien",
       "description": "Modifie une entrée du carnet d'entretien d'un véhicule (date, kilométrage, nature, coût, facture).",

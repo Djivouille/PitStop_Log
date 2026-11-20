@@ -108,6 +108,7 @@ everything directly from the card**:
 - ⚙️ gear icon in the header → brand, model, year, photo, registration, purchase date;
 - ➕ “Add a logbook entry” button → full form (multiple natures, invoice);
 - ⚙️ gear icon on the logbook section → full logbook management;
+- ⚙️ gear icon on the upcoming natures section → add / ✎ edit / ✖ delete maintenance natures;
 - 🖱️ click the Odometer cell → native Home Assistant chart.
 
 **Setup (once)**:
@@ -152,6 +153,8 @@ the stored name stays the stable ID, only the display changes.
 | `pitstop_log.update_maintenance` | Edit a logbook entry. |
 | `pitstop_log.delete_maintenance` | Delete a logbook entry. |
 | `pitstop_log.add_maintenance_plan` | Add a periodic maintenance nature. |
+| `pitstop_log.update_maintenance_plan` | Edit a maintenance nature (name, km/month intervals). |
+| `pitstop_log.delete_maintenance_plan` | Delete a maintenance nature (logbook entries kept). |
 
 Example — add a logbook entry with an invoice:
 

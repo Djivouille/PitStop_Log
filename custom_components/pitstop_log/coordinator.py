@@ -438,6 +438,57 @@ class PitStopDataUpdateCoordinator:
         await self.async_refresh()
         return plan_id
 
+    async def async_update_maintenance_plan(
+        self,
+        vehicle_id: str,
+        plan_id: str,
+        name: str | None = None,
+        interval_km: int | None = None,
+        interval_months: int | None = None,
+    ) -> bool:
+        """Mettre à jour une nature d'entretien (nom et/ou intervalles)."""
+        if self.get_vehicle(vehicle_id) is None:
+            raise HomeAssistantError(f"Véhicule inconnu : {vehicle_id}")
+        plan = self.data["plans"].get(plan_id)
+        if plan is None or plan.get("vehicle_id") != vehicle_id:
+            raise HomeAssistantError("Nature d'entretien introuvable")
+        new_name = (name if name is not None else plan.get("name") or "").strip()
+        if not new_name:
+            raise HomeAssistantError("Le nom de la nature ne peut pas être vide")
+        new_km = interval_km if interval_km is not None else plan.get("interval_km")
+        new_months = (
+            interval_months
+            if interval_months is not None
+            else plan.get("interval_months")
+        )
+        # 0 efface l'intervalle (normalisé en None)
+        new_km = new_km or None
+        new_months = new_months or None
+        if not new_km and not new_months:
+            raise HomeAssistantError(
+                "Un intervalle en km ou en mois doit être défini"
+            )
+        plan["name"] = new_name
+        plan["interval_km"] = new_km
+        plan["interval_months"] = new_months
+        await self.async_save()
+        await self.async_refresh()
+        return True
+
+    async def async_delete_maintenance_plan(
+        self, vehicle_id: str, plan_id: str
+    ) -> bool:
+        """Supprimer une nature d'entretien (les entrées du carnet sont conservées)."""
+        if self.get_vehicle(vehicle_id) is None:
+            raise HomeAssistantError(f"Véhicule inconnu : {vehicle_id}")
+        plan = self.data["plans"].get(plan_id)
+        if plan is None or plan.get("vehicle_id") != vehicle_id:
+            raise HomeAssistantError("Nature d'entretien introuvable")
+        self.delete_plan(plan_id)
+        await self.async_save()
+        await self.async_refresh()
+        return True
+
     async def async_apply_plan_template(
         self, vehicle_id: str, vehicle_type: str
     ) -> list[str]:

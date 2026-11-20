@@ -108,6 +108,7 @@ modifier directement depuis la carte** :
 - ⚙️ roue crantée de l'en-tête → marque, modèle, année, photo, immatriculation, date d'achat ;
 - ➕ bouton « Ajouter une entrée au carnet » → formulaire complet (natures multiples, facture) ;
 - ⚙️ roue crantée de la section carnet d'entretien → gestion complète du carnet ;
+- ⚙️ roue crantée de la section natures à faire → ajout / ✎ modification / ✖ suppression des natures d'entretien ;
 - 🖱️ clic sur la cellule Kilométrage → graphique natif Home Assistant.
 
 **Installation (une seule fois)** :
@@ -152,6 +153,8 @@ le nom stocké reste l'identifiant stable, seul l'affichage change.
 | `pitstop_log.update_maintenance` | Modifie une entrée du carnet d'entretien. |
 | `pitstop_log.delete_maintenance` | Supprime une entrée du carnet d'entretien. |
 | `pitstop_log.add_maintenance_plan` | Ajoute une nature d'entretien périodique. |
+| `pitstop_log.update_maintenance_plan` | Modifie une nature d'entretien (nom, intervalles km/mois). |
+| `pitstop_log.delete_maintenance_plan` | Supprime une nature d'entretien (entrées du carnet conservées). |
 
 Exemple — ajouter une entrée au carnet d'entretien avec facture :
 

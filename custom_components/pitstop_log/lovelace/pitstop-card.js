@@ -206,6 +206,18 @@ const PS_DEFAULT_STRINGS = {
   "title_hint": "Par d\u00e9faut : nom du v\u00e9hicule",
   "no_vehicle": "Aucun v\u00e9hicule PitStop Log trouv\u00e9. Cr\u00e9ez-en un dans Param\u00e8tres \u2192 Appareils et services.",
   "vehicle": "V\u00e9hicule",
+  "manage_plans_hint": "G\u00e9rer les natures d'entretien",
+  "no_plans": "Aucune nature d'entretien.",
+  "add_plan": "Ajouter une nature",
+  "new_plan": "Nouvelle nature d'entretien",
+  "edit_plan": "Modifier la nature d'entretien",
+  "interval_km": "Intervalle (km)",
+  "interval_months": "Intervalle (mois)",
+  "name_field": "Nom",
+  "err_plan_name": "Saisissez un nom de nature.",
+  "err_plan_interval": "D\u00e9finissez un intervalle en km ou en mois.",
+  "confirm_delete_plan": "Supprimer cette nature d'entretien ? (les entr\u00e9es du carnet sont conserv\u00e9es)",
+  "plan_rename_hint": "Renommer change l'identifiant : la r\u00e9initialisation auto depuis le carnet ne portera plus sur les anciennes entr\u00e9es.",
   "plan_names": {
     "autre": "Autre",
     "batterie": "Batterie",
@@ -803,11 +815,17 @@ class PitstopCard extends HTMLElement {
             <div class="value">${attrs.history_count != null ? attrs.history_count : "\u2014"}</div>
           </div>
         </div>
+        <div class="section">${psT("plans_title")}
+          <span class="gear gear-plans" title="${psT("manage_plans_hint")}">
+            <svg viewBox="0 0 24 24" width="14" height="14">
+              <path fill="currentColor" d="M19.14 12.94a7.07 7.07 0 0 0 .05-.94 7.07 7.07 0 0 0-.05-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.03 7.03 0 0 0-1.62-.94l-.36-2.54a.5.5 0 0 0-.5-.42h-3.84a.5.5 0 0 0-.5.42l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96a.5.5 0 0 0-.6.22L2.66 8.84a.5.5 0 0 0 .12.64l2.03 1.58c-.03.31-.05.63-.05.94s.02.63.05.94l-2.03 1.58a.5.5 0 0 0-.12.64l1.92 3.32c.13.22.39.31.6.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.04.24.25.42.5.42h3.84c.25 0 .46-.18.5-.42l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.09.47 0 .6-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.58ZM12 15.6A3.6 3.6 0 1 1 12 8.4a3.6 3.6 0 0 1 0 7.2Z"/>
+            </svg>
+          </span>
+        </div>
         ${
           plans
-            ? `<div class="section">${psT("plans_title")}</div>
-               <table class="table"><thead><tr><th>${psT("th_plan")}</th><th>${psT("th_status")}</th><th>${psT("th_remaining")}</th><th>${psT("th_due")}</th></tr></thead><tbody>${plans}</tbody></table>`
-            : ""
+            ? `<table class="table"><thead><tr><th>${psT("th_plan")}</th><th>${psT("th_status")}</th><th>${psT("th_remaining")}</th><th>${psT("th_due")}</th></tr></thead><tbody>${plans}</tbody></table>`
+            : `<div class="empty">${psT("no_plans")}</div>`
         }
         <div class="section">${psT("last_maintenances")}
           <span class="gear gear-history" title="${psT("manage_history_hint")}">
@@ -854,6 +872,9 @@ class PitstopCard extends HTMLElement {
     const gearHistory = root.querySelector(".gear-history");
     if (gearHistory)
       gearHistory.addEventListener("click", () => this._openHistoryEditor());
+    const gearPlans = root.querySelector(".gear-plans");
+    if (gearPlans)
+      gearPlans.addEventListener("click", () => this._openPlansEditor());
     const addMaint = root.querySelector("#ps-add-maint");
     if (addMaint)
       addMaint.addEventListener("click", () => this._openMaintenanceEditor(null));
@@ -1156,6 +1177,186 @@ class PitstopCard extends HTMLElement {
     }).then(
       () => this._openHistoryEditor(),
       () => this._openHistoryEditor()
+    );
+  }
+
+  /** Fen\u00eatre : gestion des natures d'entretien (ajouter/modifier/supprimer). */
+  async _openPlansEditor() {
+    await this._loadMaintenanceTypes();
+    this._render();
+    const root = this.shadowRoot;
+    const card = root.querySelector("ha-card");
+    if (!card) return;
+    const main = this._findMainSensor();
+    const attrs = (main && main.attributes) || {};
+    const plans = attrs.plans || [];
+    const rows = plans
+      .map(
+        (p) => `
+        <tr>
+          <td>${psName(p.name || "")}</td>
+          <td class="num">${p.interval_km ? Number(p.interval_km).toLocaleString() + " km" : "\u2014"}</td>
+          <td class="num">${p.interval_months ? p.interval_months : "\u2014"}</td>
+          <td class="num">
+            <span class="icon-btn edit" data-plan="${p.plan_id}" title="${psT("edit")}">\u270e</span>
+            <span class="icon-btn del" data-plan="${p.plan_id}" title="${psT("delete")}">\u2716</span>
+          </td>
+        </tr>`
+      )
+      .join("");
+    const overlay = document.createElement("div");
+    overlay.className = "ps-overlay";
+    overlay.innerHTML = `
+      <div class="ps-modal wide">
+        <div class="editor-title">${psT("plans_title")}</div>
+        <div class="editor-sub">${this._deviceOrVehicle()}</div>
+        ${
+          rows
+            ? `<table class="table inner"><thead><tr><th>${psT("th_plan")}</th><th>${psT("interval_km")}</th><th>${psT("interval_months")}</th><th></th></tr></thead><tbody>${rows}</tbody></table>`
+            : `<div class="empty">${psT("no_plans")}</div>`
+        }
+        <div class="editor-actions">
+          <button class="ps-cancel" data-act="back">${psT("back")}</button>
+          <button class="ps-save" data-act="new">+ ${psT("add_plan")}</button>
+        </div>
+      </div>`;
+    card.appendChild(overlay);
+    overlay.addEventListener("click", (ev) => {
+      if (ev.target === overlay) overlay.remove();
+    });
+    overlay.querySelector('[data-act="back"]').addEventListener("click", () => {
+      overlay.remove();
+    });
+    overlay.querySelector('[data-act="new"]').addEventListener("click", () => {
+      overlay.remove();
+      this._openPlanEditor(null);
+    });
+    overlay.querySelectorAll(".icon-btn.edit").forEach((btn) =>
+      btn.addEventListener("click", () => {
+        overlay.remove();
+        this._openPlanEditor(btn.dataset.plan);
+      })
+    );
+    overlay.querySelectorAll(".icon-btn.del").forEach((btn) =>
+      btn.addEventListener("click", () => {
+        overlay.remove();
+        this._deletePlan(btn.dataset.plan);
+      })
+    );
+  }
+
+  /** Fen\u00eatre : ajout (planId null) ou modification d'une nature d'entretien. */
+  async _openPlanEditor(planId) {
+    const types = await this._loadMaintenanceTypes();
+    this._render();
+    const root = this.shadowRoot;
+    const card = root.querySelector("ha-card");
+    if (!card) return;
+    const main = this._findMainSensor();
+    const attrs = (main && main.attributes) || {};
+    const plans = attrs.plans || [];
+    const plan =
+      planId != null ? plans.find((p) => p.plan_id === planId) || {} : {};
+    const known = types.slice();
+    if (plan.name && !known.includes(plan.name)) known.unshift(plan.name);
+    const options = known
+      .map((tp) => `<option value="${tp}">${psName(tp)}</option>`)
+      .join("");
+    const overlay = document.createElement("div");
+    overlay.className = "ps-overlay";
+    overlay.innerHTML = `
+      <div class="ps-modal">
+        <div class="editor-title">${planId != null ? psT("edit_plan") : psT("new_plan")}</div>
+        <div class="editor-sub">${this._deviceOrVehicle()}</div>
+        <div class="field">
+          <label for="ps-p-name">${psT("name_field")}</label>
+          <input id="ps-p-name" class="ps-input" type="text" list="ps-p-types" value="${plan.name || ""}" />
+          <datalist id="ps-p-types">${options}</datalist>
+        </div>
+        <div class="field">
+          <label for="ps-p-km">${psT("interval_km")}</label>
+          <input id="ps-p-km" class="ps-input" type="number" min="0" step="1" value="${plan.interval_km || 0}" />
+        </div>
+        <div class="field">
+          <label for="ps-p-months">${psT("interval_months")}</label>
+          <input id="ps-p-months" class="ps-input" type="number" min="0" step="1" value="${plan.interval_months || 0}" />
+        </div>
+        ${planId != null ? `<div class="hint">${psT("plan_rename_hint")}</div>` : ""}
+        <div class="editor-error" id="ps-p-error"></div>
+        <div class="editor-actions">
+          <button class="ps-cancel" id="ps-p-cancel">${psT("cancel")}</button>
+          <button class="ps-save" id="ps-p-save">${psT("save")}</button>
+        </div>
+      </div>`;
+    card.appendChild(overlay);
+    overlay.addEventListener("click", (ev) => {
+      if (ev.target === overlay) overlay.remove();
+    });
+    overlay.querySelector("#ps-p-cancel").addEventListener("click", () => {
+      overlay.remove();
+      if (planId != null) this._openPlansEditor();
+    });
+    overlay.querySelector("#ps-p-save").addEventListener("click", () =>
+      this._savePlan(planId, overlay)
+    );
+  }
+
+  /** Sauvegarde la nature (ajout ou modification) via les services. */
+  async _savePlan(planId, overlay) {
+    const main = this._findMainSensor();
+    const attrs = (main && main.attributes) || {};
+    const vehicleId = attrs.vehicle_id || this._config.vehicle;
+    const errorBox = overlay.querySelector("#ps-p-error");
+    const button = overlay.querySelector("#ps-p-save");
+    errorBox.textContent = "";
+    const name = (overlay.querySelector("#ps-p-name").value || "").trim();
+    const km = parseInt(overlay.querySelector("#ps-p-km").value, 10) || 0;
+    const months = parseInt(overlay.querySelector("#ps-p-months").value, 10) || 0;
+    if (!name) {
+      errorBox.textContent = psT("err_plan_name");
+      return;
+    }
+    if (km <= 0 && months <= 0) {
+      errorBox.textContent = psT("err_plan_interval");
+      return;
+    }
+    button.disabled = true;
+    const data = {
+      vehicle_id: vehicleId,
+      plan_name: name,
+      interval_km: km > 0 ? km : 0,
+      interval_months: months > 0 ? months : 0,
+    };
+    if (planId != null) data.plan_id = planId;
+    const service =
+      planId != null ? "update_maintenance_plan" : "add_maintenance_plan";
+    this._hass.callService("pitstop_log", service, data).then(
+      () => {
+        overlay.remove();
+        this._render();
+      },
+      (err) => {
+        button.disabled = false;
+        errorBox.textContent = (err && err.message) || psT("err_save");
+      }
+    );
+  }
+
+  /** Supprime une nature d'entretien apr\u00e8s confirmation. */
+  _deletePlan(planId) {
+    const main = this._findMainSensor();
+    const attrs = (main && main.attributes) || {};
+    const vehicleId = attrs.vehicle_id || this._config.vehicle;
+    if (!window.confirm(psT("confirm_delete_plan"))) {
+      this._openPlansEditor();
+      return;
+    }
+    this._hass.callService("pitstop_log", "delete_maintenance_plan", {
+      vehicle_id: vehicleId,
+      plan_id: planId,
+    }).then(
+      () => this._openPlansEditor(),
+      () => this._openPlansEditor()
     );
   }
 

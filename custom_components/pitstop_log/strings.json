@@ -406,6 +406,46 @@
         }
       }
     },
+    "update_maintenance_plan": {
+      "name": "Update a maintenance nature",
+      "description": "Updates a periodic maintenance nature of a vehicle (name and/or km/month intervals). Pass 0 to clear an interval.",
+      "fields": {
+        "vehicle_id": {
+          "name": "Vehicle",
+          "description": "Vehicle id or name."
+        },
+        "plan_id": {
+          "name": "Nature id",
+          "description": "Id of the maintenance nature to update (plan_id attribute of the nature sensor)."
+        },
+        "plan_name": {
+          "name": "Nature name",
+          "description": "New name (empty = keep the current one)."
+        },
+        "interval_km": {
+          "name": "Interval (km)",
+          "description": "Frequency in kilometers (0 = clear the interval). Optional."
+        },
+        "interval_months": {
+          "name": "Interval (months)",
+          "description": "Frequency in months (0 = clear the interval). Optional."
+        }
+      }
+    },
+    "delete_maintenance_plan": {
+      "name": "Delete a maintenance nature",
+      "description": "Deletes a periodic maintenance nature of a vehicle. Logbook entries are kept.",
+      "fields": {
+        "vehicle_id": {
+          "name": "Vehicle",
+          "description": "Vehicle id or name."
+        },
+        "plan_id": {
+          "name": "Nature id",
+          "description": "Id of the maintenance nature to delete (plan_id attribute of the nature sensor)."
+        }
+      }
+    },
     "update_maintenance": {
       "name": "Edit a logbook entry",
       "description": "Edits an entry of the vehicle's maintenance logbook (date, odometer, natures, cost, invoice).",

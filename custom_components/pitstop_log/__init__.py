@@ -47,6 +47,8 @@ from .const import (
     SERVICE_ADD_MAINTENANCE_PLAN,
     SERVICE_UPDATE_MAINTENANCE,
     SERVICE_DELETE_MAINTENANCE,
+    SERVICE_UPDATE_MAINTENANCE_PLAN,
+    SERVICE_DELETE_MAINTENANCE_PLAN,
     CONF_INDEX,
     MAINTENANCE_TYPES_FILE,
     PLAN_TEMPLATES_FILE,
@@ -91,6 +93,23 @@ ADD_MAINTENANCE_PLAN_SCHEMA = vol.Schema(
         vol.Optional("interval_months"): int,
         vol.Optional("last_km"): int,
         vol.Optional("last_date"): str,
+    }
+)
+
+UPDATE_MAINTENANCE_PLAN_SCHEMA = vol.Schema(
+    {
+        vol.Required("vehicle_id"): str,
+        vol.Required("plan_id"): str,
+        vol.Optional("plan_name"): str,
+        vol.Optional("interval_km"): int,
+        vol.Optional("interval_months"): int,
+    }
+)
+
+DELETE_MAINTENANCE_PLAN_SCHEMA = vol.Schema(
+    {
+        vol.Required("vehicle_id"): str,
+        vol.Required("plan_id"): str,
     }
 )
 
@@ -270,6 +289,28 @@ async def async_setup(hass: HomeAssistant, config: dict[str, Any]) -> bool:
             last_date=call.data.get(CONF_LAST_DATE),
         )
 
+    async def handle_update_maintenance_plan(call: ServiceCall) -> None:
+        """Service : modifier une nature d'entretien périodique."""
+        vehicle_id = coordinator.find_vehicle_id(call.data["vehicle_id"])
+        if vehicle_id is None:
+            raise ServiceValidationError(f"Véhicule inconnu : {call.data['vehicle_id']}")
+        await coordinator.async_update_maintenance_plan(
+            vehicle_id=vehicle_id,
+            plan_id=call.data["plan_id"],
+            name=call.data.get(CONF_PLAN_NAME),
+            interval_km=call.data.get(CONF_INTERVAL_KM),
+            interval_months=call.data.get(CONF_INTERVAL_MONTHS),
+        )
+
+    async def handle_delete_maintenance_plan(call: ServiceCall) -> None:
+        """Service : supprimer une nature d'entretien périodique."""
+        vehicle_id = coordinator.find_vehicle_id(call.data["vehicle_id"])
+        if vehicle_id is None:
+            raise ServiceValidationError(f"Véhicule inconnu : {call.data['vehicle_id']}")
+        await coordinator.async_delete_maintenance_plan(
+            vehicle_id, call.data["plan_id"]
+        )
+
     hass.services.async_register(
         DOMAIN, SERVICE_UPDATE_ODOMETER, handle_update_odometer,
         schema=UPDATE_ODOMETER_SCHEMA,
@@ -363,6 +404,14 @@ async def async_setup(hass: HomeAssistant, config: dict[str, Any]) -> bool:
     hass.services.async_register(
         DOMAIN, SERVICE_ADD_MAINTENANCE_PLAN, handle_add_maintenance_plan,
         schema=ADD_MAINTENANCE_PLAN_SCHEMA,
+    )
+    hass.services.async_register(
+        DOMAIN, SERVICE_UPDATE_MAINTENANCE_PLAN, handle_update_maintenance_plan,
+        schema=UPDATE_MAINTENANCE_PLAN_SCHEMA,
+    )
+    hass.services.async_register(
+        DOMAIN, SERVICE_DELETE_MAINTENANCE_PLAN, handle_delete_maintenance_plan,
+        schema=DELETE_MAINTENANCE_PLAN_SCHEMA,
     )
     hass.services.async_register(
         DOMAIN, SERVICE_UPDATE_MAINTENANCE, handle_update_maintenance,
