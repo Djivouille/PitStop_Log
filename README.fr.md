@@ -29,9 +29,9 @@
 - [🛠️ Services](#services)
 - [🏷️ Marques et logos](#marques-et-logos)
 - [🧰 Gabarits de plans](#gabarits-de-plans)
+- [🤝 Contribuer](#contribuer)
 - [💾 Stockage des données](#stockage-des-donnees)
 - [🗂️ Structure du dépôt](#structure-du-depot)
-- [🤝 Contribuer](#contribuer)
 - [📜 Versionnement](#versionnement)
 - [📄 Licence](#licence)
 
@@ -208,6 +208,19 @@ plans doivent rester dans `maintenance_types.json`), puis régénérez la galeri
 python3 scripts/generate_templates_page.py
 ```
 
+<a id="contribuer"></a>
+
+## 🤝 Contribuer
+
+La plupart des ajouts se font **par simple Pull Request, sans toucher au code** :
+traductions 🌍, marques + logos 🏷️, natures d'entretien 🔧.
+Voir **[CONTRIBUTING.md](CONTRIBUTING.md)** pour la marche à suivre et les
+scripts de vérification.
+
+> ✅ La CI contrôle chaque PR : syntaxe Python/JS, validité JSON, cohérence des
+> traductions, marques/logos, format de version, page des logos à jour.
+> Une PR n'est fusionnée que si tous les jobs sont verts.
+
 <a id="stockage-des-donnees"></a>
 
 ## 💾 Stockage des données
@@ -235,19 +248,6 @@ custom_components/pitstop_log/
 ├── translations/           ← traductions de l'intégration (fr, en)
 └── lovelace/pitstop-card.js
 ```
-
-<a id="contribuer"></a>
-
-## 🤝 Contribuer
-
-La plupart des ajouts se font **par simple Pull Request, sans toucher au code** :
-traductions 🌍, marques + logos 🏷️, natures d'entretien 🔧.
-Voir **[CONTRIBUTING.md](CONTRIBUTING.md)** pour la marche à suivre et les
-scripts de vérification.
-
-> ✅ La CI contrôle chaque PR : syntaxe Python/JS, validité JSON, cohérence des
-> traductions, marques/logos, format de version, page des logos à jour.
-> Une PR n'est fusionnée que si tous les jobs sont verts.
 
 <a id="versionnement"></a>
 

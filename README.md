@@ -29,9 +29,9 @@
 - [🛠️ Services](#services)
 - [🏷️ Brands and logos](#brands-and-logos)
 - [🧰 Plan templates](#plan-templates)
+- [🤝 Contributing](#contributing)
 - [💾 Data storage](#data-storage)
 - [🗂️ Repository structure](#repository-structure)
-- [🤝 Contributing](#contributing)
 - [📜 Versioning](#versioning)
 - [📄 License](#license)
 
@@ -207,6 +207,19 @@ in `maintenance_types.json`), then regenerate the gallery:
 python3 scripts/generate_templates_page.py
 ```
 
+<a id="contributing"></a>
+
+## 🤝 Contributing
+
+Most additions are made **by simple Pull Request, without touching code**:
+translations 🌍, brands + logos 🏷️, maintenance natures 🔧.
+See **[CONTRIBUTING.md](CONTRIBUTING.md)** for the process and the
+verification scripts.
+
+> ✅ CI checks every PR: Python/JS syntax, JSON validity, translation
+> consistency, brands/logos, version format, logos page up to date.
+> A PR is only merged when all jobs are green.
+
 <a id="data-storage"></a>
 
 ## 💾 Data storage
@@ -234,19 +247,6 @@ custom_components/pitstop_log/
 ├── translations/           ← integration translations (fr, en)
 └── lovelace/pitstop-card.js
 ```
-
-<a id="contributing"></a>
-
-## 🤝 Contributing
-
-Most additions are made **by simple Pull Request, without touching code**:
-translations 🌍, brands + logos 🏷️, maintenance natures 🔧.
-See **[CONTRIBUTING.md](CONTRIBUTING.md)** for the process and the
-verification scripts.
-
-> ✅ CI checks every PR: Python/JS syntax, JSON validity, translation
-> consistency, brands/logos, version format, logos page up to date.
-> A PR is only merged when all jobs are green.
 
 <a id="versioning"></a>
 
