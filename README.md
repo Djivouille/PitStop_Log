@@ -232,10 +232,11 @@ verification scripts.
 Versions follow **semantic versioning**:
 
 - 🏷️ **`MAJOR.MINOR.PATCH`** (e.g. `0.1.0`): **production** releases;
-- 🧪 **`MAJOR.MINOR.PATCH-beta.NN`**: **test** releases (pre-releases),
-  beta numbers on two digits.
+- 🧪 **`MAJOR.MINOR.PATCH-beta.N`**: **test** releases (pre-releases).
+  Strict semver: no leading zero (`beta.1`…`beta.9`, then `beta.10`… — two
+  digits from beta.10 on). HACS/HA reject a manifest with e.g. `beta.01`.
 
-**Cycle**: new features are released as `-beta.NN`; after validation, the
+**Cycle**: new features are released as `-beta.N`; after validation, the
 stable version is published. `1.0.0` will come when the target feature set
 is reached. GitHub releases are created automatically by the repository
 workflow on every version change.

@@ -14,7 +14,7 @@ Merci de votre contribution ! La plupart des ajouts se font **sans toucher au co
 ## Règles importantes
 
 - **Ne modifiez pas `lovelace/pitstop-card.js`** sans accord préalable : ce fichier doit rester en échappement ASCII (`\uXXXX`), toute insertion directe d'accents le casse.
-- **Versionnement** : `X.Y.Z` pour la production, `X.Y.Z-beta.NN` pour les betas (numéros de beta **sur 2 chiffres**). La CI refuse tout autre format.
+- **Versionnement** : `X.Y.Z` pour la production, `X.Y.Z-beta.N` pour les betas. **Semver strict : pas de zéro de tête** (`beta.1`…`beta.9`, puis `beta.10`… — à partir de beta.10 le numéro fait 2 chiffres naturellement). HACS/HA rejettent un manifest avec `beta.01`. La CI refuse tout autre format.
 - Une PR = un sujet (ne mélangez pas une traduction et une marque).
 
 ## Vérifier avant d'ouvrir la PR
