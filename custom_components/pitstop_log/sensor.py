@@ -161,6 +161,10 @@ class PitStopNextMaintenanceSensor(PitStopEntity):
                 {
                     "plan_id": plan_id,
                     "name": plan.get("name"),
+                    "display_name": plan_display_name(
+                        plan.get("name", ""),
+                        getattr(self.hass.config, "language", "fr"),
+                    ),
                     "interval_km": plan.get("interval_km"),
                     "interval_months": plan.get("interval_months"),
                     **info,
@@ -226,9 +230,11 @@ class PitStopMaintenancePlanSensor(PitStopEntity):
         plan = coordinator.data["plans"].get(plan_id, {})
         self._attr_key = f"plan_{plan_id}"
         # Nom et état traduits via translation_key + paramètres de traduction
+        # (plan_name = nom affiché traduit, l'ID stocké reste le nom d'origine)
         self._attr_translation_key = TRANSLATION_KEY_MAINTENANCE_STATUS
+        lang = getattr(coordinator.hass.config, "language", "fr")
         self._attr_translation_placeholders = {
-            "plan_name": plan.get("name", plan_id)
+            "plan_name": plan_display_name(plan.get("name", plan_id), lang)
         }
         super().__init__(coordinator, entry, vehicle_id)
 

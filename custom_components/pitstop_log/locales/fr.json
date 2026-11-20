@@ -60,5 +60,20 @@
   "title_optional": "Titre affiché (optionnel)",
   "title_hint": "Par défaut : nom du véhicule",
   "no_vehicle": "Aucun véhicule PitStop Log trouvé. Créez-en un dans Paramètres → Appareils et services.",
-  "vehicle": "Véhicule"
+  "vehicle": "Véhicule",
+  "plan_names": {
+    "vidange": "Vidange",
+    "filtre_a_huile": "Filtre à huile",
+    "filtre_a_air": "Filtre à air",
+    "plaquettes_de_frein": "Plaquettes de frein",
+    "disques_de_frein": "Disques de frein",
+    "liquide_de_frein": "Liquide de frein",
+    "pneus": "Pneus",
+    "chaine_et_kit_de_transmission": "Chaîne et kit de transmission",
+    "bougies": "Bougies",
+    "batterie": "Batterie",
+    "revision": "Révision",
+    "controle_technique": "Contrôle technique",
+    "autre": "Autre"
+  }
 }

@@ -120,6 +120,9 @@ visuel propose un menu déroulant listant les véhicules (noms des appareils) et
 un titre optionnel — **aucun YAML**. Le fichier JS est copié automatiquement
 dans `/config/www/pitstop_log/lovelace/` au démarrage.
 
+Les natures et plans affichés sont traduits via `plan_names` (`locales/<langue>.json`) :
+le nom stocké reste l'identifiant stable, seul l'affichage change.
+
 <a id="capteurs"></a>
 
 ## 📊 Capteurs

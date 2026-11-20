@@ -95,6 +95,17 @@ for t in types.get("types", []):
             f"strings.json : plan_names sans entrée pour {t!r} (clé {_slug(t)!r})"
         )
 
+# ---- 2c. plan_names aussi présent dans les locales de la carte ----
+for loc in ("fr", "en"):
+    loc_path = ROOT / "locales" / f"{loc}.json"
+    loc_names = {}
+    if loc_path.is_file():
+        loc_names = json.loads(loc_path.read_text(encoding="utf-8")).get("plan_names", {})
+    if not loc_names:
+        errors.append(f"locales/{loc}.json : section 'plan_names' vide ou absente")
+    elif set(loc_names) != set(plan_names):
+        errors.append(f"locales/{loc}.json : clés plan_names différentes de strings.json")
+
 # ---- 2b. plan_templates.json ----
 TEMPLATE_TYPES = {"moto", "car", "camper", "other"}
 templates = json.loads(

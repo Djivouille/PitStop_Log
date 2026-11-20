@@ -1,11 +1,15 @@
 {
     "domain": "pitstop_log",
     "name": "PitStop Log",
-    "codeowners": ["@Djivouille"],
+    "codeowners": [
+        "@Djivouille"
+    ],
     "config_flow": true,
-    "after_dependencies": ["file_upload"],
+    "after_dependencies": [
+        "file_upload"
+    ],
     "documentation": "https://github.com/Djivouille/PitStop_Log",
     "iot_class": "local_polling",
     "issue_tracker": "https://github.com/Djivouille/PitStop_Log/issues",
-    "version": "0.4.1-beta.02"
+    "version": "0.4.1-beta.03"
 }

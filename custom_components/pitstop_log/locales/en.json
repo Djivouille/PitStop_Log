@@ -60,5 +60,20 @@
   "title_optional": "Displayed title (optional)",
   "title_hint": "Default: vehicle name",
   "no_vehicle": "No PitStop Log vehicle found. Create one in Settings → Devices & services.",
-  "vehicle": "Vehicle"
+  "vehicle": "Vehicle",
+  "plan_names": {
+    "vidange": "Oil change",
+    "filtre_a_huile": "Oil filter",
+    "filtre_a_air": "Air filter",
+    "plaquettes_de_frein": "Brake pads",
+    "disques_de_frein": "Brake discs",
+    "liquide_de_frein": "Brake fluid",
+    "pneus": "Tires",
+    "chaine_et_kit_de_transmission": "Chain and sprocket kit",
+    "bougies": "Spark plugs",
+    "batterie": "Battery",
+    "revision": "General service",
+    "controle_technique": "Technical inspection (MOT)",
+    "autre": "Other"
+  }
 }

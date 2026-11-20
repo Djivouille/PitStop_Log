@@ -120,6 +120,9 @@ dropdown listing your vehicles (device names) and an optional title —
 **no YAML**. The JS file is copied automatically to
 `/config/www/pitstop_log/lovelace/` at startup.
 
+Displayed natures/plans are translated via `plan_names` (`locales/<lang>.json`):
+the stored name stays the stable ID, only the display changes.
+
 <a id="sensors"></a>
 
 ## 📊 Sensors

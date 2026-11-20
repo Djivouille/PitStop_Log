@@ -206,6 +206,21 @@ const PS_DEFAULT_STRINGS = {
   "title_hint": "Par d\u00e9faut : nom du v\u00e9hicule",
   "no_vehicle": "Aucun v\u00e9hicule PitStop Log trouv\u00e9. Cr\u00e9ez-en un dans Param\u00e8tres \u2192 Appareils et services.",
   "vehicle": "V\u00e9hicule",
+  "plan_names": {
+    "autre": "Autre",
+    "batterie": "Batterie",
+    "bougies": "Bougies",
+    "chaine_et_kit_de_transmission": "Cha\u00eene et kit de transmission",
+    "controle_technique": "Contr\u00f4le technique",
+    "disques_de_frein": "Disques de frein",
+    "filtre_a_air": "Filtre \u00e0 air",
+    "filtre_a_huile": "Filtre \u00e0 huile",
+    "liquide_de_frein": "Liquide de frein",
+    "plaquettes_de_frein": "Plaquettes de frein",
+    "pneus": "Pneus",
+    "revision": "R\u00e9vision",
+    "vidange": "Vidange"
+  },
 };
 let PS_STRINGS = null;
 
@@ -228,6 +243,23 @@ async function psLoadStrings(hass) {
 
 function psT(key) {
   return (PS_STRINGS && PS_STRINGS[key]) || PS_DEFAULT_STRINGS[key] || key;
+}
+
+/** Slug identique au slugify Python/HA (NFKD + ASCII, non-alnum -> "_"). */
+function psSlug(name) {
+  return String(name || "")
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9_]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+}
+
+/** Nom affich\u00e9 d'une nature/plan : mapping plan_names, repli sur le brut. */
+function psName(name) {
+  const names =
+    (PS_STRINGS && PS_STRINGS.plan_names) || PS_DEFAULT_STRINGS.plan_names || {};
+  return names[psSlug(name)] || name;
 }
 
 class PitstopCard extends HTMLElement {
@@ -843,10 +875,10 @@ class PitstopCard extends HTMLElement {
     </svg>`;
   }
 
-  /** Formate les natures d'un entretien (liste ou cha\u00eene). */
+  /** Formate les natures d'un entretien (liste ou cha\u00eene), traduites. */
   _fmtActions(actions) {
-    if (Array.isArray(actions)) return actions.join(" + ");
-    return actions || "";
+    if (Array.isArray(actions)) return actions.map((a) => psName(a)).join(" + ");
+    return actions ? psName(actions) : "";
   }
 
   /** Km courant du v\u00e9hicule (pour pr\u00e9-remplir le formulaire). */
@@ -968,7 +1000,7 @@ class PitstopCard extends HTMLElement {
     const natureBoxes = known
       .map(
         (t) =>
-          `<label class="chk"><input type="checkbox" class="ps-nature" value="${t}"${natureList.includes(t) ? " checked" : ""}/> ${t}</label>`
+          `<label class="chk"><input type="checkbox" class="ps-nature" value="${t}"${natureList.includes(t) ? " checked" : ""}/> ${psName(t)}</label>`
       )
       .join(" ");
     const overlay = document.createElement("div");
@@ -1023,7 +1055,7 @@ class PitstopCard extends HTMLElement {
       );
       const matches = plans
         .filter((p) => p.name && selected.includes(p.name.toLowerCase()))
-        .map((p) => p.name);
+        .map((p) => psName(p.name));
       plansHint.textContent = matches.length
         ? psT("plans_reset") + matches.join(", ")
         : "";
