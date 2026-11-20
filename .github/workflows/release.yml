@@ -3,12 +3,16 @@ name: Release
 # Publie automatiquement une release GitHub quand la version du manifest
 # change. HACS/Marketplace se base sur les releases pour afficher la version
 # installable et proposer les mises à jour.
+# Les notes de release listent les changements (git log) depuis le tag
+# précédent, en plus du texte standard ci-dessous.
+# workflow_dispatch permet de rejouer le workflow à la main (test).
 on:
   push:
     branches:
       - main
     paths:
       - "custom_components/pitstop_log/manifest.json"
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -17,8 +21,10 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      - name: Récupérer le dépôt
+      - name: Récupérer le dépôt (historique complet, pour git log et les tags)
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Extraire la version du manifest
         id: version
@@ -29,6 +35,60 @@ jobs:
             exit 1
           fi
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Générer les notes de release (changelog depuis le tag précédent)
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          cat > /tmp/release-notes.md <<'NOTES'
+          ## PitStop Log
+
+          Carnet d'entretien numérique multi-véhicules pour Home Assistant :
+          motos, voitures, camping-cars. Gestion des entretiens périodiques
+          (km/mois), carnet d'entretien des interventions avec factures,
+          kilométrage historisé avec graphique, carte Lovelace dédiée.
+
+          ## Versionnement
+
+          - **`MAJOR.MINOR.PATCH`** (ex. `0.1.0`) : version de **production**, stable ;
+          - **`MAJOR.MINOR.PATCH-beta.NN`** (ex. `0.4.1-beta.01`) : version de **test**
+            (pre-release, numéro de bêta toujours sur 2 chiffres) destinée à valider
+            les nouveautés avant publication.
+
+          Les nouveautés sont d'abord publiées en `-beta.NN`. Après validation,
+          la version stable `MAJOR.MINOR.PATCH` est publiée. Les releases bêta
+          ne sont proposées par le Marketplace qu'aux utilisateurs ayant activé
+          **« Afficher les versions bêta »** dans les paramètres du dépôt.
+
+          ## Installation
+
+          1. Marketplace → PitStop Log → Télécharger (activez « Afficher les
+             versions bêta » pour les versions de test) ;
+          2. Redémarrez Home Assistant ;
+          3. Ajoutez l'intégration : Paramètres → Appareils et services →
+             Ajouter une intégration → PitStop Log.
+
+          La carte Lovelace « PitStop Card » nécessite l'ajout d'une ressource
+          (voir le README du dépôt pour le guide complet).
+          NOTES
+
+          # Tag précédent (tri semver décroissant), hors version courante
+          PREV=$(git tag --sort=-v:refname | grep -v "^${VERSION}$" | head -n 1 || true)
+          if [ -n "$PREV" ]; then
+            RANGE="${PREV}..HEAD"
+            TITLE="## 🚀 Changements depuis ${PREV}"
+            LOG_CMD="git log --format=-\\ %s ${RANGE}"
+          else
+            TITLE="## 🚀 Changements"
+            LOG_CMD="git log --format=-\\ %s -n 20 HEAD"
+          fi
+          {
+            echo ""
+            echo "$TITLE"
+            echo ""
+            eval "$LOG_CMD" | grep -v "^chore" || echo "- (aucun commit listé)"
+          } >> /tmp/release-notes.md
+          echo "Notes générées (tag précédent : ${PREV:-aucun})."
 
       - name: Créer la release si elle n'existe pas
         env:
@@ -46,37 +106,6 @@ jobs:
             PRERELEASE_ARGS="--prerelease"
             echo "Version $VERSION détectée comme bêta -> pre-release."
           fi
-
-          cat > /tmp/release-notes.md <<'NOTES'
-          ## PitStop Log
-
-          Carnet d'entretien numérique multi-véhicules pour Home Assistant :
-          motos, voitures, camping-cars. Gestion des entretiens périodiques
-          (km/mois), carnet d'entretien des interventions avec factures,
-          kilométrage historisé avec graphique, carte Lovelace dédiée.
-
-          ## Versionnement
-
-          - **`MAJOR.MINOR.PATCH`** (ex. `0.1.0`) : version de **production**, stable ;
-          - **`MAJOR.MINOR.PATCH-beta.N`** (ex. `0.2.0-beta.1`) : version de **test**
-            (pre-release) destinée à valider les nouveautés avant publication.
-
-          Les nouveautés sont d'abord publiées en `-beta.N`. Après validation,
-          la version stable `MAJOR.MINOR.PATCH` est publiée. Les releases bêta
-          ne sont proposées par le Marketplace qu'aux utilisateurs ayant activé
-          **« Afficher les versions bêta »** dans les paramètres du dépôt.
-
-          ## Installation
-
-          1. Marketplace → PitStop Log → Télécharger (activez « Afficher les
-             versions bêta » pour les versions de test) ;
-          2. Redémarrez Home Assistant ;
-          3. Ajoutez l'intégration : Paramètres → Appareils et services →
-             Ajouter une intégration → PitStop Log.
-
-          La carte Lovelace « PitStop Card » nécessite l'ajout d'une ressource
-          (voir le README du dépôt pour le guide complet).
-          NOTES
 
           git tag "$VERSION" 2>/dev/null || true
           git push origin "refs/tags/$VERSION"
