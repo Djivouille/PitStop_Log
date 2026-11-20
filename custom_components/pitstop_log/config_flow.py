@@ -187,14 +187,23 @@ def apply_template_schema(vehicle_type: str) -> vol.Schema:
     return vol.Schema(schema)
 
 
-def template_description(vehicle_type: str) -> str:
-    """Lister le contenu du gabarit (affiché dans la description de l'étape)."""
+def template_description(vehicle_type: str, lang: str = "fr") -> str:
+    """Tableau du gabarit + emplacements personnalisés (description de l'étape)."""
     template = plan_template_for_type(vehicle_type)
-    return "\n".join(
-        f"- **{tpl.get('name')}** — {tpl.get('interval_km') or '—'} km / "
-        f"{tpl.get('interval_months') or '—'} mois"
+    if lang == "en":
+        header = "| Plan | Interval (km) | Interval (months) |"
+        custom_label = "Custom plan"
+    else:
+        header = "| Plan | Intervalle (km) | Intervalle (mois) |"
+        custom_label = "Plan personnalisé"
+    rows = [
+        f"| {tpl.get('name')} | {tpl.get('interval_km') or '—'} | "
+        f"{tpl.get('interval_months') or '—'} |"
         for tpl in template.get("plans", [])
-    )
+    ]
+    for index in range(EXTRA_TEMPLATE_SLOTS):
+        rows.append(f"| {custom_label} {index + 1} |  |  |")
+    return "\n".join([header, "|---|---|---|", *rows])
 
 
 def template_plans_from_input(
@@ -368,7 +377,10 @@ class PitStopLogConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             step_id="apply_template",
             data_schema=apply_template_schema(self._vehicle_type),
             description_placeholders={
-                "plans": template_description(self._vehicle_type)
+                "plans": template_description(
+                    self._vehicle_type,
+                    getattr(self.hass.config, "language", "fr"),
+                )
             },
             errors=errors,
         )

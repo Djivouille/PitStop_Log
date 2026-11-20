@@ -10,7 +10,7 @@ Contrôles :
 3. plan_templates.json : types connus, plans nommés (présents dans
    maintenance_types.json) avec au moins un intervalle.
 4. manifest.json : version au format semver (X.Y.Z ou X.Y.Z-beta.NN,
-   numéros de beta sur 2 chiffres).
+   numéro de beta toujours sur 2 chiffres : beta.01, beta.02…).
 """
 
 import json
@@ -22,7 +22,7 @@ ROOT = Path(__file__).resolve().parent.parent / "custom_components" / "pitstop_l
 CATEGORIES = {"moto", "car", "camper", "other"}
 LOCAL_PREFIX = "/local/pitstop_log/brands/"
 VERSION_RE = re.compile(
-    r"^\d+\.\d+\.\d+(-beta\.[1-9]\d?|-(?:rc|alpha)\.[1-9]\d?)?$"
+    r"^\d+\.\d+\.\d+(-beta\.\d{2}|-(?:rc|alpha)\.\d{2})?$"
 )
 
 errors = []
@@ -114,8 +114,8 @@ version = manifest.get("version", "")
 if not VERSION_RE.match(version):
     errors.append(
         f"manifest.json : version {version!r} invalide "
-        "(formats attendus : X.Y.Z, X.Y.Z-beta.N — le semver interdit "
-        "les zéros de tête : beta.1 à beta.9, puis beta.10, beta.11…)"
+        "(formats attendus : X.Y.Z, X.Y.Z-beta.NN avec NN toujours sur "
+        "2 chiffres : beta.01, beta.02… beta.10, beta.11…)"
     )
 
 if errors:
