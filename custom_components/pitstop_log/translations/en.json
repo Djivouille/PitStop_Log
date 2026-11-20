@@ -37,7 +37,7 @@
       },
       "apply_template": {
         "title": "Maintenance plan template",
-        "description": "Template proposed for this vehicle type:\n\n{plans}\n\nCustomize the plans below (they remain editable and deletable afterwards).",
+        "description": "Template proposed for this vehicle type:\n\n{plans}\n\nCustomize the plans below and add custom plans if needed (they remain editable and deletable afterwards).",
         "data": {
           "tpl_batterie_enabled": "Batterie — include?",
           "tpl_batterie_name": "Batterie — name",
@@ -74,7 +74,19 @@
           "tpl_vidange_enabled": "Vidange — include?",
           "tpl_vidange_name": "Vidange — name",
           "tpl_vidange_interval_km": "Vidange — interval (km)",
-          "tpl_vidange_interval_months": "Vidange — interval (months)"
+          "tpl_vidange_interval_months": "Vidange — interval (months)",
+          "tpl_custom_0_enabled": "Custom plan 1 — include?",
+          "tpl_custom_0_name": "Custom plan 1 — name",
+          "tpl_custom_0_interval_km": "Custom plan 1 — interval (km)",
+          "tpl_custom_0_interval_months": "Custom plan 1 — interval (months)",
+          "tpl_custom_1_enabled": "Custom plan 2 — include?",
+          "tpl_custom_1_name": "Custom plan 2 — name",
+          "tpl_custom_1_interval_km": "Custom plan 2 — interval (km)",
+          "tpl_custom_1_interval_months": "Custom plan 2 — interval (months)",
+          "tpl_custom_2_enabled": "Custom plan 3 — include?",
+          "tpl_custom_2_name": "Custom plan 3 — name",
+          "tpl_custom_2_interval_km": "Custom plan 3 — interval (km)",
+          "tpl_custom_2_interval_months": "Custom plan 3 — interval (months)"
         }
       }
     },

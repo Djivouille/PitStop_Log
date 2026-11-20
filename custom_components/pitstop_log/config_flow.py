@@ -140,11 +140,36 @@ def template_plan_fields(vehicle_type: str) -> list[tuple[str, dict[str, Any]]]:
     return fields
 
 
+# Emplacements « plan personnalisé » ajoutables dans le formulaire gabarit
+EXTRA_TEMPLATE_SLOTS = 3
+
+
+def template_form_fields(vehicle_type: str) -> list[tuple[str, dict[str, Any], bool]]:
+    """Blocs de champs du formulaire gabarit : gabarit + plans personnalisés.
+
+    Retourne (préfixe, plan, activé_par_défaut) pour chaque bloc. Les plans
+    du gabarit sont activés par défaut ; les emplacements personnalisés
+    (tpl_custom_N, vides) sont désactivés par défaut.
+    """
+    fields: list[tuple[str, dict[str, Any], bool]] = [
+        (prefix, tpl, True) for prefix, tpl in template_plan_fields(vehicle_type)
+    ]
+    for index in range(EXTRA_TEMPLATE_SLOTS):
+        fields.append(
+            (
+                f"tpl_custom_{index}",
+                {"name": "", "interval_km": None, "interval_months": None},
+                False,
+            )
+        )
+    return fields
+
+
 def apply_template_schema(vehicle_type: str) -> vol.Schema:
     """Schéma de l'étape gabarit : un bloc de champs éditables par plan."""
     schema: dict[Any, Any] = {}
-    for prefix, tpl in template_plan_fields(vehicle_type):
-        schema[vol.Optional(f"{prefix}_enabled", default=True)] = bool
+    for prefix, tpl, enabled in template_form_fields(vehicle_type):
+        schema[vol.Optional(f"{prefix}_enabled", default=enabled)] = bool
         schema[vol.Required(f"{prefix}_name", default=tpl.get("name", ""))] = str
         if tpl.get("interval_km"):
             schema[vol.Optional(f"{prefix}_interval_km", default=tpl["interval_km"])] = int
@@ -170,11 +195,11 @@ def template_description(vehicle_type: str) -> str:
 def template_plans_from_input(
     user_input: dict[str, Any], vehicle_type: str
 ) -> tuple[list[dict[str, Any]], dict[str, str]]:
-    """Extraire les plans personnalisés saisis ; retourne (plans, erreurs)."""
+    """Extraire les plans saisis (gabarit + personnalisés) ; retourne (plans, erreurs)."""
     plans: list[dict[str, Any]] = []
     errors: dict[str, str] = {}
-    for prefix, tpl in template_plan_fields(vehicle_type):
-        if not user_input.get(f"{prefix}_enabled", True):
+    for prefix, tpl, enabled in template_form_fields(vehicle_type):
+        if not user_input.get(f"{prefix}_enabled", enabled):
             continue
         name = (user_input.get(f"{prefix}_name") or "").strip() or tpl.get("name", "")
         interval_km = user_input.get(f"{prefix}_interval_km")

@@ -37,7 +37,7 @@
       },
       "apply_template": {
         "title": "Gabarit de plans d'entretien",
-        "description": "Gabarit proposé pour ce type de véhicule :\n\n{plans}\n\nPersonnalisez les plans ci-dessous (ils restent modifiables et supprimables ensuite).",
+        "description": "Gabarit proposé pour ce type de véhicule :\n\n{plans}\n\nPersonnalisez les plans ci-dessous et ajoutez au besoin des plans personnalisés (ils restent modifiables et supprimables ensuite).",
         "data": {
           "tpl_batterie_enabled": "Batterie — inclure ?",
           "tpl_batterie_name": "Batterie — nom",
@@ -74,7 +74,19 @@
           "tpl_vidange_enabled": "Vidange — inclure ?",
           "tpl_vidange_name": "Vidange — nom",
           "tpl_vidange_interval_km": "Vidange — intervalle (km)",
-          "tpl_vidange_interval_months": "Vidange — intervalle (mois)"
+          "tpl_vidange_interval_months": "Vidange — intervalle (mois)",
+          "tpl_custom_0_enabled": "Plan personnalisé 1 — inclure ?",
+          "tpl_custom_0_name": "Plan personnalisé 1 — nom",
+          "tpl_custom_0_interval_km": "Plan personnalisé 1 — intervalle (km)",
+          "tpl_custom_0_interval_months": "Plan personnalisé 1 — intervalle (mois)",
+          "tpl_custom_1_enabled": "Plan personnalisé 2 — inclure ?",
+          "tpl_custom_1_name": "Plan personnalisé 2 — nom",
+          "tpl_custom_1_interval_km": "Plan personnalisé 2 — intervalle (km)",
+          "tpl_custom_1_interval_months": "Plan personnalisé 2 — intervalle (mois)",
+          "tpl_custom_2_enabled": "Plan personnalisé 3 — inclure ?",
+          "tpl_custom_2_name": "Plan personnalisé 3 — nom",
+          "tpl_custom_2_interval_km": "Plan personnalisé 3 — intervalle (km)",
+          "tpl_custom_2_interval_months": "Plan personnalisé 3 — intervalle (mois)"
         }
       }
     },
