@@ -42,10 +42,10 @@
   brand (dropdown with logo), model, model year, purchase date,
   registration, odometer and vehicle photo (uploaded from the UI,
   stored locally).
-- 📝 **Maintenance entry from the card**: “+ Add maintenance” button —
+- 📝 **Logbook entry from the card**: “+ Add a logbook entry” button —
   date, odometer, **multiple natures** (checkboxes: oil change, filters,
   tires…), cost and **invoice (photo or PDF)** stored locally.
-- 🔄 **Fully editable history**: every completed maintenance can be
+- 🔄 **Editable maintenance logbook**: every logbook entry can be
   edited or deleted from the card; odometer readings created by a
   maintenance entry are identified and protected.
 - 📅 **Upcoming maintenance**: due by km and/or months interval, automatic
@@ -53,7 +53,7 @@
   `Overdue` 🔴. Recording a maintenance **automatically resets** the
   matching plans.
 - 🛠️ **Full editing from the UI** (Options Flow): vehicle metadata,
-  maintenance plans and history — no YAML.
+  maintenance plans and maintenance logbook — no YAML.
 - 📊 **Odometer history**: every reading (manual or from a maintenance)
   feeds the history; click the cell → native Home Assistant chart.
 - 🌍 **Bilingual UI** 🇫🇷/🇬🇧 — integration **and** Lovelace card, extensible by translation.
@@ -87,7 +87,7 @@
 4. To manage a vehicle: its page → **Configure**:
    - ✏️ **Edit vehicle**: name, type, brand, model, year, purchase, registration, odometer;
    - 📅 **Maintenance plans**: add / edit / delete;
-   - 🗂️ **Maintenance history**: edit / delete.
+   - 🗂️ **Maintenance logbook**: edit / delete.
 
 <a id="lovelace-card"></a>
 
@@ -95,13 +95,13 @@
 
 The integration ships a custom card showing the whole vehicle: brand
 logo (with a default icon when missing), photo, odometer, maintenance
-status, upcoming plans, recent maintenance — and lets you **edit
+status, upcoming plans, recent logbook entries — and lets you **edit
 everything directly from the card**:
 
 - ⚙️ gear icon on the Odometer cell → readings (add, ✎ edit, ✖ delete);
 - ⚙️ gear icon in the header → brand, model, year, photo, registration, purchase date;
-- ➕ “Add maintenance” button → full form (multiple natures, invoice);
-- ⚙️ gear icon on the history section → full maintenance management;
+- ➕ “Add a logbook entry” button → full form (multiple natures, invoice);
+- ⚙️ gear icon on the logbook section → full logbook management;
 - 🖱️ click the Odometer cell → native Home Assistant chart.
 
 **Setup (once)**:
@@ -123,7 +123,7 @@ dropdown listing your vehicles (device names) and an optional title —
 | Sensor | Description |
 |---|---|
 | 📏 Odometer | Current odometer (km), with reading history in attributes. |
-| 🔧 Next maintenance | Most urgent status (`OK` / `Due soon` / `Overdue`), with plans and full history in attributes. |
+| 🔧 Next maintenance | Most urgent status (`OK` / `Due soon` / `Overdue`), with plans and the full logbook in attributes. |
 | 📅 One per plan | Plan status with `km_remaining`, `days_remaining`, `due_km`, `due_date`. |
 | 🖼️ Vehicle photo (image) | Uploaded photo, visible on the device page and dashboards. |
 | 🏷️ Brand logo (image) | Brand logo, visible on the device page and dashboards. |
@@ -139,12 +139,12 @@ dropdown listing your vehicles (device names) and an optional title —
 | `pitstop_log.update_registration` | Update the registration. |
 | `pitstop_log.update_purchase_date` | Update the purchase date. |
 | `pitstop_log.update_brand_model` | Brand, model, year, photo, registration, purchase. |
-| `pitstop_log.add_maintenance_done` | Record a maintenance (multiple natures, invoice, plan reset). |
-| `pitstop_log.update_maintenance` | Edit a completed maintenance. |
-| `pitstop_log.delete_maintenance` | Delete a completed maintenance. |
+| `pitstop_log.add_maintenance_done` | Add a logbook entry (multiple natures, invoice, plan reset). |
+| `pitstop_log.update_maintenance` | Edit a logbook entry. |
+| `pitstop_log.delete_maintenance` | Delete a logbook entry. |
 | `pitstop_log.add_maintenance_plan` | Add a periodic maintenance plan. |
 
-Example — record a maintenance with an invoice:
+Example — add a logbook entry with an invoice:
 
 ```yaml
 service: pitstop_log.add_maintenance_done
@@ -181,7 +181,7 @@ To add a brand: drop its SVG in `brands/` and edit `brands.json`:
 
 ## 💾 Data storage
 
-- 🗄️ Data (vehicles, plans, history): `.storage/pitstop_log` (JSON,
+- 🗄️ Data (vehicles, plans, logbook): `.storage/pitstop_log` (JSON,
   managed by Home Assistant's `Store`).
 - 🧾 Invoices: `/config/www/pitstop_log/invoices/`
 - 📷 Vehicle photos: `/config/www/pitstop_log/photos/`

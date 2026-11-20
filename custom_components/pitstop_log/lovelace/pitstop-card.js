@@ -150,11 +150,11 @@ const PS_DEFAULT_STRINGS = {
   "km": "Kilom\u00e9trage",
   "km_update_hint": "Mettre \u00e0 jour le kilom\u00e9trage",
   "km_history_hint": "Voir l'historique du kilom\u00e9trage",
-  "maintenances_done": "Entretiens r\u00e9alis\u00e9s",
-  "last_maintenances": "Derniers entretiens",
-  "manage_history_hint": "G\u00e9rer l'historique des entretiens",
-  "no_maintenance": "Aucun entretien enregistr\u00e9.",
-  "add_maintenance": "Ajouter un entretien",
+  "maintenances_done": "Carnet d'entretien",
+  "last_maintenances": "Derni\u00e8res entr\u00e9es du carnet",
+  "manage_history_hint": "G\u00e9rer le carnet d'entretien",
+  "no_maintenance": "Aucune entr\u00e9e dans le carnet.",
+  "add_maintenance": "Ajouter une entr\u00e9e au carnet",
   "plans_title": "Entretiens \u00e0 faire",
   "th_date": "Date",
   "th_km": "Km",
@@ -170,8 +170,8 @@ const PS_DEFAULT_STRINGS = {
   "back": "Retour",
   "cancel": "Annuler",
   "save": "Sauvegarder",
-  "new_maintenance": "Nouvel entretien",
-  "edit_maintenance": "Modifier l'entretien",
+  "new_maintenance": "Nouvelle entr\u00e9e du carnet",
+  "edit_maintenance": "Modifier l'entr\u00e9e du carnet",
   "date": "Date",
   "natures": "Natures de l'entretien",
   "other_natures": "Autre (pr\u00e9ciser, s\u00e9par\u00e9 par des virgules)",
@@ -183,9 +183,9 @@ const PS_DEFAULT_STRINGS = {
   "err_date_km": "Renseignez la date et le kilom\u00e9trage.",
   "err_nature": "Cochez au moins une nature d'entretien.",
   "err_save": "Erreur lors de la sauvegarde.",
-  "confirm_delete_maintenance": "Supprimer cet entretien ?",
+  "confirm_delete_maintenance": "Supprimer cette entr\u00e9e du carnet ?",
   "badge_maintenance": "Entretien",
-  "badge_maintenance_hint": "Cr\u00e9\u00e9 par un entretien \u2014 modifiable depuis la rubrique Derniers entretiens",
+  "badge_maintenance_hint": "Cr\u00e9\u00e9 par un entretien \u2014 modifiable depuis la rubrique Derni\u00e8res entr\u00e9es du carnet",
   "km_update_title": "Mise \u00e0 jour du kilom\u00e9trage",
   "reading_date": "Date du relev\u00e9",
   "km_field": "Kilom\u00e9trage (km)",
@@ -875,7 +875,7 @@ class PitstopCard extends HTMLElement {
     return this._maint_types;
   }
 
-  /** Fen\u00eatre : historique complet des entretiens (modifier/supprimer). */
+  /** Fen\u00eatre : carnet d'entretien complet (modifier/supprimer). */
   async _openHistoryEditor() {
     await this._loadMaintenanceTypes();
     this._render();

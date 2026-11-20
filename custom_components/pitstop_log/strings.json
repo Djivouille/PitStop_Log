@@ -51,7 +51,7 @@
         "menu_options": {
           "vehicle": "Modifier le véhicule",
           "plans": "Plans d'entretien",
-          "history": "Historique des entretiens",
+          "history": "Carnet d'entretien",
           "done": "Terminé"
         }
       },
@@ -93,14 +93,14 @@
         }
       },
       "history": {
-        "title": "Historique des entretiens",
-        "description": "Sélectionnez un entretien à modifier.",
+        "title": "Carnet d'entretien",
+        "description": "Sélectionnez une entrée du carnet à modifier.",
         "data": {
-          "choice": "Entretien réalisé"
+          "choice": "Entrée du carnet"
         }
       },
       "history_entry": {
-        "title": "Modifier l'entretien",
+        "title": "Modifier l'entrée du carnet",
         "description": "Cochez « Supprimer » pour supprimer cette entrée.",
         "data": {
           "date": "Date (AAAA-MM-JJ)",
@@ -256,8 +256,8 @@
       }
     },
     "add_maintenance_done": {
-      "name": "Record a completed maintenance",
-      "description": "Records a completed maintenance. If plan_id is provided, the associated maintenance plan is reset.",
+      "name": "Add a logbook entry",
+      "description": "Adds a completed maintenance to the vehicle's maintenance logbook. If plan_id is provided, the associated maintenance plan is reset.",
       "fields": {
         "vehicle_id": {
           "name": "Vehicle",
@@ -324,8 +324,8 @@
       }
     },
     "update_maintenance": {
-      "name": "Edit a completed maintenance",
-      "description": "Edits an entry of the maintenance history of a vehicle (date, odometer, natures, cost, invoice).",
+      "name": "Edit a logbook entry",
+      "description": "Edits an entry of the vehicle's maintenance logbook (date, odometer, natures, cost, invoice).",
       "fields": {
         "vehicle_id": {
           "name": "Vehicle",
@@ -333,7 +333,7 @@
         },
         "index": {
           "name": "Index",
-          "description": "Index of the entry in the history (0 = most recent)."
+          "description": "Index of the entry in the logbook (0 = most recent)."
         },
         "date": {
           "name": "Date",
@@ -358,8 +358,8 @@
       }
     },
     "delete_maintenance": {
-      "name": "Delete a completed maintenance",
-      "description": "Deletes an entry of the maintenance history of a vehicle.",
+      "name": "Delete a logbook entry",
+      "description": "Deletes an entry of the vehicle's maintenance logbook.",
       "fields": {
         "vehicle_id": {
           "name": "Vehicle",
@@ -367,7 +367,7 @@
         },
         "index": {
           "name": "Index",
-          "description": "Index of the entry in the history (0 = most recent)."
+          "description": "Index of the entry in the logbook (0 = most recent)."
         }
       }
     },

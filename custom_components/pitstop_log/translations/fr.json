@@ -51,7 +51,7 @@
         "menu_options": {
           "vehicle": "Modifier le véhicule",
           "plans": "Plans d'entretien",
-          "history": "Historique des entretiens",
+          "history": "Carnet d'entretien",
           "done": "Terminé"
         }
       },
@@ -93,14 +93,14 @@
         }
       },
       "history": {
-        "title": "Historique des entretiens",
-        "description": "Sélectionnez un entretien à modifier.",
+        "title": "Carnet d'entretien",
+        "description": "Sélectionnez une entrée du carnet à modifier.",
         "data": {
-          "choice": "Entretien réalisé"
+          "choice": "Entrée du carnet"
         }
       },
       "history_entry": {
-        "title": "Modifier l'entretien",
+        "title": "Modifier l'entrée du carnet",
         "description": "Cochez « Supprimer » pour supprimer cette entrée.",
         "data": {
           "date": "Date (AAAA-MM-JJ)",
@@ -256,8 +256,8 @@
       }
     },
     "add_maintenance_done": {
-      "name": "Enregistrer un entretien réalisé",
-      "description": "Ajoute une intervention réalisée à l'historique du véhicule.",
+      "name": "Ajouter une entrée au carnet d'entretien",
+      "description": "Ajoute une intervention réalisée au carnet d'entretien du véhicule.",
       "fields": {
         "vehicle_id": {
           "name": "Véhicule",
@@ -324,8 +324,8 @@
       }
     },
     "update_maintenance": {
-      "name": "Modifier un entretien réalisé",
-      "description": "Modifie une entrée de l'historique des entretiens réalisés d'un véhicule (date, kilométrage, nature, coût, facture).",
+      "name": "Modifier une entrée du carnet d'entretien",
+      "description": "Modifie une entrée du carnet d'entretien d'un véhicule (date, kilométrage, nature, coût, facture).",
       "fields": {
         "vehicle_id": {
           "name": "Véhicule",
@@ -333,7 +333,7 @@
         },
         "index": {
           "name": "Index",
-          "description": "Index de l'entrée dans l'historique (0 = plus récente)."
+          "description": "Index de l'entrée dans le carnet d'entretien (0 = plus récente)."
         },
         "date": {
           "name": "Date",
@@ -358,8 +358,8 @@
       }
     },
     "delete_maintenance": {
-      "name": "Supprimer un entretien réalisé",
-      "description": "Supprime une entrée de l'historique des entretiens réalisés d'un véhicule.",
+      "name": "Supprimer une entrée du carnet d'entretien",
+      "description": "Supprime une entrée du carnet d'entretien d'un véhicule.",
       "fields": {
         "vehicle_id": {
           "name": "Véhicule",
@@ -367,7 +367,7 @@
         },
         "index": {
           "name": "Index",
-          "description": "Index de l'entrée dans l'historique (0 = plus récente)."
+          "description": "Index de l'entrée dans le carnet d'entretien (0 = plus récente)."
         }
       }
     },

@@ -607,7 +607,7 @@ class PitStopDataUpdateCoordinator:
             raise HomeAssistantError("Le kilom\u00e9trage ne peut pas \u00eatre n\u00e9gatif")
         target = self.get_history_entry(vehicle_id, index)
         if target is None:
-            raise HomeAssistantError("Entr\u00e9e d'historique introuvable")
+            raise HomeAssistantError("Entr\u00e9e du carnet d'entretien introuvable")
         entry = {
             "vehicle_id": vehicle_id,
             "date": entry_date.isoformat(),
@@ -646,7 +646,7 @@ class PitStopDataUpdateCoordinator:
         """Supprimer une entr\u00e9e d'historique (entretien r\u00e9alis\u00e9)."""
         target = self.get_history_entry(vehicle_id, index)
         if not self.delete_history_entry(vehicle_id, index):
-            raise HomeAssistantError("Entr\u00e9e d'historique introuvable")
+            raise HomeAssistantError("Entr\u00e9e du carnet d'entretien introuvable")
         # Retirer aussi le relev\u00e9 kilom\u00e9trique cr\u00e9\u00e9 par cet entretien
         if target is not None:
             vehicle = self.get_vehicle(vehicle_id) or {}

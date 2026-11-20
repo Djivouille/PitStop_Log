@@ -52,8 +52,8 @@ jobs:
 
           Carnet d'entretien numérique multi-véhicules pour Home Assistant :
           motos, voitures, camping-cars. Gestion des entretiens périodiques
-          (km/mois), historique des interventions avec factures, kilométrage
-          avec historique et graphique, carte Lovelace dédiée.
+          (km/mois), carnet d'entretien des interventions avec factures,
+          kilométrage historisé avec graphique, carte Lovelace dédiée.
 
           ## Versionnement
 

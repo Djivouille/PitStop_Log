@@ -135,9 +135,9 @@ update_brand_model:
         date:
 
 add_maintenance_done:
-  name: Enregistrer un entretien réalisé
+  name: Ajouter une entrée au carnet d'entretien
   description: >-
-    Ajoute une intervention réalisée à l'historique du véhicule.
+    Ajoute une intervention réalisée au carnet d'entretien du véhicule.
   fields:
     vehicle_id:
       name: Véhicule
@@ -272,9 +272,9 @@ add_maintenance_plan:
         date:
 
 update_maintenance:
-  name: Modifier un entretien réalisé
+  name: Modifier une entrée du carnet d'entretien
   description: >-
-    Modifie une entrée de l'historique des entretiens réalisés d'un véhicule
+    Modifie une entrée du carnet d'entretien d'un véhicule
     (date, kilométrage, nature, coût, facture).
   fields:
     vehicle_id:
@@ -286,7 +286,7 @@ update_maintenance:
         text:
     index:
       name: Index
-      description: Index de l'entrée dans l'historique (0 = plus récente).
+      description: Index de l'entrée dans le carnet d'entretien (0 = plus récente).
       required: true
       example: 0
       selector:
@@ -340,9 +340,9 @@ update_maintenance:
         text:
 
 delete_maintenance:
-  name: Supprimer un entretien réalisé
+  name: Supprimer une entrée du carnet d'entretien
   description: >-
-    Supprime une entrée de l'historique des entretiens réalisés d'un véhicule.
+    Supprime une entrée du carnet d'entretien d'un véhicule.
   fields:
     vehicle_id:
       name: Véhicule
@@ -353,7 +353,7 @@ delete_maintenance:
         text:
     index:
       name: Index
-      description: Index de l'entrée dans l'historique (0 = plus récente).
+      description: Index de l'entrée dans le carnet d'entretien (0 = plus récente).
       required: true
       example: 0
       selector:

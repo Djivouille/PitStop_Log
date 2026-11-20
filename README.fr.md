@@ -42,18 +42,18 @@
   marque (liste déroulante avec logo), modèle, année-modèle, date d'achat,
   immatriculation, kilométrage et photo du véhicule (téléversée depuis
   l'interface, stockée localement).
-- 📝 **Saisie des entretiens depuis la carte** : bouton « + Ajouter un entretien »
+- 📝 **Saisie des entrées depuis la carte** : bouton « + Ajouter une entrée au carnet »
   — date, kilométrage, **natures multiples** (cases à cocher : vidange, filtres,
   pneus…), coût et **facture (photo ou PDF)** stockés localement.
-- 🔄 **Historique complet modifiable** : chaque entretien réalisé peut être
-  modifié ou supprimé depuis la carte ; les relevés kilométriques issus d'un
+- 🔄 **Carnet d'entretien modifiable** : chaque entrée du carnet peut être
+  modifiée ou supprimée depuis la carte ; les relevés kilométriques issus d'un
   entretien sont identifiés et protégés.
 - 📅 **Entretiens à faire** : échéances par intervalle km et/ou mois, calcul
   automatique du reste à faire et statut d'alerte — `OK` 🟢, `Bientôt dû` 🟡,
   `En retard` 🔴. Un entretien réalisé **réinitialise automatiquement** les plans
   correspondants.
 - 🛠️ **Édition complète via l'interface** (Options Flow) : métadonnées du
-  véhicule, plans d'entretien et historique — sans YAML.
+  véhicule, plans d'entretien et carnet d'entretien — sans YAML.
 - 📊 **Kilométrage historisé** : chaque relevé (manuel ou issu d'un entretien)
   alimente l'historique ; clic sur la cellule → graphique natif Home Assistant.
 - 🌍 **Interface bilingue** 🇫🇷/🇬🇧 — intégration **et** carte Lovelace, extensible par traduction.
@@ -87,7 +87,7 @@
 4. Pour gérer un véhicule : sa fiche → **Configurer** :
    - ✏️ **Modifier le véhicule** : nom, type, marque, modèle, année, achat, immatriculation, km ;
    - 📅 **Plans d'entretien** : ajout / modification / suppression ;
-   - 🗂️ **Historique des entretiens** : modification / suppression.
+   - 🗂️ **Carnet d'entretien** : modification / suppression.
 
 <a id="carte-lovelace"></a>
 
@@ -95,13 +95,13 @@
 
 L'intégration embarque une carte personnalisée qui affiche tout le véhicule :
 logo de marque (avec icône par défaut si manquant), photo, kilométrage,
-statut d'entretien, plans à faire, derniers entretiens — et permet de **tout
+statut d'entretien, plans à faire, dernières entrées du carnet — et permet de **tout
 modifier directement depuis la carte** :
 
 - ⚙️ roue crantée de la cellule Kilométrage → relevés (ajout, ✎ modification, ✖ suppression) ;
 - ⚙️ roue crantée de l'en-tête → marque, modèle, année, photo, immatriculation, date d'achat ;
-- ➕ bouton « Ajouter un entretien » → formulaire complet (natures multiples, facture) ;
-- ⚙️ roue crantée de la section historique → gestion complète des entretiens ;
+- ➕ bouton « Ajouter une entrée au carnet » → formulaire complet (natures multiples, facture) ;
+- ⚙️ roue crantée de la section carnet d'entretien → gestion complète du carnet ;
 - 🖱️ clic sur la cellule Kilométrage → graphique natif Home Assistant.
 
 **Installation (une seule fois)** :
@@ -123,7 +123,7 @@ dans `/config/www/pitstop_log/lovelace/` au démarrage.
 | Capteur | Description |
 |---|---|
 | 📏 Kilométrage | Kilométrage actuel (km), avec historique des relevés en attributs. |
-| 🔧 Prochain entretien | Statut le plus urgent (`OK` / `Bientôt dû` / `En retard`), avec plans et historique complet en attributs. |
+| 🔧 Prochain entretien | Statut le plus urgent (`OK` / `Bientôt dû` / `En retard`), avec plans et carnet d'entretien complet en attributs. |
 | 📅 Un capteur par plan | Statut du plan avec `km_remaining`, `days_remaining`, `due_km`, `due_date`. |
 | 🖼️ Photo du véhicule (image) | Photo téléversée, visible sur la page de l'appareil et les tableaux de bord. |
 | 🏷️ Logo de marque (image) | Logo de la marque, visible sur la page de l'appareil et les tableaux de bord. |
@@ -139,12 +139,12 @@ dans `/config/www/pitstop_log/lovelace/` au démarrage.
 | `pitstop_log.update_registration` | Met à jour l'immatriculation. |
 | `pitstop_log.update_purchase_date` | Met à jour la date d'achat. |
 | `pitstop_log.update_brand_model` | Marque, modèle, année, photo, immatriculation, achat. |
-| `pitstop_log.add_maintenance_done` | Enregistre un entretien (natures multiples, facture, réinitialisation des plans). |
-| `pitstop_log.update_maintenance` | Modifie un entretien réalisé. |
-| `pitstop_log.delete_maintenance` | Supprime un entretien réalisé. |
+| `pitstop_log.add_maintenance_done` | Ajoute une entrée au carnet d'entretien (natures multiples, facture, réinitialisation des plans). |
+| `pitstop_log.update_maintenance` | Modifie une entrée du carnet d'entretien. |
+| `pitstop_log.delete_maintenance` | Supprime une entrée du carnet d'entretien. |
 | `pitstop_log.add_maintenance_plan` | Ajoute un plan d'entretien périodique. |
 
-Exemple — enregistrer un entretien avec facture :
+Exemple — ajouter une entrée au carnet d'entretien avec facture :
 
 ```yaml
 service: pitstop_log.add_maintenance_done
@@ -181,7 +181,7 @@ Pour ajouter une marque : déposez son SVG dans `brands/` et éditez `brands.jso
 
 ## 💾 Stockage des données
 
-- 🗄️ Données (véhicules, plans, historique) : `.storage/pitstop_log` (JSON,
+- 🗄️ Données (véhicules, plans, carnet d'entretien) : `.storage/pitstop_log` (JSON,
   géré par le `Store` de Home Assistant).
 - 🧾 Factures : `/config/www/pitstop_log/invoices/`
 - 📷 Photos des véhicules : `/config/www/pitstop_log/photos/`
