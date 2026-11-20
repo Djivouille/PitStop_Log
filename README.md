@@ -89,7 +89,8 @@
    - ✏️ **Edit vehicle**: name, type, brand, model, year, purchase, registration, odometer;
    - 📅 **Maintenance plans**: add / edit / delete;
    - 🧰 **Plan templates**: one-click typical plans for the vehicle type
-     (motorcycle, car, campervan), without duplicating existing plans;
+     (motorcycle, car, campervan), without duplicating existing plans
+     (template content viewable at `/local/pitstop_log/plan_templates.json`);
    - 🗂️ **Maintenance logbook**: edit / delete.
 
 <a id="lovelace-card"></a>
@@ -126,7 +127,7 @@ dropdown listing your vehicles (device names) and an optional title —
 | Sensor | Description |
 |---|---|
 | 📏 Odometer | Current odometer (km), with reading history in attributes. |
-| 🔧 Next maintenance | Most urgent status (`OK` / `Due soon` / `Overdue`), with plans and the full logbook in attributes. |
+| 🔧 Next maintenance | Most urgent status (`OK` / `Due soon` / `Overdue`), with plans, the vehicle type's template (`plan_template`) and the full logbook in attributes. |
 | 📅 One per plan | Plan status with `km_remaining`, `days_remaining`, `due_km`, `due_date`. |
 | 🖼️ Vehicle photo (image) | Uploaded photo, visible on the device page and dashboards. |
 | 🏷️ Brand logo (image) | Brand logo, visible on the device page and dashboards. |

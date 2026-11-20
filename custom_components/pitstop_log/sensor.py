@@ -20,6 +20,7 @@ from .const import (
     STATUS_OK,
     STATUS_OVERDUE,
     TRANSLATION_KEY_MAINTENANCE_STATUS,
+    plan_template_for_type,
 )
 from .coordinator import PitStopDataUpdateCoordinator
 
@@ -151,7 +152,7 @@ class PitStopNextMaintenanceSensor(PitStopEntity):
 
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
-        """Attributs détaillés : plans, historique et factures associées."""
+        """Attributs détaillés : plans, gabarit du type, historique, factures."""
         plans_attr: list[dict[str, Any]] = []
         for plan_id, plan in self.coordinator.get_plans(self.vehicle_id):
             info = self.coordinator.get_due_info(plan)
@@ -188,6 +189,16 @@ class PitStopNextMaintenanceSensor(PitStopEntity):
             "model_year": vehicle.get("model_year"),
             "vehicle_id": self.vehicle_id,
             "plans": plans_attr,
+            "plan_template": [
+                {
+                    "name": tpl.get("name"),
+                    "interval_km": tpl.get("interval_km"),
+                    "interval_months": tpl.get("interval_months"),
+                }
+                for tpl in plan_template_for_type(
+                    vehicle.get("type", "car")
+                ).get("plans", [])
+            ],
             "history": history_attr,
             "history_count": len(history_attr),
         }

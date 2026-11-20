@@ -49,6 +49,7 @@ from .const import (
     SERVICE_DELETE_MAINTENANCE,
     CONF_INDEX,
     MAINTENANCE_TYPES_FILE,
+    PLAN_TEMPLATES_FILE,
     SERVICE_UPDATE_ODOMETER,
     SERVICE_DELETE_ODOMETER_POINT,
     SERVICE_UPDATE_REGISTRATION,
@@ -138,6 +139,13 @@ async def _sync_www_assets(hass: HomeAssistant) -> None:
         _sync_single_file,
         os.path.join(integration_dir, MAINTENANCE_TYPES_FILE),
         os.path.join(www_dir, "www/pitstop_log/maintenance_types.json"),
+    )
+    # Gabarits de plans par type de véhicule (consultables via
+    # /local/pitstop_log/plan_templates.json)
+    await hass.async_add_executor_job(
+        _sync_single_file,
+        os.path.join(integration_dir, PLAN_TEMPLATES_FILE),
+        os.path.join(www_dir, "www/pitstop_log/plan_templates.json"),
     )
     # Localisation de la carte Lovelace (locales/<langue>.json)
     locales_src = os.path.join(integration_dir, "locales")

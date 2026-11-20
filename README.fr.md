@@ -89,7 +89,8 @@
    - ✏️ **Modifier le véhicule** : nom, type, marque, modèle, année, achat, immatriculation, km ;
    - 📅 **Plans d'entretien** : ajout / modification / suppression ;
    - 🧰 **Gabarits de plans** : applique en un clic les plans types du type de
-     véhicule (moto, voiture, camping-car), sans doublonner les plans existants ;
+     véhicule (moto, voiture, camping-car), sans doublonner les plans existants
+     (contenu des gabarits consultable : `/local/pitstop_log/plan_templates.json`) ;
    - 🗂️ **Carnet d'entretien** : modification / suppression.
 
 <a id="carte-lovelace"></a>
@@ -126,7 +127,7 @@ dans `/config/www/pitstop_log/lovelace/` au démarrage.
 | Capteur | Description |
 |---|---|
 | 📏 Kilométrage | Kilométrage actuel (km), avec historique des relevés en attributs. |
-| 🔧 Prochain entretien | Statut le plus urgent (`OK` / `Bientôt dû` / `En retard`), avec plans et carnet d'entretien complet en attributs. |
+| 🔧 Prochain entretien | Statut le plus urgent (`OK` / `Bientôt dû` / `En retard`), avec plans, gabarit du type (`plan_template`) et carnet d'entretien complet en attributs. |
 | 📅 Un capteur par plan | Statut du plan avec `km_remaining`, `days_remaining`, `due_km`, `due_date`. |
 | 🖼️ Photo du véhicule (image) | Photo téléversée, visible sur la page de l'appareil et les tableaux de bord. |
 | 🏷️ Logo de marque (image) | Logo de la marque, visible sur la page de l'appareil et les tableaux de bord. |
