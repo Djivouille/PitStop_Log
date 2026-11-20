@@ -28,6 +28,7 @@
 - [📊 Capteurs](#capteurs)
 - [🛠️ Services](#services)
 - [🏷️ Marques et logos](#marques-et-logos)
+- [🧰 Gabarits de plans](#gabarits-de-plans)
 - [💾 Stockage des données](#stockage-des-donnees)
 - [🗂️ Structure du dépôt](#structure-du-depot)
 - [🤝 Contribuer](#contribuer)
@@ -183,6 +184,28 @@ Pour ajouter une marque : déposez son SVG dans `brands/` et éditez `brands.jso
 
 ```json
 "Ma Marque": {"logo": "/local/pitstop_log/brands/mamarque.svg", "category": "moto", "label": "Ma Marque"}
+```
+
+<a id="gabarits-de-plans"></a>
+
+## 🧰 Gabarits de plans
+
+Les gabarits de plans d'entretien par type de véhicule (moto, voiture,
+camping-car, autre) sont définis dans `plan_templates.json` (fichier séparé).
+Ils s'appliquent en un clic à la création d'un véhicule ou depuis
+**Configurer**, sans jamais écraser les plans existants, qui restent
+modifiables ensuite. La copie servie à l'exécution est consultable :
+`/local/pitstop_log/plan_templates.json`.
+
+> 🧰 **[Galerie des gabarits de plans](docs/plan_templates.md)** — visualisez tous
+> les gabarits par type de véhicule : noms affichés (FR/EN), nom stocké, slug
+> et intervalles (page générée automatiquement depuis `plan_templates.json`).
+
+Pour ajouter ou modifier un gabarit : éditez `plan_templates.json` (les noms de
+plans doivent rester dans `maintenance_types.json`), puis régénérez la galerie :
+
+```bash
+python3 scripts/generate_templates_page.py
 ```
 
 <a id="stockage-des-donnees"></a>

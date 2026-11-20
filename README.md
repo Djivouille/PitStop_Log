@@ -28,6 +28,7 @@
 - [📊 Sensors](#sensors)
 - [🛠️ Services](#services)
 - [🏷️ Brands and logos](#brands-and-logos)
+- [🧰 Plan templates](#plan-templates)
 - [💾 Data storage](#data-storage)
 - [🗂️ Repository structure](#repository-structure)
 - [🤝 Contributing](#contributing)
@@ -183,6 +184,27 @@ To add a brand: drop its SVG in `brands/` and edit `brands.json`:
 
 ```json
 "My Brand": {"logo": "/local/pitstop_log/brands/mybrand.svg", "category": "moto", "label": "My Brand"}
+```
+
+<a id="plan-templates"></a>
+
+## 🧰 Plan templates
+
+Maintenance plan templates per vehicle type (motorcycle, car, campervan,
+other) are defined in `plan_templates.json` (separate file). They are
+applied with one click when creating a vehicle or from **Configure**,
+never overwriting existing plans, which remain editable afterwards.
+The runtime copy is served at `/local/pitstop_log/plan_templates.json`.
+
+> 🧰 **[Plan templates gallery](docs/plan_templates.md)** — browse all templates
+> by vehicle type: displayed names (FR/EN), stored name, slug and intervals
+> (page generated automatically from `plan_templates.json`).
+
+To add or edit a template: edit `plan_templates.json` (plan names must stay
+in `maintenance_types.json`), then regenerate the gallery:
+
+```bash
+python3 scripts/generate_templates_page.py
 ```
 
 <a id="data-storage"></a>
