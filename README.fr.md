@@ -81,12 +81,15 @@
 ## ⚙️ Configuration
 
 1. **Paramètres** → **Appareils et services** → **Ajouter une intégration** → **PitStop Log**.
-2. Suivez l'assistant en deux étapes : *type/marque/modèle*, puis le reste
-   (nom, année, achat, immatriculation, kilométrage, photo).
+2. Suivez l'assistant : *type/marque/modèle*, puis le reste
+   (nom, année, achat, immatriculation, kilométrage, photo) et le choix du
+   **gabarit de plans d'entretien**.
 3. ➕ Répétez pour chaque véhicule du garage.
 4. Pour gérer un véhicule : sa fiche → **Configurer** :
    - ✏️ **Modifier le véhicule** : nom, type, marque, modèle, année, achat, immatriculation, km ;
    - 📅 **Plans d'entretien** : ajout / modification / suppression ;
+   - 🧰 **Gabarits de plans** : applique en un clic les plans types du type de
+     véhicule (moto, voiture, camping-car), sans doublonner les plans existants ;
    - 🗂️ **Carnet d'entretien** : modification / suppression.
 
 <a id="carte-lovelace"></a>

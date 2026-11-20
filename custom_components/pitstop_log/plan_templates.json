@@ -1,0 +1,41 @@
+{
+  "templates": {
+    "moto": {
+      "plans": [
+        {"name": "Vidange", "interval_km": 6000, "interval_months": 12},
+        {"name": "Chaîne et kit de transmission", "interval_km": 15000},
+        {"name": "Liquide de frein", "interval_months": 24},
+        {"name": "Plaquettes de frein", "interval_km": 20000},
+        {"name": "Pneus", "interval_km": 10000},
+        {"name": "Batterie", "interval_months": 12},
+        {"name": "Révision", "interval_km": 12000, "interval_months": 12}
+      ]
+    },
+    "car": {
+      "plans": [
+        {"name": "Vidange", "interval_km": 15000, "interval_months": 12},
+        {"name": "Filtre à air", "interval_km": 30000, "interval_months": 24},
+        {"name": "Liquide de frein", "interval_months": 24},
+        {"name": "Plaquettes de frein", "interval_km": 30000},
+        {"name": "Pneus", "interval_km": 30000},
+        {"name": "Batterie", "interval_months": 24},
+        {"name": "Contrôle technique", "interval_months": 24}
+      ]
+    },
+    "camper": {
+      "plans": [
+        {"name": "Vidange", "interval_km": 20000, "interval_months": 12},
+        {"name": "Liquide de frein", "interval_months": 24},
+        {"name": "Batterie", "interval_months": 12},
+        {"name": "Révision", "interval_months": 12},
+        {"name": "Pneus", "interval_km": 30000},
+        {"name": "Contrôle technique", "interval_months": 24}
+      ]
+    },
+    "other": {
+      "plans": [
+        {"name": "Révision", "interval_months": 12}
+      ]
+    }
+  }
+}

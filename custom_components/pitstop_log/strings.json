@@ -34,6 +34,16 @@
           "odometer": "Kilométrage actuel",
           "photo": "Photo du véhicule (téléverser une image)"
         }
+      },
+      "apply_template": {
+        "title": "Gabarit de plans d'entretien",
+        "description": "Appliquer le gabarit de plans du type de véhicule choisi ? Les plans créés restent modifiables et supprimables ensuite.",
+        "data": {
+          "apply_template": {
+            "name": "Appliquer le gabarit de plans",
+            "description": "Pré-remplit les plans types (vidange, freins, pneus…) pour ce véhicule."
+          }
+        }
       }
     },
     "error": {
@@ -52,6 +62,7 @@
           "vehicle": "Modifier le véhicule",
           "plans": "Plans d'entretien",
           "history": "Carnet d'entretien",
+          "templates": "Gabarits de plans",
           "done": "Terminé"
         }
       },
@@ -109,6 +120,16 @@
           "cost": "Coût",
           "invoice_path": "Chemin / URL de la facture",
           "delete": "Supprimer cette entrée"
+        }
+      },
+      "templates": {
+        "title": "Gabarits de plans",
+        "description": "Applique le gabarit du type du véhicule. Les plans dont le nom existe déjà ne sont pas dupliqués.",
+        "data": {
+          "apply_template": {
+            "name": "Appliquer le gabarit",
+            "description": "Ajoute les plans types manquants (vidange, freins, pneus…)."
+          }
         }
       },
       "vehicle_details": {

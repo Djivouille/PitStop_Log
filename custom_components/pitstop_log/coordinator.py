@@ -27,6 +27,7 @@ from .const import (
     STATUS_DUE_SOON,
     STATUS_OK,
     STATUS_OVERDUE,
+    plan_template_for_type,
 )
 
 DEFAULT_SAVE_DELAY = 30  # Secondes avant écriture différée sur le disque
@@ -436,6 +437,52 @@ class PitStopDataUpdateCoordinator:
         await self.async_save()
         await self.async_refresh()
         return plan_id
+
+    async def async_apply_plan_template(
+        self, vehicle_id: str, vehicle_type: str
+    ) -> list[str]:
+        """Appliquer le gabarit de plans d'un type de v\u00e9hicule.
+
+        Les plans dont le nom existe d\u00e9j\u00e0 pour ce v\u00e9hicule ne sont
+        pas dupliqu\u00e9s. Retourne la liste des identifiants de plans cr\u00e9\u00e9s.
+        """
+        if self.get_vehicle(vehicle_id) is None:
+            raise HomeAssistantError(f"V\u00e9hicule inconnu : {vehicle_id}")
+        template = plan_template_for_type(vehicle_type)
+        existing_names = {
+            plan.get("name") for _, plan in self.get_plans(vehicle_id)
+        }
+        created: list[str] = []
+        for tpl in template.get("plans", []):
+            name = (tpl.get("name") or "").strip()
+            interval_km = tpl.get("interval_km")
+            interval_months = tpl.get("interval_months")
+            if not name or name in existing_names:
+                continue
+            if not interval_km and not interval_months:
+                continue
+            base_id = f"{vehicle_id}_{slugify(name)}"
+            plan_id = base_id
+            index = 2
+            while plan_id in self.data["plans"]:
+                plan_id = f"{base_id}_{index}"
+                index += 1
+            self.data["plans"][plan_id] = {
+                "vehicle_id": vehicle_id,
+                "name": name,
+                "interval_km": interval_km,
+                "interval_months": interval_months,
+                "last_km": None,
+                "last_date": None,
+                "active": True,
+                "created_at": dt_util.utcnow().isoformat(),
+            }
+            existing_names.add(name)
+            created.append(plan_id)
+        if created:
+            await self.async_save()
+            await self.async_refresh()
+        return created
 
     def get_plans(self, vehicle_id: str) -> list[tuple[str, dict[str, Any]]]:
         """Lister les plans d'entretien actifs d'un véhicule."""

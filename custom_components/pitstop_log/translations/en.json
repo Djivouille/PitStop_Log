@@ -34,6 +34,16 @@
           "odometer": "Current mileage",
           "photo": "Vehicle photo (upload an image)"
         }
+      },
+      "apply_template": {
+        "title": "Maintenance plan template",
+        "description": "Apply the plan template for the selected vehicle type? Created plans remain editable and can be deleted later.",
+        "data": {
+          "apply_template": {
+            "name": "Apply the plan template",
+            "description": "Pre-fills the typical plans (oil change, brakes, tires…) for this vehicle."
+          }
+        }
       }
     },
     "error": {
@@ -52,6 +62,7 @@
           "vehicle": "Edit vehicle",
           "plans": "Maintenance plans",
           "history": "Maintenance logbook",
+          "templates": "Plan templates",
           "done": "Done"
         }
       },
@@ -109,6 +120,16 @@
           "cost": "Cost",
           "invoice_path": "Invoice path / URL",
           "delete": "Delete this entry"
+        }
+      },
+      "templates": {
+        "title": "Plan templates",
+        "description": "Applies the template matching the vehicle type. Plans whose name already exists are not duplicated.",
+        "data": {
+          "apply_template": {
+            "name": "Apply the template",
+            "description": "Adds the missing typical plans (oil change, brakes, tires…)."
+          }
         }
       },
       "vehicle_details": {

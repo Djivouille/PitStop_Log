@@ -81,12 +81,15 @@
 ## ⚙️ Configuration
 
 1. **Settings** → **Devices & services** → **Add integration** → **PitStop Log**.
-2. Follow the two-step wizard: *type/brand/model*, then the rest
-   (name, year, purchase, registration, odometer, photo).
+2. Follow the wizard: *type/brand/model*, then the rest
+   (name, year, purchase, registration, odometer, photo) and the
+   **maintenance plan template** choice.
 3. ➕ Repeat for each vehicle in your garage.
 4. To manage a vehicle: its page → **Configure**:
    - ✏️ **Edit vehicle**: name, type, brand, model, year, purchase, registration, odometer;
    - 📅 **Maintenance plans**: add / edit / delete;
+   - 🧰 **Plan templates**: one-click typical plans for the vehicle type
+     (motorcycle, car, campervan), without duplicating existing plans;
    - 🗂️ **Maintenance logbook**: edit / delete.
 
 <a id="lovelace-card"></a>

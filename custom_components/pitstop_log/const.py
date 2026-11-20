@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from typing import Any
 
 
 def _load_brands() -> dict[str, dict[str, str]]:
@@ -36,6 +37,25 @@ def brands_for_type(vehicle_type: str) -> list[str]:
         for name, info in BRANDS.items()
         if info.get("category") == vehicle_type or name == "Autre"
     ]
+
+
+# Gabarits de plans d'entretien par type de véhicule (fichier à part)
+PLAN_TEMPLATES_FILE = "plan_templates.json"
+
+
+def _load_plan_templates() -> dict[str, dict[str, Any]]:
+    """Charger les gabarits de plans depuis plan_templates.json."""
+    templates_path = Path(__file__).parent / PLAN_TEMPLATES_FILE
+    with open(templates_path, encoding="utf-8") as file:
+        return json.load(file)["templates"]
+
+
+PLAN_TEMPLATES = _load_plan_templates()
+
+
+def plan_template_for_type(vehicle_type: str) -> dict[str, Any]:
+    """Retourner le gabarit de plans d'un type de véhicule (repli : « other »)."""
+    return PLAN_TEMPLATES.get(vehicle_type) or PLAN_TEMPLATES.get("other", {})
 
 # Domaine et version de l'intégration
 # Versionnement sémantique : MAJOR.MINOR.PATCH pour la production,
@@ -84,6 +104,7 @@ VEHICLE_TYPE_LABELS = {
 }
 
 # Clés des plans d'entretien (entretiens à faire)
+CONF_APPLY_TEMPLATE = "apply_template"
 CONF_PLAN_NAME = "plan_name"
 CONF_INTERVAL_KM = "interval_km"
 CONF_INTERVAL_MONTHS = "interval_months"

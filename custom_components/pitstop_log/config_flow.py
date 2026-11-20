@@ -23,6 +23,7 @@ from homeassistant.util import slugify
 from .const import (
     BRAND_NAMES,
     CONF_ACTIONS,
+    CONF_APPLY_TEMPLATE,
     CONF_BRAND,
     CONF_COST,
     CONF_DATE,
@@ -107,6 +108,20 @@ VEHICLE_TYPE_SCHEMA = vol.Schema(
 
 
 
+# Schéma de l'étape d'application du gabarit de plans (création du véhicule)
+APPLY_TEMPLATE_SCHEMA = vol.Schema(
+    {
+        vol.Required(CONF_APPLY_TEMPLATE, default=True): bool,
+    }
+)
+
+# Schéma de l'étape d'application du gabarit (flux d'options, défaut : non)
+APPLY_TEMPLATE_OPTIONS_SCHEMA = vol.Schema(
+    {
+        vol.Optional(CONF_APPLY_TEMPLATE, default=False): bool,
+    }
+)
+
 # Schéma d'ajout d'un plan d'entretien depuis l'interface
 PLAN_SCHEMA = vol.Schema(
     {
@@ -153,6 +168,7 @@ class PitStopLogConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self._vehicle_type: str = "car"
         self._vehicle_brand: str = ""
         self._vehicle_model: str = ""
+        self._pending_vehicle: tuple[str, dict[str, Any], str] | None = None
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
@@ -215,22 +231,36 @@ class PitStopLogConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     photo_url = await async_save_uploaded_photo(
                         self.hass, user_input[CONF_PHOTO], vehicle_id
                     )
-                return self.async_create_entry(
-                    title=user_input[CONF_VEHICLE_NAME],
-                    data={
-                        "vehicle_id": vehicle_id,
-                        CONF_VEHICLE_TYPE: self._vehicle_type,
-                        CONF_BRAND: self._vehicle_brand,
-                        CONF_MODEL: self._vehicle_model,
-                        **user_input,
-                        CONF_PHOTO: photo_url,
-                    },
-                )
+                # Étape suivante : appliquer ou non le gabarit de plans
+                self._pending_vehicle = (vehicle_id, dict(user_input), photo_url)
+                return await self.async_step_apply_template()
 
         return self.async_show_form(
             step_id="vehicle_details",
             data_schema=vehicle_details_schema(),
             errors=errors,
+        )
+
+    async def async_step_apply_template(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Étape 3 : appliquer ou non le gabarit de plans du type de véhicule."""
+        if user_input is not None and self._pending_vehicle is not None:
+            vehicle_id, details, photo_url = self._pending_vehicle
+            return self.async_create_entry(
+                title=details[CONF_VEHICLE_NAME],
+                data={
+                    "vehicle_id": vehicle_id,
+                    CONF_VEHICLE_TYPE: self._vehicle_type,
+                    CONF_BRAND: self._vehicle_brand,
+                    CONF_MODEL: self._vehicle_model,
+                    **details,
+                    CONF_PHOTO: photo_url,
+                    CONF_APPLY_TEMPLATE: user_input.get(CONF_APPLY_TEMPLATE, False),
+                },
+            )
+        return self.async_show_form(
+            step_id="apply_template", data_schema=APPLY_TEMPLATE_SCHEMA
         )
 
     @staticmethod
@@ -271,7 +301,7 @@ class PitStopLogOptionsFlow(config_entries.OptionsFlow):
         """Menu principal : véhicule, plans d'entretien ou historique."""
         return self.async_show_menu(
             step_id="init",
-            menu_options=["vehicle", "plans", "history", "done"],
+            menu_options=["vehicle", "plans", "templates", "history", "done"],
         )
 
     async def async_step_done(
@@ -534,6 +564,25 @@ class PitStopLogOptionsFlow(config_entries.OptionsFlow):
             }
         )
         return self.async_show_form(step_id="plan", data_schema=schema, errors=errors)
+
+    # ------------------------------------------------------------------
+    # Gabarits de plans par type de véhicule
+    # ------------------------------------------------------------------
+    async def async_step_templates(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Appliquer le gabarit du type du véhicule (sans doublon de nom)."""
+        coordinator = await async_get_or_create_coordinator(self.hass)
+        if user_input is not None:
+            if user_input.get(CONF_APPLY_TEMPLATE):
+                vehicle = coordinator.get_vehicle(self._vehicle_id) or {}
+                await coordinator.async_apply_plan_template(
+                    self._vehicle_id, vehicle.get("type", "car")
+                )
+            return await self.async_step_init()
+        return self.async_show_form(
+            step_id="templates", data_schema=APPLY_TEMPLATE_OPTIONS_SCHEMA
+        )
 
     # ------------------------------------------------------------------
     # Historique des entretiens

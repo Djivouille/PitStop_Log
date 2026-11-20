@@ -7,7 +7,9 @@ Contrôles :
 1. brands.json : catégories valides, label présent, logo existant,
    pas de logo orphelin dans brands/.
 2. maintenance_types.json : liste non vide, sans doublons.
-3. manifest.json : version au format semver (X.Y.Z ou X.Y.Z-beta.NN,
+3. plan_templates.json : types connus, plans nommés (présents dans
+   maintenance_types.json) avec au moins un intervalle.
+4. manifest.json : version au format semver (X.Y.Z ou X.Y.Z-beta.NN,
    numéros de beta sur 2 chiffres).
 """
 
@@ -75,6 +77,36 @@ else:
         elif t in seen:
             errors.append(f"maintenance_types.json : doublon {t!r}")
         seen.add(t)
+
+# ---- 2b. plan_templates.json ----
+TEMPLATE_TYPES = {"moto", "car", "camper", "other"}
+templates = json.loads(
+    (ROOT / "plan_templates.json").read_text(encoding="utf-8")
+)
+if not isinstance(templates.get("templates"), dict) or not templates["templates"]:
+    errors.append("plan_templates.json : objet 'templates' vide ou absent")
+else:
+    for vtype, tpl in templates["templates"].items():
+        if vtype not in TEMPLATE_TYPES:
+            errors.append(f"plan_templates.json : type de véhicule inconnu {vtype!r}")
+            continue
+        plans = tpl.get("plans")
+        if not isinstance(plans, list) or not plans:
+            errors.append(f"plan_templates.json : gabarit {vtype!r} sans plans")
+            continue
+        for plan in plans:
+            name = (plan.get("name") or "").strip()
+            if not name:
+                errors.append(f"plan_templates.json : plan sans nom dans {vtype!r}")
+            elif name not in types.get("types", []):
+                errors.append(
+                    f"plan_templates.json : {name!r} absent de maintenance_types.json "
+                    f"(le plan ne se réinitialiserait jamais automatiquement)"
+                )
+            if not plan.get("interval_km") and not plan.get("interval_months"):
+                errors.append(
+                    f"plan_templates.json : plan {name!r} sans intervalle (km ou mois)"
+                )
 
 # ---- 3. manifest.json ----
 manifest = json.loads((ROOT / "manifest.json").read_text(encoding="utf-8"))
