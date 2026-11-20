@@ -3,8 +3,8 @@ name: Release
 # Publie automatiquement une release GitHub quand la version du manifest
 # change. HACS/Marketplace se base sur les releases pour afficher la version
 # installable et proposer les mises à jour.
-# Les notes de release listent les changements (git log) depuis le tag
-# précédent, en plus du texte standard ci-dessous.
+# Les notes de release ne contiennent QUE la liste des changements
+# (git log) depuis le tag précédent — pas de texte standard.
 # workflow_dispatch permet de rejouer le workflow à la main (test).
 on:
   push:
@@ -40,38 +40,6 @@ jobs:
         env:
           VERSION: ${{ steps.version.outputs.version }}
         run: |
-          cat > /tmp/release-notes.md <<'NOTES'
-          ## PitStop Log
-
-          Carnet d'entretien numérique multi-véhicules pour Home Assistant :
-          motos, voitures, camping-cars. Gestion des entretiens périodiques
-          (km/mois), carnet d'entretien des interventions avec factures,
-          kilométrage historisé avec graphique, carte Lovelace dédiée.
-
-          ## Versionnement
-
-          - **`MAJOR.MINOR.PATCH`** (ex. `0.1.0`) : version de **production**, stable ;
-          - **`MAJOR.MINOR.PATCH-beta.NN`** (ex. `0.4.1-beta.01`) : version de **test**
-            (pre-release, numéro de bêta toujours sur 2 chiffres) destinée à valider
-            les nouveautés avant publication.
-
-          Les nouveautés sont d'abord publiées en `-beta.NN`. Après validation,
-          la version stable `MAJOR.MINOR.PATCH` est publiée. Les releases bêta
-          ne sont proposées par le Marketplace qu'aux utilisateurs ayant activé
-          **« Afficher les versions bêta »** dans les paramètres du dépôt.
-
-          ## Installation
-
-          1. Marketplace → PitStop Log → Télécharger (activez « Afficher les
-             versions bêta » pour les versions de test) ;
-          2. Redémarrez Home Assistant ;
-          3. Ajoutez l'intégration : Paramètres → Appareils et services →
-             Ajouter une intégration → PitStop Log.
-
-          La carte Lovelace « PitStop Card » nécessite l'ajout d'une ressource
-          (voir le README du dépôt pour le guide complet).
-          NOTES
-
           # Tag précédent (tri semver décroissant), hors version courante
           PREV=$(git tag --sort=-v:refname | grep -v "^${VERSION}$" | head -n 1 || true)
           if [ -n "$PREV" ]; then
@@ -83,11 +51,10 @@ jobs:
             LOG_CMD="git log --format=-\\ %s -n 20 HEAD"
           fi
           {
-            echo ""
             echo "$TITLE"
             echo ""
             eval "$LOG_CMD" | grep -v "^chore" || echo "- (aucun commit listé)"
-          } >> /tmp/release-notes.md
+          } > /tmp/release-notes.md
           echo "Notes générées (tag précédent : ${PREV:-aucun})."
 
       - name: Créer la release si elle n'existe pas
