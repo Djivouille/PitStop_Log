@@ -48,6 +48,7 @@ from .const import (
     VEHICLE_TYPE_LABELS,
     brand_logo,
     brands_for_type,
+    plan_display_name,
     plan_template_for_type,
 )
 from .coordinator import (
@@ -197,8 +198,8 @@ def template_description(vehicle_type: str, lang: str = "fr") -> str:
         header = "| Plan | Intervalle (km) | Intervalle (mois) |"
         custom_label = "Plan personnalisé"
     rows = [
-        f"| {tpl.get('name')} | {tpl.get('interval_km') or '—'} | "
-        f"{tpl.get('interval_months') or '—'} |"
+        f"| {plan_display_name(tpl.get('name', ''), lang)} | "
+        f"{tpl.get('interval_km') or '—'} | {tpl.get('interval_months') or '—'} |"
         for tpl in template.get("plans", [])
     ]
     for index in range(EXTRA_TEMPLATE_SLOTS):

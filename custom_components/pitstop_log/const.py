@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import json
+import re
+import unicodedata
 from pathlib import Path
 from typing import Any
 
@@ -56,6 +58,37 @@ PLAN_TEMPLATES = _load_plan_templates()
 def plan_template_for_type(vehicle_type: str) -> dict[str, Any]:
     """Retourner le gabarit de plans d'un type de véhicule (repli : « other »)."""
     return PLAN_TEMPLATES.get(vehicle_type) or PLAN_TEMPLATES.get("other", {})
+
+
+def _slug(text: str) -> str:
+    """Slug identique à homeassistant.util.slugify (sans dépendre de HA)."""
+    text = unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode("ascii")
+    return re.sub(r"[^a-zA-Z0-9_]+", "_", text).strip("_").lower()
+
+
+def _load_plan_names() -> dict[str, dict[str, str]]:
+    """Charger les noms affichés des plans depuis les traductions (plan_names)."""
+    translations_dir = Path(__file__).parent / "translations"
+    names: dict[str, dict[str, str]] = {}
+    for lang in ("fr", "en"):
+        path = translations_dir / f"{lang}.json"
+        with open(path, encoding="utf-8") as file:
+            names[lang] = json.load(file).get("plan_names", {})
+    return names
+
+
+# Noms affichés des plans par langue (clé = slug du nom d'origine, ex. « vidange »)
+PLAN_NAMES = _load_plan_names()
+
+
+def plan_display_name(name: str, lang: str = "fr") -> str:
+    """Nom affiché d'un plan traduit (repli : fr, puis nom d'origine)."""
+    slug = _slug(name)
+    return (
+        PLAN_NAMES.get(lang, {}).get(slug)
+        or PLAN_NAMES.get("fr", {}).get(slug)
+        or name
+    )
 
 # Domaine et version de l'intégration
 # Versionnement sémantique : MAJOR.MINOR.PATCH pour la production,

@@ -201,6 +201,8 @@ custom_components/pitstop_log/
 ├── services.yaml, strings.json, icons.json
 ├── brands.json             ← brands + logos
 ├── maintenance_types.json  ← maintenance natures
+├── plan_templates.json     ← plan templates per vehicle type
+│                            (display names translated via `plan_names` in translations/)
 ├── brands/                 ← SVG logos
 ├── locales/                ← card translations (fr, en)
 ├── translations/           ← integration translations (fr, en)

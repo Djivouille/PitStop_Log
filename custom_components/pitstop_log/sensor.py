@@ -20,6 +20,7 @@ from .const import (
     STATUS_OK,
     STATUS_OVERDUE,
     TRANSLATION_KEY_MAINTENANCE_STATUS,
+    plan_display_name,
     plan_template_for_type,
 )
 from .coordinator import PitStopDataUpdateCoordinator
@@ -192,6 +193,10 @@ class PitStopNextMaintenanceSensor(PitStopEntity):
             "plan_template": [
                 {
                     "name": tpl.get("name"),
+                    "display_name": plan_display_name(
+                        tpl.get("name", ""),
+                        getattr(self.hass.config, "language", "fr"),
+                    ),
                     "interval_km": tpl.get("interval_km"),
                     "interval_months": tpl.get("interval_months"),
                 }

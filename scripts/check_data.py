@@ -7,6 +7,7 @@ Contrôles :
 1. brands.json : catégories valides, label présent, logo existant,
    pas de logo orphelin dans brands/.
 2. maintenance_types.json : liste non vide, sans doublons.
+2a. plan_names (strings.json) couvre toutes les natures de maintenance_types.json.
 3. plan_templates.json : types connus, plans nommés (présents dans
    maintenance_types.json) avec au moins un intervalle.
 4. manifest.json : version au format semver (X.Y.Z ou X.Y.Z-beta.NN,
@@ -16,6 +17,7 @@ Contrôles :
 import json
 import re
 import sys
+import unicodedata
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent / "custom_components" / "pitstop_log"
@@ -77,6 +79,21 @@ else:
         elif t in seen:
             errors.append(f"maintenance_types.json : doublon {t!r}")
         seen.add(t)
+
+# ---- 2a. plan_names (traductions) couvre maintenance_types.json ----
+def _slug(text):
+    text = unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode("ascii")
+    return re.sub(r"[^a-zA-Z0-9_]+", "_", text).strip("_").lower()
+
+strings = json.loads((ROOT / "strings.json").read_text(encoding="utf-8"))
+plan_names = strings.get("plan_names", {})
+if not plan_names:
+    errors.append("strings.json : section 'plan_names' vide ou absente")
+for t in types.get("types", []):
+    if _slug(t) not in plan_names:
+        errors.append(
+            f"strings.json : plan_names sans entrée pour {t!r} (clé {_slug(t)!r})"
+        )
 
 # ---- 2b. plan_templates.json ----
 TEMPLATE_TYPES = {"moto", "car", "camper", "other"}
