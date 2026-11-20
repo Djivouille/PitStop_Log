@@ -118,12 +118,32 @@ APPLY_TEMPLATE_OPTIONS_SCHEMA = vol.Schema(
 )
 
 
+def template_plan_fields(vehicle_type: str) -> list[tuple[str, dict[str, Any]]]:
+    """Liste (préfixe de champs, plan) pour chaque plan du gabarit du type.
+
+    Le préfixe est dérivé du nom du plan (ex. « tpl_vidange ») pour que les
+    libellés affichés soient parlants ; un suffixe _N est ajouté en cas de
+    collision.
+    """
+    template = plan_template_for_type(vehicle_type)
+    fields: list[tuple[str, dict[str, Any]]] = []
+    used: set[str] = set()
+    for tpl in template.get("plans", []):
+        base = f"tpl_{slugify(tpl.get('name', ''))}"
+        prefix = base
+        index = 2
+        while prefix in used:
+            prefix = f"{base}_{index}"
+            index += 1
+        used.add(prefix)
+        fields.append((prefix, tpl))
+    return fields
+
+
 def apply_template_schema(vehicle_type: str) -> vol.Schema:
     """Schéma de l'étape gabarit : un bloc de champs éditables par plan."""
-    template = plan_template_for_type(vehicle_type)
     schema: dict[Any, Any] = {}
-    for index, tpl in enumerate(template.get("plans", [])):
-        prefix = f"tpl_{index}"
+    for prefix, tpl in template_plan_fields(vehicle_type):
         schema[vol.Optional(f"{prefix}_enabled", default=True)] = bool
         schema[vol.Required(f"{prefix}_name", default=tpl.get("name", ""))] = str
         if tpl.get("interval_km"):
@@ -151,11 +171,9 @@ def template_plans_from_input(
     user_input: dict[str, Any], vehicle_type: str
 ) -> tuple[list[dict[str, Any]], dict[str, str]]:
     """Extraire les plans personnalisés saisis ; retourne (plans, erreurs)."""
-    template = plan_template_for_type(vehicle_type)
     plans: list[dict[str, Any]] = []
     errors: dict[str, str] = {}
-    for index, tpl in enumerate(template.get("plans", [])):
-        prefix = f"tpl_{index}"
+    for prefix, tpl in template_plan_fields(vehicle_type):
         if not user_input.get(f"{prefix}_enabled", True):
             continue
         name = (user_input.get(f"{prefix}_name") or "").strip() or tpl.get("name", "")
