@@ -792,9 +792,6 @@ class PitstopCard extends HTMLElement {
               (attrs.registration || "\u2014")
             }</div>
           </div>
-          <div class="statusbox">
-            <div class="status" style="border-color:${statusColor};color:${statusColor}">${main.state}</div>
-          </div>
         </div>
         ${photo}
         <div class="grid">
@@ -812,12 +809,8 @@ class PitstopCard extends HTMLElement {
                 : "\u2014"
             }</div>
           </div>
-          <div class="cell">
-            <div class="label">${psT("maintenances_done")}</div>
-            <div class="value">${attrs.history_count != null ? attrs.history_count : "\u2014"}</div>
-          </div>
         </div>
-        <div class="section">${psT("plans_title")}
+        <div class="section">${psT("plans_title")} <span class="status" style="border-color:${statusColor};color:${statusColor}">${main.state}</span>
           <span class="gear gear-plans" title="${psT("manage_plans_hint")}">
             <svg viewBox="0 0 24 24" width="14" height="14">
               <path fill="currentColor" d="M19.14 12.94a7.07 7.07 0 0 0 .05-.94 7.07 7.07 0 0 0-.05-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.03 7.03 0 0 0-1.62-.94l-.36-2.54a.5.5 0 0 0-.5-.42h-3.84a.5.5 0 0 0-.5.42l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96a.5.5 0 0 0-.6.22L2.66 8.84a.5.5 0 0 0 .12.64l2.03 1.58c-.03.31-.05.63-.05.94s.02.63.05.94l-2.03 1.58a.5.5 0 0 0-.12.64l1.92 3.32c.13.22.39.31.6.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.04.24.25.42.5.42h3.84c.25 0 .46-.18.5-.42l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.09.47 0 .6-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.58ZM12 15.6A3.6 3.6 0 1 1 12 8.4a3.6 3.6 0 0 1 0 7.2Z"/>
@@ -829,7 +822,7 @@ class PitstopCard extends HTMLElement {
             ? `<table class="table"><thead><tr><th>${psT("th_plan")}</th><th>${psT("th_status")}</th><th>${psT("th_remaining")}</th><th>${psT("th_due")}</th></tr></thead><tbody>${plans}</tbody></table>`
             : `<div class="empty">${psT("no_plans")}</div>`
         }
-        <div class="section">${psT("last_maintenances")}
+        <div class="section">${psT("last_maintenances")} (${attrs.history_count != null ? attrs.history_count : 0})
           <span class="gear gear-history" title="${psT("manage_history_hint")}">
             <svg viewBox="0 0 24 24" width="14" height="14">
               <path fill="currentColor" d="M19.14 12.94a7.07 7.07 0 0 0 .05-.94 7.07 7.07 0 0 0-.05-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.03 7.03 0 0 0-1.62-.94l-.36-2.54a.5.5 0 0 0-.5-.42h-3.84a.5.5 0 0 0-.5.42l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96a.5.5 0 0 0-.6.22L2.66 8.84a.5.5 0 0 0 .12.64l2.03 1.58c-.03.31-.05.63-.05.94s.02.63.05.94l-2.03 1.58a.5.5 0 0 0-.12.64l1.92 3.32c.13.22.39.31.6.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.04.24.25.42.5.42h3.84c.25 0 .46-.18.5-.42l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.09.47 0 .6-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.58ZM12 15.6A3.6 3.6 0 1 1 12 8.4a3.6 3.6 0 0 1 0 7.2Z"/>
