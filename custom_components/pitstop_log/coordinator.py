@@ -20,13 +20,17 @@ from homeassistant.util import dt as dt_util
 
 from .const import (
     DOMAIN,
-    DUE_SOON_DAYS,
-    DUE_SOON_KM_PERCENT,
+    CONF_REMINDER_URGENT_DAYS,
+    CONF_REMINDER_VERY_URGENT_DAYS,
+    CONF_REMINDER_URGENT_KM,
+    CONF_REMINDER_VERY_URGENT_KM,
+    REMINDER_DEFAULTS,
     PHOTOS_DIR,
     PHOTOS_URL_PREFIX,
-    STATUS_DUE_SOON,
-    STATUS_OK,
-    STATUS_OVERDUE,
+    STATUS_NOT_URGENT,
+    STATUS_URGENT,
+    STATUS_VERY_URGENT,
+    STATUS_PAST_DUE,
     plan_template_for_type,
 )
 
@@ -792,12 +796,22 @@ class PitStopDataUpdateCoordinator:
     # ------------------------------------------------------------------
     # Calcul des échéances
     # ------------------------------------------------------------------
-    def get_due_info(self, plan: dict[str, Any]) -> dict[str, Any]:
-        """Calculer l'état d'un plan d'entretien.
+    def get_due_info(
+        self, plan: dict[str, Any], options: dict[str, Any] | None = None
+    ) -> dict[str, Any]:
+        """Calculer l'état d'une nature d'entretien (reminder à 4 statuts).
 
-        Retourne le statut (OK / Bientôt dû / En retard), le kilométrage
-        cible, la date cible, et le reste à faire en km et en jours.
+        Seuils personnalisables via les options du véhicule (étape « Rappels »),
+        défauts dans REMINDER_DEFAULTS. « past_due » (échéance dépassée) est
+        toujours prioritaire et non paramétrable.
+        Retourne le statut, le kilométrage cible, la date cible et le reste
+        à faire en km et en jours.
         """
+        thresholds = dict(REMINDER_DEFAULTS)
+        for key in REMINDER_DEFAULTS:
+            value = (options or {}).get(key)
+            if value is not None:
+                thresholds[key] = value
         vehicle = self.get_vehicle(plan.get("vehicle_id", ""))
         odometer = vehicle.get("odometer", 0) if vehicle else 0
         interval_km = plan.get("interval_km")
@@ -826,24 +840,29 @@ class PitStopDataUpdateCoordinator:
             due_date = base_date + timedelta(days=interval_months * 30)
             days_remaining = (due_date - today).days
 
-        # Détermination du statut d'alerte
-        km_overdue = km_remaining is not None and km_remaining <= 0
-        days_overdue = days_remaining is not None and days_remaining <= 0
-        km_due_soon = (
-            km_remaining is not None
-            and interval_km is not None
-            and km_remaining <= interval_km * DUE_SOON_KM_PERCENT
-        )
-        days_due_soon = (
-            days_remaining is not None and 0 < days_remaining <= DUE_SOON_DAYS
-        )
-
-        if km_overdue or days_overdue:
-            status = STATUS_OVERDUE
-        elif km_due_soon or days_due_soon:
-            status = STATUS_DUE_SOON
-        else:
-            status = STATUS_OK
+        # Sévérité = max entre la dimension km et la dimension temps
+        # 0 = pas urgent, 1 = urgent, 2 = très urgent, 3 = en retard
+        level = 0
+        if km_remaining is not None:
+            if km_remaining <= 0:
+                level = 3
+            elif km_remaining <= thresholds[CONF_REMINDER_VERY_URGENT_KM]:
+                level = max(level, 2)
+            elif km_remaining <= thresholds[CONF_REMINDER_URGENT_KM]:
+                level = max(level, 1)
+        if days_remaining is not None:
+            if days_remaining <= 0:
+                level = 3
+            elif days_remaining <= thresholds[CONF_REMINDER_VERY_URGENT_DAYS]:
+                level = max(level, 2)
+            elif days_remaining <= thresholds[CONF_REMINDER_URGENT_DAYS]:
+                level = max(level, 1)
+        status = (
+            STATUS_NOT_URGENT,
+            STATUS_URGENT,
+            STATUS_VERY_URGENT,
+            STATUS_PAST_DUE,
+        )[level]
 
         return {
             "status": status,

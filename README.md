@@ -50,7 +50,7 @@
   edited or deleted from the card; odometer readings created by a
   maintenance entry are identified and protected.
 - 📅 **Upcoming maintenance**: due by km and/or months interval, automatic
-  remaining calculation and alert status — `OK` 🟢, `Due soon` 🟡,
+  remaining calculation and alert status on 4 levels — `Not urgent` 🟢, `Urgent` 🟡, `Very urgent` 🟠, `Past Due` 🔴,
   `Overdue` 🔴. Recording a maintenance **automatically resets** the
   matching natures.
 - 🛠️ **Full editing from the UI** (Options Flow): vehicle metadata,
@@ -93,6 +93,7 @@
      (motorcycle, car, campervan), without duplicating existing natures
      (template content viewable at `/local/pitstop_log/plan_templates.json`,
      gallery: [nature templates](docs/plan_templates.md));
+   - 🔔 **Reminders**: custom Urgent / Very urgent thresholds (days and km) — Past Due always on top;
    - 🗂️ **Maintenance logbook**: edit / delete.
 
 <a id="lovelace-card"></a>
@@ -133,7 +134,7 @@ the stored name stays the stable ID, only the display changes.
 | Sensor | Description |
 |---|---|
 | 📏 Odometer | Current odometer (km), with reading history in attributes. |
-| 🔧 Next maintenance | Most urgent status (`OK` / `Due soon` / `Overdue`), with natures, the vehicle type's template (`plan_template`) and the full logbook in attributes. |
+| 🔧 Next maintenance | Most urgent status (`Not urgent` / `Urgent` / `Very urgent` / `Past Due`), with natures, the vehicle type's template (`plan_template`) and the full logbook in attributes. |
 | 📅 One per nature | Nature status with `km_remaining`, `days_remaining`, `due_km`, `due_date`. |
 | 🖼️ Vehicle photo (image) | Uploaded photo, visible on the device page and dashboards. |
 | 🏷️ Brand logo (image) | Brand logo, visible on the device page and dashboards. |

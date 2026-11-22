@@ -48,6 +48,7 @@ from .const import (
     VEHICLE_TYPE_LABELS,
     brand_logo,
     brands_for_type,
+    REMINDER_DEFAULTS,
     plan_display_name,
     plan_template_for_type,
 )
@@ -424,8 +425,26 @@ class PitStopLogOptionsFlow(config_entries.OptionsFlow):
         """Menu principal : véhicule, plans d'entretien ou historique."""
         return self.async_show_menu(
             step_id="init",
-            menu_options=["vehicle", "plans", "templates", "history", "done"],
+            menu_options=["vehicle", "plans", "templates", "reminders", "history", "done"],
         )
+
+    async def async_step_reminders(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Seuils personnalisés du reminder (4 statuts d'entretien)."""
+        if user_input is not None:
+            options = dict(self.config_entry.options)
+            for key in REMINDER_DEFAULTS:
+                options[key] = user_input.get(key, REMINDER_DEFAULTS[key])
+            return self.async_create_entry(title="", data=options)
+        defaults = {**REMINDER_DEFAULTS, **dict(self.config_entry.options)}
+        schema = vol.Schema(
+            {
+                vol.Optional(key, default=defaults[key]): int
+                for key in REMINDER_DEFAULTS
+            }
+        )
+        return self.async_show_form(step_id="reminders", data_schema=schema)
 
     async def async_step_done(
         self, user_input: dict[str, Any] | None = None

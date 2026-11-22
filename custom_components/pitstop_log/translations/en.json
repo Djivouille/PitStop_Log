@@ -125,6 +125,7 @@
           "plans": "Maintenance natures",
           "history": "Maintenance logbook",
           "templates": "Nature templates",
+          "reminders": "Reminders",
           "done": "Done"
         }
       },
@@ -194,6 +195,28 @@
           }
         }
       },
+      "reminders": {
+        "title": "Reminder thresholds",
+        "description": "Customize when a maintenance nature becomes Urgent or Very urgent. Past Due (deadline passed) is always shown and cannot be configured.",
+        "data": {
+          "reminder_urgent_days": {
+            "name": "Urgent (days)",
+            "description": "Days before the due date to show Urgent."
+          },
+          "reminder_very_urgent_days": {
+            "name": "Very urgent (days)",
+            "description": "Days before the due date to show Very urgent."
+          },
+          "reminder_urgent_km": {
+            "name": "Urgent (km)",
+            "description": "Kilometers remaining before the due odometer to show Urgent."
+          },
+          "reminder_very_urgent_km": {
+            "name": "Very urgent (km)",
+            "description": "Kilometers remaining before the due odometer to show Very urgent."
+          }
+        }
+      },
       "vehicle_details": {
         "title": "Step 2/2 — Vehicle information",
         "description": "Enter your vehicle information.",
@@ -234,17 +257,19 @@
       "next_maintenance": {
         "name": "Next maintenance",
         "state": {
-          "ok": "OK",
-          "due_soon": "Due soon",
-          "overdue": "Overdue"
+          "not_urgent": "Not urgent",
+          "urgent": "Urgent",
+          "very_urgent": "Very urgent",
+          "past_due": "Past Due"
         }
       },
       "maintenance_status": {
         "name": "Maintenance: {plan_name}",
         "state": {
-          "ok": "OK",
-          "due_soon": "Due soon",
-          "overdue": "Overdue"
+          "not_urgent": "Not urgent",
+          "urgent": "Urgent",
+          "very_urgent": "Very urgent",
+          "past_due": "Past Due"
         }
       }
     },

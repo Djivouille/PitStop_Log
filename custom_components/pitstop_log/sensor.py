@@ -16,9 +16,10 @@ from homeassistant.helpers.typing import StateType
 
 from .const import (
     DOMAIN,
-    STATUS_DUE_SOON,
-    STATUS_OK,
-    STATUS_OVERDUE,
+    STATUS_NOT_URGENT,
+    STATUS_URGENT,
+    STATUS_VERY_URGENT,
+    STATUS_PAST_DUE,
     TRANSLATION_KEY_MAINTENANCE_STATUS,
     plan_display_name,
     plan_template_for_type,
@@ -26,7 +27,12 @@ from .const import (
 from .coordinator import PitStopDataUpdateCoordinator
 
 # Priorité d'affichage des statuts (le plus urgent remonte en tête)
-_STATUS_PRIORITY = {STATUS_OVERDUE: 0, STATUS_DUE_SOON: 1, STATUS_OK: 2}
+_STATUS_PRIORITY = {
+    STATUS_PAST_DUE: 0,
+    STATUS_VERY_URGENT: 1,
+    STATUS_URGENT: 2,
+    STATUS_NOT_URGENT: 3,
+}
 
 
 async def async_setup_entry(
@@ -65,6 +71,7 @@ class PitStopEntity(SensorEntity):
         """Initialiser l'entité et son appareil associé."""
         self.coordinator = coordinator
         self.vehicle_id = vehicle_id
+        self._options = dict(entry.options)
         vehicle = coordinator.get_vehicle(vehicle_id) or {}
         self._attr_unique_id = f"{vehicle_id}_{self._attr_key}"
         self._attr_device_info = {
@@ -132,9 +139,9 @@ class PitStopNextMaintenanceSensor(PitStopEntity):
         """Statut d'entretien le plus urgent (jeton traduit dans l'interface)."""
         plans = self.coordinator.get_plans(self.vehicle_id)
         if not plans:
-            return STATUS_OK
+            return STATUS_NOT_URGENT
         infos = [
-            (self.coordinator.get_due_info(plan), plan)
+            (self.coordinator.get_due_info(plan, self._options), plan)
             for _, plan in plans
         ]
         infos.sort(
@@ -156,7 +163,7 @@ class PitStopNextMaintenanceSensor(PitStopEntity):
         """Attributs détaillés : plans, gabarit du type, historique, factures."""
         plans_attr: list[dict[str, Any]] = []
         for plan_id, plan in self.coordinator.get_plans(self.vehicle_id):
-            info = self.coordinator.get_due_info(plan)
+            info = self.coordinator.get_due_info(plan, self._options)
             plans_attr.append(
                 {
                     "plan_id": plan_id,
@@ -244,7 +251,7 @@ class PitStopMaintenancePlanSensor(PitStopEntity):
         plan = self.coordinator.data["plans"].get(self.plan_id)
         if plan is None:
             return None
-        return self.coordinator.get_due_info(plan)["status"]
+        return self.coordinator.get_due_info(plan, self._options)["status"]
 
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
@@ -252,4 +259,4 @@ class PitStopMaintenancePlanSensor(PitStopEntity):
         plan = self.coordinator.data["plans"].get(self.plan_id)
         if plan is None:
             return {}
-        return self.coordinator.get_due_info(plan)
+        return self.coordinator.get_due_info(plan, self._options)

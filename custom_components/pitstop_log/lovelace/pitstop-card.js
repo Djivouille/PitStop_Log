@@ -732,11 +732,13 @@ class PitstopCard extends HTMLElement {
 
     const attrs = main.attributes || {};
     const statusColors = {
-      OK: "var(--label-badge-green, #13ba6e)",
-      "Bient\u00f4t d\u00fb": "var(--label-badge-yellow, #ffab40)",
+      "Pas urgent": "var(--label-badge-green, #13ba6e)",
+      Urgent: "var(--label-badge-yellow, #ffab40)",
+      "Tr\u00e8s urgent": "var(--label-badge-orange, #ff9800)",
       "En retard": "var(--label-badge-red, #fce588)",
-      "Due soon": "var(--label-badge-yellow, #ffab40)",
-      Overdue: "var(--label-badge-red, #fce588)",
+      "Not urgent": "var(--label-badge-green, #13ba6e)",
+      "Very urgent": "var(--label-badge-orange, #ff9800)",
+      "Past Due": "var(--label-badge-red, #fce588)",
     };
     const statusColor =
       statusColors[main.state] || "var(--primary-color, #03a9f4)";
@@ -747,8 +749,8 @@ class PitstopCard extends HTMLElement {
         <tr>
           <td>${p.attributes.friendly_name || p.entity_id}</td>
           <td><span class="badge" style="background:${statusColors[p.state] || "var(--primary-color)"}">${p.state}</span></td>
-          <td class="num">${p.attributes.km_remaining != null ? p.attributes.km_remaining.toLocaleString() + " km" : "\u2014"}</td>
-          <td class="num">${p.attributes.days_remaining != null ? p.attributes.days_remaining + " j" : "\u2014"}</td>
+          <td class="num">${p.attributes.km_remaining != null ? p.attributes.km_remaining.toLocaleString() + " km" : p.attributes.days_remaining != null ? p.attributes.days_remaining + " j" : "\u2014"}</td>
+          <td class="num">${PitstopCard._fmtDue(p.attributes)}</td>
         </tr>`
       )
       .join("");
@@ -881,6 +883,16 @@ class PitstopCard extends HTMLElement {
   }
 
   /** Logo de marque, avec ic\u00f4ne par d\u00e9faut si l'image est manquante. */
+  /** Formate l'\u00e9ch\u00e9ance d'une nature : date pr\u00e9vue (JJ/MM/AAAA) ou km cible. */
+  static _fmtDue(attrs) {
+    if (attrs.due_date) {
+      const d = String(attrs.due_date);
+      return d.slice(8) + "/" + d.slice(5, 7) + "/" + d.slice(0, 4);
+    }
+    if (attrs.due_km != null) return attrs.due_km.toLocaleString() + " km";
+    return "\u2014";
+  }
+
   static _logoHtml(attrs) {
     if (attrs.brand_logo) {
       return `<img class="logo" src="${attrs.brand_logo}" alt="${attrs.brand || ""}">`;

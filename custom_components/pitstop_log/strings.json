@@ -125,6 +125,7 @@
           "plans": "Natures d'entretien",
           "history": "Carnet d'entretien",
           "templates": "Gabarits de natures",
+          "reminders": "Reminders",
           "done": "Terminé"
         }
       },
@@ -194,6 +195,28 @@
           }
         }
       },
+      "reminders": {
+        "title": "Reminder thresholds",
+        "description": "Customize when a maintenance nature becomes Urgent or Very urgent. Past Due (deadline passed) is always shown and cannot be configured.",
+        "data": {
+          "reminder_urgent_days": {
+            "name": "Urgent (days)",
+            "description": "Days before the due date to show Urgent."
+          },
+          "reminder_very_urgent_days": {
+            "name": "Very urgent (days)",
+            "description": "Days before the due date to show Very urgent."
+          },
+          "reminder_urgent_km": {
+            "name": "Urgent (km)",
+            "description": "Kilometers remaining before the due odometer to show Urgent."
+          },
+          "reminder_very_urgent_km": {
+            "name": "Very urgent (km)",
+            "description": "Kilometers remaining before the due odometer to show Very urgent."
+          }
+        }
+      },
       "vehicle_details": {
         "title": "Étape 2/2 — Informations du véhicule",
         "description": "Renseignez les informations de votre véhicule.",
@@ -234,17 +257,19 @@
       "next_maintenance": {
         "name": "Prochain entretien",
         "state": {
-          "ok": "OK",
-          "due_soon": "Bientôt dû",
-          "overdue": "En retard"
+          "not_urgent": "Not urgent",
+          "urgent": "Urgent",
+          "very_urgent": "Very urgent",
+          "past_due": "Past Due"
         }
       },
       "maintenance_status": {
         "name": "Entretien : {plan_name}",
         "state": {
-          "ok": "OK",
-          "due_soon": "Bientôt dû",
-          "overdue": "En retard"
+          "not_urgent": "Not urgent",
+          "urgent": "Urgent",
+          "very_urgent": "Very urgent",
+          "past_due": "Past Due"
         }
       }
     },

@@ -125,6 +125,7 @@
           "plans": "Natures d'entretien",
           "history": "Carnet d'entretien",
           "templates": "Gabarits de natures",
+          "reminders": "Rappels",
           "done": "Terminé"
         }
       },
@@ -194,6 +195,28 @@
           }
         }
       },
+      "reminders": {
+        "title": "Seuils de rappel",
+        "description": "Personnalisez quand une nature d'entretien passe en Urgent ou Très urgent. « En retard » (échéance dépassée) est toujours affiché et non configurable.",
+        "data": {
+          "reminder_urgent_days": {
+            "name": "Urgent (jours)",
+            "description": "Jours avant l'échéance pour afficher Urgent."
+          },
+          "reminder_very_urgent_days": {
+            "name": "Très urgent (jours)",
+            "description": "Jours avant l'échéance pour afficher Très urgent."
+          },
+          "reminder_urgent_km": {
+            "name": "Urgent (km)",
+            "description": "Kilomètres restants avant l'échéance kilométrique pour afficher Urgent."
+          },
+          "reminder_very_urgent_km": {
+            "name": "Très urgent (km)",
+            "description": "Kilomètres restants avant l'échéance kilométrique pour afficher Très urgent."
+          }
+        }
+      },
       "vehicle_details": {
         "title": "Étape 2/2 — Informations du véhicule",
         "description": "Renseignez les informations de votre véhicule.",
@@ -234,17 +257,19 @@
       "next_maintenance": {
         "name": "Prochain entretien",
         "state": {
-          "ok": "OK",
-          "due_soon": "Bientôt dû",
-          "overdue": "En retard"
+          "not_urgent": "Pas urgent",
+          "urgent": "Urgent",
+          "very_urgent": "Très urgent",
+          "past_due": "En retard"
         }
       },
       "maintenance_status": {
         "name": "Entretien : {plan_name}",
         "state": {
-          "ok": "OK",
-          "due_soon": "Bientôt dû",
-          "overdue": "En retard"
+          "not_urgent": "Pas urgent",
+          "urgent": "Urgent",
+          "very_urgent": "Très urgent",
+          "past_due": "En retard"
         }
       }
     },

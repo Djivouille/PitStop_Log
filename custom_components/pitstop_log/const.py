@@ -175,15 +175,26 @@ SERVICE_DELETE_MAINTENANCE_PLAN = "delete_maintenance_plan"
 ATTR_VEHICLE_ID = "vehicle_id"
 ATTR_ENTITY_ID = "entity_id"
 
-# Seuils d'alerte (en % de l'intervalle ou en jours restants)
-DUE_SOON_KM_PERCENT = 0.15  # Bientôt dû sous 15 % de l'intervalle km restant
-DUE_SOON_DAYS = 30  # Bientôt dû sous 30 jours
+# Seuils de rappel par défaut (modifiables par véhicule, étape « Rappels »)
+CONF_REMINDER_URGENT_DAYS = "reminder_urgent_days"
+CONF_REMINDER_VERY_URGENT_DAYS = "reminder_very_urgent_days"
+CONF_REMINDER_URGENT_KM = "reminder_urgent_km"
+CONF_REMINDER_VERY_URGENT_KM = "reminder_very_urgent_km"
+
+REMINDER_DEFAULTS: dict[str, int] = {
+    CONF_REMINDER_URGENT_DAYS: 30,      # Urgent sous 30 jours restants
+    CONF_REMINDER_VERY_URGENT_DAYS: 7, # Très urgent sous 7 jours restants
+    CONF_REMINDER_URGENT_KM: 100,       # Urgent à moins de 100 km de l'échéance
+    CONF_REMINDER_VERY_URGENT_KM: 50,  # Très urgent à moins de 50 km de l'échéance
+}
 
 # États possibles des capteurs d'entretien (jetons neutres, traduits dans
-# l'interface via translation_key + sélecteur de texte)
-STATUS_OK = "ok"
-STATUS_DUE_SOON = "due_soon"
-STATUS_OVERDUE = "overdue"
+# l'interface via translation_key + sélecteur de texte).
+# past_due (échéance dépassée) est toujours prioritaire et non paramétrable.
+STATUS_NOT_URGENT = "not_urgent"
+STATUS_URGENT = "urgent"
+STATUS_VERY_URGENT = "very_urgent"
+STATUS_PAST_DUE = "past_due"
 
 # Clé de traduction commune des capteurs de statut d'entretien
 TRANSLATION_KEY_MAINTENANCE_STATUS = "maintenance_status"

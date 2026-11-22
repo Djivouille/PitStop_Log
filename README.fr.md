@@ -50,7 +50,7 @@
   modifiée ou supprimée depuis la carte ; les relevés kilométriques issus d'un
   entretien sont identifiés et protégés.
 - 📅 **Entretiens à faire** : échéances par intervalle km et/ou mois, calcul
-  automatique du reste à faire et statut d'alerte — `OK` 🟢, `Bientôt dû` 🟡,
+  automatique du reste à faire et statut d'alerte à 4 niveaux — `Pas urgent` 🟢, `Urgent` 🟡, `Très urgent` 🟠, `En retard` 🔴,
   `En retard` 🔴. Un entretien réalisé **réinitialise automatiquement** les natures
   correspondants.
 - 🛠️ **Édition complète via l'interface** (Options Flow) : métadonnées du
@@ -93,6 +93,7 @@
      véhicule (moto, voiture, camping-car), sans doublonner les natures existantes
      (contenu des gabarits consultable : `/local/pitstop_log/plan_templates.json`,
      galerie : [gabarits de natures](docs/plan_templates.md)) ;
+   - 🔔 **Rappels** : seuils personnalisés Urgent / Très urgent (jours et km) — « En retard » reste toujours prioritaire ;
    - 🗂️ **Carnet d'entretien** : modification / suppression.
 
 <a id="carte-lovelace"></a>
@@ -133,7 +134,7 @@ le nom stocké reste l'identifiant stable, seul l'affichage change.
 | Capteur | Description |
 |---|---|
 | 📏 Kilométrage | Kilométrage actuel (km), avec historique des relevés en attributs. |
-| 🔧 Prochain entretien | Statut le plus urgent (`OK` / `Bientôt dû` / `En retard`), avec natures, gabarit du type (`plan_template`) et carnet d'entretien complet en attributs. |
+| 🔧 Prochain entretien | Statut le plus urgent (`Pas urgent` / `Urgent` / `Très urgent` / `En retard`), avec natures, gabarit du type (`plan_template`) et carnet d'entretien complet en attributs. |
 | 📅 Un capteur par nature | Statut de la nature avec `km_remaining`, `days_remaining`, `due_km`, `due_date`. |
 | 🖼️ Photo du véhicule (image) | Photo téléversée, visible sur la page de l'appareil et les tableaux de bord. |
 | 🏷️ Logo de marque (image) | Logo de la marque, visible sur la page de l'appareil et les tableaux de bord. |
