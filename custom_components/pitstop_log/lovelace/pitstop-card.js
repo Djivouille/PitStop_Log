@@ -763,7 +763,7 @@ class PitstopCard extends HTMLElement {
         <tr>
           <td>${psName(p.name || "")}</td>
           <td><span class="badge" style="background:${statusColors[p.status] || "var(--primary-color)"}">${psStatus(p.status)}</span></td>
-          <td class="num">${p.km_remaining != null ? p.km_remaining.toLocaleString() + " km" : p.days_remaining != null ? p.days_remaining + " j" : "\u2014"}</td>
+          <td class="num">${PitstopCard._fmtRemaining(p)}</td>
           <td class="num">${PitstopCard._fmtDue(p)}</td>
         </tr>`
       )
@@ -811,17 +811,18 @@ class PitstopCard extends HTMLElement {
         <div class="grid">
           <div class="cell cell-km" title="${psT("km_history_hint")}">
             <div class="label">${psT("km")}
-              <span class="gear gear-km" title="${psT("km_update_hint")}">
-                <svg viewBox="0 0 24 24" width="16" height="16">
-                  <path fill="currentColor" d="M19.14 12.94a7.07 7.07 0 0 0 .05-.94 7.07 7.07 0 0 0-.05-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.03 7.03 0 0 0-1.62-.94l-.36-2.54a.5.5 0 0 0-.5-.42h-3.84a.5.5 0 0 0-.5.42l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96a.5.5 0 0 0-.6.22L2.66 8.84a.5.5 0 0 0 .12.64l2.03 1.58c-.03.31-.05.63-.05.94s.02.63.05.94l-2.03 1.58a.5.5 0 0 0-.12.64l1.92 3.32c.13.22.39.31.6.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.04.24.25.42.5.42h3.84c.25 0 .46-.18.5-.42l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.09.47 0 .6-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.58ZM12 15.6A3.6 3.6 0 1 1 12 8.4a3.6 3.6 0 0 1 0 7.2Z"/>
-                </svg>
-              </span>
+
             </div>
             <div class="value">${
               entities.odometer
                 ? Number(entities.odometer.state).toLocaleString() + " km"
                 : "\u2014"
             }</div>
+            <span class="gear gear-km" title="${psT("km_update_hint")}">
+                <svg viewBox="0 0 24 24" width="16" height="16">
+                  <path fill="currentColor" d="M19.14 12.94a7.07 7.07 0 0 0 .05-.94 7.07 7.07 0 0 0-.05-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.03 7.03 0 0 0-1.62-.94l-.36-2.54a.5.5 0 0 0-.5-.42h-3.84a.5.5 0 0 0-.5.42l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96a.5.5 0 0 0-.6.22L2.66 8.84a.5.5 0 0 0 .12.64l2.03 1.58c-.03.31-.05.63-.05.94s.02.63.05.94l-2.03 1.58a.5.5 0 0 0-.12.64l1.92 3.32c.13.22.39.31.6.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.04.24.25.42.5.42h3.84c.25 0 .46-.18.5-.42l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.09.47 0 .6-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.58ZM12 15.6A3.6 3.6 0 1 1 12 8.4a3.6 3.6 0 0 1 0 7.2Z"/>
+                </svg>
+              </span>
           </div>
         </div>
         <div class="section">${psT("plans_title")} <span class="status" style="border-color:${statusColor};color:${statusColor}">${psStatus(main.state)}</span>
@@ -892,12 +893,26 @@ class PitstopCard extends HTMLElement {
   /** Logo de marque, avec ic\u00f4ne par d\u00e9faut si l'image est manquante. */
   /** Formate l'\u00e9ch\u00e9ance d'une nature : date pr\u00e9vue (JJ/MM/AAAA) ou km cible. */
   /** Cl\u00e9 de tri "prochain entretien" : fraction restante la plus faible (n\u00e9gative = en retard). */
+  /** Reste \u00e0 faire affich\u00e9 : la dimension la plus urgente (fraction restante min). */
+  static _fmtRemaining(p) {
+    const fr = [];
+    if (p.interval_km && p.km_remaining != null)
+      fr.push({ f: p.km_remaining / p.interval_km, s: p.km_remaining.toLocaleString() + " km" });
+    const daysTotal = p.days_total || (p.interval_months ? p.interval_months * 30 : 0);
+    if (daysTotal && p.days_remaining != null)
+      fr.push({ f: p.days_remaining / daysTotal, s: p.days_remaining + " j" });
+    if (!fr.length) return "\u2014";
+    fr.sort((a, b) => a.f - b.f);
+    return fr[0].s;
+  }
+
   static _dueKey(p) {
     const keys = [];
     if (p.interval_km && p.km_remaining != null)
       keys.push(p.km_remaining / p.interval_km);
-    if (p.interval_months && p.days_remaining != null)
-      keys.push(p.days_remaining / (p.interval_months * 30));
+    const daysTotal = p.days_total || (p.interval_months ? p.interval_months * 30 : 0);
+    if (daysTotal && p.days_remaining != null)
+      keys.push(p.days_remaining / daysTotal);
     return keys.length ? Math.min.apply(null, keys) : 999;
   }
 

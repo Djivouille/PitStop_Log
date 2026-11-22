@@ -7,6 +7,7 @@ le calcul des échéances et la mise à jour des capteurs.
 from __future__ import annotations
 
 import base64
+import calendar
 import os
 import shutil
 from datetime import date, datetime, timedelta
@@ -33,6 +34,15 @@ from .const import (
     STATUS_PAST_DUE,
     plan_template_for_type,
 )
+
+def _add_months(base: date, months: int) -> date:
+    """Ajouter des mois calendaires à une date (ex. 31/01 + 1 mois -> 28/02)."""
+    month_index = base.month - 1 + months
+    year = base.year + month_index // 12
+    month = month_index % 12 + 1
+    day = min(base.day, calendar.monthrange(year, month)[1])
+    return date(year, month, day)
+
 
 DEFAULT_SAVE_DELAY = 30  # Secondes avant écriture différée sur le disque
 
@@ -822,6 +832,7 @@ class PitStopDataUpdateCoordinator:
         km_remaining: int | None = None
         due_km: int | None = None
         days_remaining: int | None = None
+        days_total: int | None = None
         due_date: date | None = None
         today = dt_util.now().date()
 
@@ -837,8 +848,9 @@ class PitStopDataUpdateCoordinator:
                 base_date = datetime.strptime(last_date_str, "%Y-%m-%d").date()
             else:
                 base_date = today
-            due_date = base_date + timedelta(days=interval_months * 30)
+            due_date = _add_months(base_date, interval_months)
             days_remaining = (due_date - today).days
+            days_total = (due_date - base_date).days
 
         # Sévérité = max entre la dimension km et la dimension temps
         # 0 = pas urgent, 1 = urgent, 2 = très urgent, 3 = en retard
@@ -870,6 +882,7 @@ class PitStopDataUpdateCoordinator:
             "due_date": due_date.isoformat() if due_date else None,
             "km_remaining": km_remaining,
             "days_remaining": days_remaining,
+            "days_total": days_total,
             "last_km": last_km,
             "last_date": last_date_str,
         }
