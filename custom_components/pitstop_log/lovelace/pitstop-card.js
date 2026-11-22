@@ -1415,7 +1415,9 @@ class PitstopCard extends HTMLElement {
       .photo { width: 100%; max-height: 260px; object-fit: cover; display: block; margin: 8px 0; border-radius: var(--ha-card-border-radius, 12px); }
       .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; padding: 0 16px 8px; }
       .cell { background: var(--secondary-background-color, #f5f5f5); border-radius: 10px; padding: 10px; }
-      .cell-km { cursor: pointer; }
+      .cell-km { cursor: pointer; display: flex; align-items: center; gap: 8px; padding: 8px 12px; }
+      .cell-km .label { margin: 0; text-transform: none; letter-spacing: 0; }
+      .cell-km .value { margin: 0 0 0 auto; font-size: 15px; font-weight: 600; }
       .src-badge { font-size: 10px; font-weight: 600; color: var(--secondary-text-color, #727272); border: 1px solid var(--divider-color, #e0e0e0); border-radius: 8px; padding: 1px 6px; white-space: nowrap; }
       .label { font-size: 11px; color: var(--secondary-text-color, #727272); text-transform: uppercase; letter-spacing: 0.5px; }
       .value { font-size: 20px; font-weight: 500; margin-top: 2px; }
