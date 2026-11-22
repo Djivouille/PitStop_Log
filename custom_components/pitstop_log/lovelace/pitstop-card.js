@@ -755,14 +755,16 @@ class PitstopCard extends HTMLElement {
     const statusColor =
       statusColors[main.state] || "var(--primary-color, #03a9f4)";
 
-    const plans = entities.plans
+    const plans = (attrs.plans || [])
+      .slice()
+      .sort((a, b) => PitstopCard._dueKey(a) - PitstopCard._dueKey(b))
       .map(
         (p) => `
         <tr>
-          <td>${p.attributes.friendly_name || p.entity_id}</td>
-          <td><span class="badge" style="background:${statusColors[p.state] || "var(--primary-color)"}">${psStatus(p.state)}</span></td>
-          <td class="num">${p.attributes.km_remaining != null ? p.attributes.km_remaining.toLocaleString() + " km" : p.attributes.days_remaining != null ? p.attributes.days_remaining + " j" : "\u2014"}</td>
-          <td class="num">${PitstopCard._fmtDue(p.attributes)}</td>
+          <td>${psName(p.name || "")}</td>
+          <td><span class="badge" style="background:${statusColors[p.status] || "var(--primary-color)"}">${psStatus(p.status)}</span></td>
+          <td class="num">${p.km_remaining != null ? p.km_remaining.toLocaleString() + " km" : p.days_remaining != null ? p.days_remaining + " j" : "\u2014"}</td>
+          <td class="num">${PitstopCard._fmtDue(p)}</td>
         </tr>`
       )
       .join("");
@@ -889,6 +891,16 @@ class PitstopCard extends HTMLElement {
 
   /** Logo de marque, avec ic\u00f4ne par d\u00e9faut si l'image est manquante. */
   /** Formate l'\u00e9ch\u00e9ance d'une nature : date pr\u00e9vue (JJ/MM/AAAA) ou km cible. */
+  /** Cl\u00e9 de tri "prochain entretien" : fraction restante la plus faible (n\u00e9gative = en retard). */
+  static _dueKey(p) {
+    const keys = [];
+    if (p.interval_km && p.km_remaining != null)
+      keys.push(p.km_remaining / p.interval_km);
+    if (p.interval_months && p.days_remaining != null)
+      keys.push(p.days_remaining / (p.interval_months * 30));
+    return keys.length ? Math.min.apply(null, keys) : 999;
+  }
+
   static _fmtDue(attrs) {
     if (attrs.due_date) {
       const d = String(attrs.due_date);
