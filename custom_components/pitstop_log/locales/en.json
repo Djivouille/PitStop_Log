@@ -73,6 +73,12 @@
   "err_plan_interval": "Set an interval in km or in months.",
   "confirm_delete_plan": "Delete this maintenance nature? (logbook entries are kept)",
   "plan_rename_hint": "Renaming changes the id: automatic reset from the logbook will no longer match past entries.",
+  "status_names": {
+    "not_urgent": "Not urgent",
+    "urgent": "Urgent",
+    "very_urgent": "Very urgent",
+    "past_due": "Past Due"
+  },
   "plan_names": {
     "vidange": "Oil change",
     "filtre_a_huile": "Oil filter",

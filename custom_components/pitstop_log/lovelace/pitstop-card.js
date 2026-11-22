@@ -218,6 +218,12 @@ const PS_DEFAULT_STRINGS = {
   "err_plan_interval": "D\u00e9finissez un intervalle en km ou en mois.",
   "confirm_delete_plan": "Supprimer cette nature d'entretien ? (les entr\u00e9es du carnet sont conserv\u00e9es)",
   "plan_rename_hint": "Renommer change l'identifiant : la r\u00e9initialisation auto depuis le carnet ne portera plus sur les anciennes entr\u00e9es.",
+  "status_names": {
+    "not_urgent": "Pas urgent",
+    "urgent": "Urgent",
+    "very_urgent": "Tr\u00e8s urgent",
+    "past_due": "En retard"
+  },
   "plan_names": {
     "autre": "Autre",
     "batterie": "Batterie",
@@ -272,6 +278,15 @@ function psName(name) {
   const names =
     (PS_STRINGS && PS_STRINGS.plan_names) || PS_DEFAULT_STRINGS.plan_names || {};
   return names[psSlug(name)] || name;
+}
+
+/** Libell\u00e9 traduit d'un jeton de statut (not_urgent, urgent, ...). */
+function psStatus(token) {
+  const names =
+    (PS_STRINGS && PS_STRINGS.status_names) ||
+    PS_DEFAULT_STRINGS.status_names ||
+    {};
+  return names[token] || token;
 }
 
 class PitstopCard extends HTMLElement {
@@ -732,13 +747,10 @@ class PitstopCard extends HTMLElement {
 
     const attrs = main.attributes || {};
     const statusColors = {
-      "Pas urgent": "var(--label-badge-green, #13ba6e)",
-      Urgent: "var(--label-badge-yellow, #ffab40)",
-      "Tr\u00e8s urgent": "var(--label-badge-orange, #ff9800)",
-      "En retard": "var(--label-badge-red, #fce588)",
-      "Not urgent": "var(--label-badge-green, #13ba6e)",
-      "Very urgent": "var(--label-badge-orange, #ff9800)",
-      "Past Due": "var(--label-badge-red, #fce588)",
+      not_urgent: "var(--label-badge-green, #13ba6e)",
+      urgent: "var(--label-badge-yellow, #ffab40)",
+      very_urgent: "var(--label-badge-orange, #ff9800)",
+      past_due: "var(--label-badge-red, #fce588)",
     };
     const statusColor =
       statusColors[main.state] || "var(--primary-color, #03a9f4)";
@@ -748,7 +760,7 @@ class PitstopCard extends HTMLElement {
         (p) => `
         <tr>
           <td>${p.attributes.friendly_name || p.entity_id}</td>
-          <td><span class="badge" style="background:${statusColors[p.state] || "var(--primary-color)"}">${p.state}</span></td>
+          <td><span class="badge" style="background:${statusColors[p.state] || "var(--primary-color)"}">${psStatus(p.state)}</span></td>
           <td class="num">${p.attributes.km_remaining != null ? p.attributes.km_remaining.toLocaleString() + " km" : p.attributes.days_remaining != null ? p.attributes.days_remaining + " j" : "\u2014"}</td>
           <td class="num">${PitstopCard._fmtDue(p.attributes)}</td>
         </tr>`
@@ -810,7 +822,7 @@ class PitstopCard extends HTMLElement {
             }</div>
           </div>
         </div>
-        <div class="section">${psT("plans_title")} <span class="status" style="border-color:${statusColor};color:${statusColor}">${main.state}</span>
+        <div class="section">${psT("plans_title")} <span class="status" style="border-color:${statusColor};color:${statusColor}">${psStatus(main.state)}</span>
           <span class="gear gear-plans" title="${psT("manage_plans_hint")}">
             <svg viewBox="0 0 24 24" width="14" height="14">
               <path fill="currentColor" d="M19.14 12.94a7.07 7.07 0 0 0 .05-.94 7.07 7.07 0 0 0-.05-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.03 7.03 0 0 0-1.62-.94l-.36-2.54a.5.5 0 0 0-.5-.42h-3.84a.5.5 0 0 0-.5.42l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96a.5.5 0 0 0-.6.22L2.66 8.84a.5.5 0 0 0 .12.64l2.03 1.58c-.03.31-.05.63-.05.94s.02.63.05.94l-2.03 1.58a.5.5 0 0 0-.12.64l1.92 3.32c.13.22.39.31.6.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.04.24.25.42.5.42h3.84c.25 0 .46-.18.5-.42l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.09.47 0 .6-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.58ZM12 15.6A3.6 3.6 0 1 1 12 8.4a3.6 3.6 0 0 1 0 7.2Z"/>

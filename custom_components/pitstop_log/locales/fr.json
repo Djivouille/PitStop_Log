@@ -73,6 +73,12 @@
   "err_plan_interval": "Définissez un intervalle en km ou en mois.",
   "confirm_delete_plan": "Supprimer cette nature d'entretien ? (les entrées du carnet sont conservées)",
   "plan_rename_hint": "Renommer change l'identifiant : la réinitialisation auto depuis le carnet ne portera plus sur les anciennes entrées.",
+  "status_names": {
+    "not_urgent": "Pas urgent",
+    "urgent": "Urgent",
+    "very_urgent": "Très urgent",
+    "past_due": "En retard"
+  },
   "plan_names": {
     "vidange": "Vidange",
     "filtre_a_huile": "Filtre à huile",
