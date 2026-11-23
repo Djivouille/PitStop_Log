@@ -18,7 +18,7 @@
   "th_nature": "Nature",
   "th_plan": "Nature",
   "th_status": "Status",
-  "th_remaining": "Remaining",
+  "th_remaining": "Remaining (km)",
   "th_due": "Due",
   "edit": "Edit",
   "delete": "Delete",
@@ -73,6 +73,9 @@
   "err_plan_interval": "Set an interval in km or in months.",
   "confirm_delete_plan": "Delete this maintenance nature? (logbook entries are kept)",
   "plan_rename_hint": "Renaming changes the id: automatic reset from the logbook will no longer match past entries.",
+  "th_days": "Days left",
+  "show_all": "Show all",
+  "show_less": "Show less",
   "status_names": {
     "not_urgent": "Not urgent",
     "urgent": "Urgent",

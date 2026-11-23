@@ -426,7 +426,8 @@ class PitStopDataUpdateCoordinator:
         last_date: str | None = None,
     ) -> str:
         """Ajouter une règle d'entretien périodique."""
-        if self.get_vehicle(vehicle_id) is None:
+        vehicle = self.get_vehicle(vehicle_id)
+        if vehicle is None:
             raise HomeAssistantError(f"Véhicule inconnu : {vehicle_id}")
         if not interval_km and not interval_months:
             raise HomeAssistantError(
@@ -447,6 +448,7 @@ class PitStopDataUpdateCoordinator:
             "last_date": last_date,
             "active": True,
             "created_at": dt_util.utcnow().isoformat(),
+            "created_odometer": vehicle.get("odometer") if vehicle else None,
         }
         await self.async_save()
         await self.async_refresh()
@@ -461,7 +463,8 @@ class PitStopDataUpdateCoordinator:
         interval_months: int | None = None,
     ) -> bool:
         """Mettre à jour une nature d'entretien (nom et/ou intervalles)."""
-        if self.get_vehicle(vehicle_id) is None:
+        vehicle = self.get_vehicle(vehicle_id)
+        if vehicle is None:
             raise HomeAssistantError(f"Véhicule inconnu : {vehicle_id}")
         plan = self.data["plans"].get(plan_id)
         if plan is None or plan.get("vehicle_id") != vehicle_id:
@@ -493,7 +496,8 @@ class PitStopDataUpdateCoordinator:
         self, vehicle_id: str, plan_id: str
     ) -> bool:
         """Supprimer une nature d'entretien (les entrées du carnet sont conservées)."""
-        if self.get_vehicle(vehicle_id) is None:
+        vehicle = self.get_vehicle(vehicle_id)
+        if vehicle is None:
             raise HomeAssistantError(f"Véhicule inconnu : {vehicle_id}")
         plan = self.data["plans"].get(plan_id)
         if plan is None or plan.get("vehicle_id") != vehicle_id:
@@ -518,7 +522,8 @@ class PitStopDataUpdateCoordinator:
         Les plans dont le nom existe d\u00e9j\u00e0 pour ce v\u00e9hicule ne sont
         pas dupliqu\u00e9s. Retourne la liste des identifiants de plans cr\u00e9\u00e9s.
         """
-        if self.get_vehicle(vehicle_id) is None:
+        vehicle = self.get_vehicle(vehicle_id)
+        if vehicle is None:
             raise HomeAssistantError(f"V\u00e9hicule inconnu : {vehicle_id}")
         existing_names = {
             plan.get("name") for _, plan in self.get_plans(vehicle_id)
@@ -547,6 +552,7 @@ class PitStopDataUpdateCoordinator:
                 "last_date": None,
                 "active": True,
                 "created_at": dt_util.utcnow().isoformat(),
+            "created_odometer": vehicle.get("odometer") if vehicle else None,
             }
             existing_names.add(name)
             created.append(plan_id)
@@ -838,7 +844,12 @@ class PitStopDataUpdateCoordinator:
 
         # Échéance basée sur le kilométrage
         if interval_km:
-            base_km = last_km if last_km is not None else odometer
+            if last_km is not None:
+                base_km = last_km
+            elif plan.get("created_odometer") is not None:
+                base_km = plan["created_odometer"]
+            else:
+                base_km = odometer
             due_km = base_km + interval_km
             km_remaining = due_km - odometer
 

@@ -163,7 +163,7 @@ const PS_DEFAULT_STRINGS = {
   "th_nature": "Nature",
   "th_plan": "Nature",
   "th_status": "Statut",
-  "th_remaining": "Reste",
+  "th_remaining": "Reste (km)",
   "th_due": "\u00c9ch\u00e9ance",
   "edit": "Modifier",
   "delete": "Supprimer",
@@ -218,6 +218,9 @@ const PS_DEFAULT_STRINGS = {
   "err_plan_interval": "D\u00e9finissez un intervalle en km ou en mois.",
   "confirm_delete_plan": "Supprimer cette nature d'entretien ? (les entr\u00e9es du carnet sont conserv\u00e9es)",
   "plan_rename_hint": "Renommer change l'identifiant : la r\u00e9initialisation auto depuis le carnet ne portera plus sur les anciennes entr\u00e9es.",
+  "th_days": "Jours restants",
+  "show_all": "Tout afficher",
+  "show_less": "R\u00e9duire",
   "status_names": {
     "not_urgent": "Pas urgent",
     "urgent": "Urgent",
@@ -296,6 +299,8 @@ class PitstopCard extends HTMLElement {
     this._config = null;
     this._hass = null;
     this._device_label = null;
+    this._showAllPlans = false;
+    this._showAllHistory = false;
     this._device_promise = null;
   }
 
@@ -755,22 +760,25 @@ class PitstopCard extends HTMLElement {
     const statusColor =
       statusColors[main.state] || "var(--primary-color, #03a9f4)";
 
-    const plans = (attrs.plans || [])
+    const allPlans = (attrs.plans || [])
       .slice()
-      .sort((a, b) => PitstopCard._dueKey(a) - PitstopCard._dueKey(b))
+      .sort((a, b) => PitstopCard._dueKey(a) - PitstopCard._dueKey(b));
+    const hasPlans = allPlans.length > 0;
+    const plans = (this._showAllPlans ? allPlans : allPlans.slice(0, 1))
       .map(
         (p) => `
         <tr>
           <td>${psName(p.name || "")}</td>
           <td><span class="badge" style="background:${statusColors[p.status] || "var(--primary-color)"}">${psStatus(p.status)}</span></td>
-          <td class="num">${PitstopCard._fmtRemaining(p)}</td>
+          <td class="num">${p.km_remaining != null ? p.km_remaining.toLocaleString() + " km" : "\u2014"}</td>
+          <td class="num">${p.days_remaining != null ? p.days_remaining + " j" : "\u2014"}</td>
           <td class="num">${PitstopCard._fmtDue(p)}</td>
         </tr>`
       )
       .join("");
 
-    const history = (attrs.history || [])
-      .slice(0, 5)
+    const allHistory = attrs.history || [];
+    const history = (this._showAllHistory ? allHistory : allHistory.slice(0, 3))
       .map(
         (h) => `
         <tr>
@@ -825,7 +833,7 @@ class PitstopCard extends HTMLElement {
               </span>
           </div>
         </div>
-        <div class="section">${psT("plans_title")} <span class="status" style="border-color:${statusColor};color:${statusColor}">${psStatus(main.state)}</span>
+        <div class="section">${psT("plans_title")}${hasPlans ? ` <span class="status" style="border-color:${statusColor};color:${statusColor}">${psStatus(main.state)}</span>` : ""}${allPlans.length > 1 ? ` <span class="gear gear-more" data-more="plans" title="${this._showAllPlans ? psT("show_less") : psT("show_all")}">...</span>` : ""}
           <span class="gear gear-plans" title="${psT("manage_plans_hint")}">
             <svg viewBox="0 0 24 24" width="14" height="14">
               <path fill="currentColor" d="M19.14 12.94a7.07 7.07 0 0 0 .05-.94 7.07 7.07 0 0 0-.05-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.03 7.03 0 0 0-1.62-.94l-.36-2.54a.5.5 0 0 0-.5-.42h-3.84a.5.5 0 0 0-.5.42l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96a.5.5 0 0 0-.6.22L2.66 8.84a.5.5 0 0 0 .12.64l2.03 1.58c-.03.31-.05.63-.05.94s.02.63.05.94l-2.03 1.58a.5.5 0 0 0-.12.64l1.92 3.32c.13.22.39.31.6.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.04.24.25.42.5.42h3.84c.25 0 .46-.18.5-.42l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.09.47 0 .6-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.58ZM12 15.6A3.6 3.6 0 1 1 12 8.4a3.6 3.6 0 0 1 0 7.2Z"/>
@@ -834,10 +842,10 @@ class PitstopCard extends HTMLElement {
         </div>
         ${
           plans
-            ? `<table class="table"><thead><tr><th>${psT("th_plan")}</th><th>${psT("th_status")}</th><th>${psT("th_remaining")}</th><th>${psT("th_due")}</th></tr></thead><tbody>${plans}</tbody></table>`
+            ? `<table class="table"><thead><tr><th>${psT("th_plan")}</th><th>${psT("th_status")}</th><th>${psT("th_remaining")}</th><th>${psT("th_days")}</th><th>${psT("th_due")}</th></tr></thead><tbody>${plans}</tbody></table>`
             : `<div class="empty">${psT("no_plans")}</div>`
         }
-        <div class="section">${psT("last_maintenances")} (${attrs.history_count != null ? attrs.history_count : 0})
+        <div class="section">${psT("last_maintenances")} (${attrs.history_count != null ? attrs.history_count : 0})${allHistory.length > 3 ? ` <span class="gear gear-more" data-more="history" title="${this._showAllHistory ? psT("show_less") : psT("show_all")}">...</span>` : ""}
           <span class="gear gear-history" title="${psT("manage_history_hint")}">
             <svg viewBox="0 0 24 24" width="14" height="14">
               <path fill="currentColor" d="M19.14 12.94a7.07 7.07 0 0 0 .05-.94 7.07 7.07 0 0 0-.05-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.03 7.03 0 0 0-1.62-.94l-.36-2.54a.5.5 0 0 0-.5-.42h-3.84a.5.5 0 0 0-.5.42l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96a.5.5 0 0 0-.6.22L2.66 8.84a.5.5 0 0 0 .12.64l2.03 1.58c-.03.31-.05.63-.05.94s.02.63.05.94l-2.03 1.58a.5.5 0 0 0-.12.64l1.92 3.32c.13.22.39.31.6.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.04.24.25.42.5.42h3.84c.25 0 .46-.18.5-.42l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.09.47 0 .6-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.58ZM12 15.6A3.6 3.6 0 1 1 12 8.4a3.6 3.6 0 0 1 0 7.2Z"/>
@@ -885,6 +893,13 @@ class PitstopCard extends HTMLElement {
     const gearPlans = root.querySelector(".gear-plans");
     if (gearPlans)
       gearPlans.addEventListener("click", () => this._openPlansEditor());
+    root.querySelectorAll(".gear-more").forEach((btn) =>
+      btn.addEventListener("click", () => {
+        if (btn.dataset.more === "plans") this._showAllPlans = !this._showAllPlans;
+        else this._showAllHistory = !this._showAllHistory;
+        this._render();
+      })
+    );
     const addMaint = root.querySelector("#ps-add-maint");
     if (addMaint)
       addMaint.addEventListener("click", () => this._openMaintenanceEditor(null));
@@ -893,19 +908,6 @@ class PitstopCard extends HTMLElement {
   /** Logo de marque, avec ic\u00f4ne par d\u00e9faut si l'image est manquante. */
   /** Formate l'\u00e9ch\u00e9ance d'une nature : date pr\u00e9vue (JJ/MM/AAAA) ou km cible. */
   /** Cl\u00e9 de tri "prochain entretien" : fraction restante la plus faible (n\u00e9gative = en retard). */
-  /** Reste \u00e0 faire affich\u00e9 : la dimension la plus urgente (fraction restante min). */
-  static _fmtRemaining(p) {
-    const fr = [];
-    if (p.interval_km && p.km_remaining != null)
-      fr.push({ f: p.km_remaining / p.interval_km, s: p.km_remaining.toLocaleString() + " km" });
-    const daysTotal = p.days_total || (p.interval_months ? p.interval_months * 30 : 0);
-    if (daysTotal && p.days_remaining != null)
-      fr.push({ f: p.days_remaining / daysTotal, s: p.days_remaining + " j" });
-    if (!fr.length) return "\u2014";
-    fr.sort((a, b) => a.f - b.f);
-    return fr[0].s;
-  }
-
   static _dueKey(p) {
     const keys = [];
     if (p.interval_km && p.km_remaining != null)
