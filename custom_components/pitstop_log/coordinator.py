@@ -121,6 +121,9 @@ class PitStopDataUpdateCoordinator:
             # Migration : amorcer l'historique du kilométrage des véhicules existants
             for vehicle_id in self.data["vehicles"]:
                 self._ensure_odometer_history(vehicle_id)
+            # Migration : renseigner created_odometer des plans créés avant 0.4.2-beta.6
+            if self._backfill_created_odometer():
+                await self.async_save()
 
     async def async_save(self) -> None:
         """Écrire les données sur le disque (écriture différée)."""
@@ -812,6 +815,52 @@ class PitStopDataUpdateCoordinator:
     # ------------------------------------------------------------------
     # Calcul des échéances
     # ------------------------------------------------------------------
+    @staticmethod
+    def _plan_created_date(plan: dict[str, Any]) -> date | None:
+        """Date de création d'un plan (champ created_at), si renseignée."""
+        created_at = plan.get("created_at")
+        if not created_at:
+            return None
+        try:
+            return datetime.fromisoformat(str(created_at)).date()
+        except ValueError:
+            return None
+
+    def _backfill_created_odometer(self) -> bool:
+        """Renseigner created_odometer des plans créés avant 0.4.2-beta.6.
+
+        Base retenue : le relevé d'historique positif le plus récent avant la
+        création du plan, sinon le kilométrage actuel du véhicule. Ainsi le
+        « reste (km) » part d'une échéance fixe et diminue quand on roule,
+        au lieu d'être recalculé à partir du kilométrage courant à chaque fois.
+        """
+        changed = False
+        for plan in self.data["plans"].values():
+            if (
+                plan.get("created_odometer") is not None
+                or plan.get("last_km") is not None
+            ):
+                continue
+            vehicle = self.get_vehicle(plan.get("vehicle_id", ""))
+            if vehicle is None:
+                continue
+            base: int | None = None
+            created_day = str(plan.get("created_at") or "")[:10]
+            if created_day:
+                candidates = [
+                    point.get("km") or 0
+                    for point in vehicle.get("odometer_history") or []
+                    if point.get("date", "") <= created_day
+                    and (point.get("km") or 0) > 0
+                ]
+                if candidates:
+                    base = max(candidates)
+            if base is None:
+                base = vehicle.get("odometer") or 0
+            plan["created_odometer"] = base
+            changed = True
+        return changed
+
     def get_due_info(
         self, plan: dict[str, Any], options: dict[str, Any] | None = None
     ) -> dict[str, Any]:
@@ -858,7 +907,8 @@ class PitStopDataUpdateCoordinator:
             if last_date_str:
                 base_date = datetime.strptime(last_date_str, "%Y-%m-%d").date()
             else:
-                base_date = today
+                # Sans entretien réalisé : base = création du plan (created_at)
+                base_date = self._plan_created_date(plan) or today
             due_date = _add_months(base_date, interval_months)
             days_remaining = (due_date - today).days
             days_total = (due_date - base_date).days
