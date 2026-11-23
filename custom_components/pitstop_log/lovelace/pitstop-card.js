@@ -244,11 +244,13 @@ const PS_DEFAULT_STRINGS = {
   },
 };
 let PS_STRINGS = null;
+let PS_LANG = "fr";
 
 async function psLoadStrings(hass) {
   if (PS_STRINGS) return null;
   const lang = ((hass && hass.locale && hass.locale.language) || "fr")
     .split("-")[0];
+  PS_LANG = lang;
   const fetchLang = async (l) => {
     try {
       const resp = await fetch(`/local/pitstop_log/locales/${l}.json`);
@@ -290,6 +292,54 @@ function psStatus(token) {
     PS_DEFAULT_STRINGS.status_names ||
     {};
   return names[token] || token;
+}
+
+/** Active UI language of HA (fr, en, ...), set by psLoadStrings. */
+function psLang() {
+  return PS_LANG || "fr";
+}
+
+/** Date input placeholder per UI locale (fr JJ/MM/AAAA, en MM/DD/YYYY). */
+function psDatePlaceholder() {
+  const lang = psLang();
+  if (lang === "fr") return "JJ/MM/AAAA";
+  if (lang === "en") return "MM/DD/YYYY";
+  return "YYYY-MM-DD";
+}
+
+/** ISO date (YYYY-MM-DD) -> display format of the UI locale. */
+function psDateFmt(iso) {
+  const s = String(iso == null ? "" : iso);
+  const m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (!m) return s;
+  const lang = psLang();
+  if (lang === "fr") return m[3] + "/" + m[2] + "/" + m[1];
+  if (lang === "en") return m[2] + "/" + m[3] + "/" + m[1];
+  return s;
+}
+
+/** Typed date of the UI locale -> ISO (YYYY-MM-DD), or null when invalid. */
+function psDateParse(str) {
+  const s = String(str == null ? "" : str).trim();
+  if (!s) return null;
+  let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  let y, mo, d;
+  if (m) {
+    y = m[1]; mo = m[2]; d = m[3]; // ISO always accepted
+  } else {
+    m = s.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})$/);
+    if (!m) return null;
+    if (psLang() === "en") { mo = m[1]; d = m[2]; y = m[3]; }
+    else { d = m[1]; mo = m[2]; y = m[3]; } // fr and others: day first
+  }
+  y = parseInt(y, 10); mo = parseInt(mo, 10); d = parseInt(d, 10);
+  if (!(y >= 1900 && y <= 9999) || mo < 1 || mo > 12 || d < 1 || d > 31)
+    return null;
+  const dt = new Date(Date.UTC(y, mo - 1, d));
+  if (dt.getUTCFullYear() !== y || dt.getUTCMonth() !== mo - 1 || dt.getUTCDate() !== d)
+    return null; // rejects e.g. 31/02
+  const pad = (n) => (n < 10 ? "0" + n : "" + n);
+  return y + "-" + pad(mo) + "-" + pad(d);
 }
 
 class PitstopCard extends HTMLElement {
@@ -462,7 +512,7 @@ class PitstopCard extends HTMLElement {
       .sort((a, b) => (a.date < b.date ? 1 : -1))
       .map(
         (p, i) =>
-          `<tr><td>${p.date}</td><td class="num">${Number(p.km).toLocaleString()} km</td><td class="num">${
+          `<tr><td>${psDateFmt(p.date)}</td><td class="num">${Number(p.km).toLocaleString()} km</td><td class="num">${
             p.source === "maintenance"
               ? `<span class="src-badge" title="${psT("badge_maintenance_hint")}">${psT("badge_maintenance")}</span>`
               : `<span class="icon-btn edit" data-date="${p.date}" data-km="${p.km}" title="${psT("edit")}">\u270e</span><span class="icon-btn del" data-date="${p.date}" title="${psT("delete")}">\u2716</span>`
@@ -477,7 +527,7 @@ class PitstopCard extends HTMLElement {
         <div class="editor-sub">${this._deviceOrVehicle()}</div>
         <div class="field">
           <label for="ps-date">${psT("reading_date")}</label>
-          <input id="ps-date" class="ps-input" type="date" value="${today}" />
+          <input id="ps-date" class="ps-input" type="text" inputmode="numeric" maxlength="10" placeholder="${psDatePlaceholder()}" value="${psDateFmt(today)}" />
         </div>
         <div class="field">
           <label for="ps-km">${psT("km_field")}</label>
@@ -515,13 +565,13 @@ class PitstopCard extends HTMLElement {
     overlay.querySelectorAll(".icon-btn.edit").forEach((btn) =>
       btn.addEventListener("click", () => {
         this._odo_edit_date = btn.dataset.date;
-        overlay.querySelector("#ps-date").value = btn.dataset.date;
+        overlay.querySelector("#ps-date").value = psDateFmt(btn.dataset.date);
         overlay.querySelector("#ps-km").value = btn.dataset.km;
       })
     );
     overlay.querySelectorAll(".icon-btn.del").forEach((btn) =>
       btn.addEventListener("click", () => {
-        if (!window.confirm(psT("confirm_delete_reading") + " " + btn.dataset.date + " ?"))
+        if (!window.confirm(psT("confirm_delete_reading") + " " + psDateFmt(btn.dataset.date) + " ?"))
           return;
         this._hass
           .callService("pitstop_log", "delete_odometer_point", {
@@ -538,7 +588,7 @@ class PitstopCard extends HTMLElement {
 
   /** Valide la saisie d'un nouveau kilom\u00e9trage et appelle le service. */
   _saveOdometer(vehicleId, overlay) {
-    const dateValue = overlay.querySelector("#ps-date").value;
+    const dateValue = psDateParse(overlay.querySelector("#ps-date").value);
     const kmValue = parseFloat(overlay.querySelector("#ps-km").value);
     const errorBox = overlay.querySelector("#ps-error");
     errorBox.textContent = "";
@@ -666,7 +716,7 @@ class PitstopCard extends HTMLElement {
           </div>
           <div class="field">
             <label for="ps-pdate">${psT("purchase_date")}</label>
-            <input id="ps-pdate" class="ps-input" type="date" value="${attrs.purchase_date || ""}" />
+            <input id="ps-pdate" class="ps-input" type="text" inputmode="numeric" maxlength="10" placeholder="${psDatePlaceholder()}" value="${psDateFmt(attrs.purchase_date || "")}" />
           </div>
           <div class="editor-error" id="ps-error"></div>
           <div class="editor-actions">
@@ -714,7 +764,16 @@ class PitstopCard extends HTMLElement {
     }
 
     const reg = root.querySelector("#ps-reg").value.trim();
-    const pdate = root.querySelector("#ps-pdate").value;
+    const pdateRaw = root.querySelector("#ps-pdate").value.trim();
+    let pdate = null;
+    if (pdateRaw) {
+      pdate = psDateParse(pdateRaw);
+      if (!pdate) {
+        button.disabled = false;
+        errorBox.textContent = psT("err_date");
+        return;
+      }
+    }
     const data = { vehicle_id: vehicleId, brand: brand, model: model };
     if (year) data.model_year = parseInt(year, 10);
     if (photoBase64) data.photo_base64 = photoBase64;
@@ -782,7 +841,7 @@ class PitstopCard extends HTMLElement {
       .map(
         (h) => `
         <tr>
-          <td>${h.date || ""}</td>
+          <td>${psDateFmt(h.date)}</td>
           <td class="num">${h.km != null ? Number(h.km).toLocaleString() + " km" : ""}</td>
           <td>${this._fmtActions(h.actions)}</td>
           <td class="num">${h.cost != null ? Number(h.cost).toLocaleString() + " \u20ac" : ""}</td>
@@ -809,7 +868,7 @@ class PitstopCard extends HTMLElement {
                 </svg>
               </span></div>
             <div class="meta">${
-              (attrs.purchase_date || "\u2014") +
+              (attrs.purchase_date ? psDateFmt(attrs.purchase_date) : "\u2014") +
               " - " +
               (attrs.registration || "\u2014")
             }</div>
@@ -920,8 +979,7 @@ class PitstopCard extends HTMLElement {
 
   static _fmtDue(attrs) {
     if (attrs.due_date) {
-      const d = String(attrs.due_date);
-      return d.slice(8) + "/" + d.slice(5, 7) + "/" + d.slice(0, 4);
+      return psDateFmt(attrs.due_date);
     }
     if (attrs.due_km != null) return attrs.due_km.toLocaleString() + " km";
     return "\u2014";
@@ -988,7 +1046,7 @@ class PitstopCard extends HTMLElement {
       .map(
         (h, i) => `
         <tr>
-          <td>${h.date || ""}</td>
+          <td>${psDateFmt(h.date)}</td>
           <td class="num">${h.km != null ? Number(h.km).toLocaleString() + " km" : ""}</td>
           <td>${this._fmtActions(h.actions)}</td>
           <td class="num">${h.cost != null ? Number(h.cost).toLocaleString() + " \u20ac" : ""}</td>
@@ -1080,7 +1138,7 @@ class PitstopCard extends HTMLElement {
         <div class="editor-sub">${this._deviceOrVehicle()}</div>
         <div class="field">
           <label for="ps-m-date">${psT("date")}</label>
-          <input id="ps-m-date" class="ps-input" type="date" value="${entry.date || today}" />
+          <input id="ps-m-date" class="ps-input" type="text" inputmode="numeric" maxlength="10" placeholder="${psDatePlaceholder()}" value="${psDateFmt(entry.date || today)}" />
         </div>
         <div class="field">
           <label for="ps-m-km">${psT("km")}</label>
@@ -1149,7 +1207,7 @@ class PitstopCard extends HTMLElement {
     const errorBox = overlay.querySelector("#ps-m-error");
     const button = overlay.querySelector("#ps-m-save");
     errorBox.textContent = "";
-    const date = overlay.querySelector("#ps-m-date").value;
+    const date = psDateParse(overlay.querySelector("#ps-m-date").value);
     const km = parseInt(overlay.querySelector("#ps-m-km").value, 10);
     if (!date || isNaN(km) || km < 0) {
       errorBox.textContent = psT("err_date_km");
